@@ -37,7 +37,7 @@
 
 const myProductName = "SomethingAwful Last Read Enhancement";
 const myProductRegKey = "salastread";
-const myProductRegVersion = "1.15.1912";
+const myProductRegVersion = "1.15.1914";
 const myProductRegVersionBuild = "1";
 const myJarFileName = "salastread.jar";
 const myJarFileSize = 37; // the filesize in KB of myJarFileName

@@ -8,7 +8,7 @@
 
 //var postedInThreadReColor = "#fcfd99";
 
-var SALR_CURRENT_VERSION = "1.15.1912";
+var SALR_CURRENT_VERSION = "1.15.1914";
 var needToShowChangeLog = false;
 var upgradeFromVersion = null;
 

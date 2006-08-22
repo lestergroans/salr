@@ -6,7 +6,7 @@
 	
 		<em:id>{fc6339b8-9581-4fc7-b824-dffcb091fcb7}</em:id>
 		<em:name>SomethingAwful Last Read Enhancement</em:name>
-		<em:version>1.15.1913</em:version>
+		<em:version>1.15.1914</em:version>
 		<em:description>Adds "Last Read" support to the Something Awful forums</em:description>
 		<em:creator>Tim Fries (biznatchio)</em:creator>
 		<em:contributor>Joseph Wain (uncut product)</em:contributor>
