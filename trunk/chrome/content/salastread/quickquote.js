@@ -490,3 +490,50 @@ function doAttach() {
       attachedFileName = "";
    }
 }
+
+function getvBcode(command) {
+
+			//A questo punto widgetTrasferibile contiene il contenuto degli appunti
+    
+			var str = null;
+    
+			var theBox = document.getElementById("messagearea");
+			var oPosition = theBox.scrollTop;
+			var oHeight = theBox.scrollHeight;
+    
+    
+    		//Recupera il testo selezionato e lo memorizza in str
+      		var startPos = theBox.selectionStart;
+      		var endPos = theBox.selectionEnd;
+      		str = theBox.value.substring(startPos, endPos);
+						
+    		//bbcodextra.insertAtCursorSetup(myCommand, str_clipboard, str, theBox, extraParam);
+			var nHeight = theBox.scrollHeight - oHeight;
+			theBox.scrollTop = oPosition + nHeight;
+
+
+		  switch (command) {
+        
+      		case "img":
+        		insertTextAtCursor("[img]" + str + "[/img]");
+        	break;
+
+	       	case "urltag":
+        		insertTextAtCursor("[url]" + str + "[/url]");
+        	break;  
+
+      		case "bold":
+        		insertTextAtCursor("[b]" + str + "[/b]");
+        	break;
+
+      		case "italic":
+        		insertTextAtCursor("[i]" + str + "[/i]");
+        	break;
+        
+      		case "underline":
+        		insertTextAtCursor("[u]" + str + "[/u]");
+        	break;
+						
+      		default : alert("Nessuna opzione selezionata!");
+		  }//end switch		
+}
