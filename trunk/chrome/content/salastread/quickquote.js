@@ -566,10 +566,10 @@ function getvBcode(command) {
         		insertTextAtCursor("[sub]" + str + "[/sub]");
         	break;
 
-			case "sub":
+			case "super":
         		insertTextAtCursor("[super]" + str + "[/super]");
         	break;
 						
-      		default : alert("Nessuna opzione selezionata!");
+      		default : alert("vBcode error! No menu option selected.");
 		  }//end switch		
 }
