@@ -519,11 +519,35 @@ function getvBcode(command) {
         	break;
 
 	       	case "urltag":
-        		insertTextAtCursor("[url]" + str + "[/url]");
+				var menuch = str.match(/^(http:\/\/)|(https:\/\/)|(ftp:\/\/)/i);
+				if(menuch)
+				{
+					insertTextAtCursor("[url]" + str + "[/url]");
+				}
+				else 
+				{
+					var url = prompt('You have selected text that may not be a URL.  Enter a URL to link to with the selected text or press cancel to make the selected text a link.', ' ')
+					if(!url)
+					{
+						insertTextAtCursor("[url]" + str + "[/url]");
+					}
+					else
+					{
+						insertTextAtCursor("[url=" + url + "]" + str + "[/url]");
+					}
+				}
         	break;  
 
       		case "bold":
         		insertTextAtCursor("[b]" + str + "[/b]");
+        	break;
+
+			case "code":
+        		insertTextAtCursor("[code]" + str + "[/code]");
+        	break;
+
+			case "quote":
+        		insertTextAtCursor("[quote]" + str + "[/quote]");
         	break;
 
       		case "italic":
@@ -532,6 +556,18 @@ function getvBcode(command) {
         
       		case "underline":
         		insertTextAtCursor("[u]" + str + "[/u]");
+        	break;
+
+			case "strike":
+        		insertTextAtCursor("[s]" + str + "[/s]");
+        	break;
+
+			case "sub":
+        		insertTextAtCursor("[sub]" + str + "[/sub]");
+        	break;
+
+			case "sub":
+        		insertTextAtCursor("[super]" + str + "[/super]");
         	break;
 						
       		default : alert("Nessuna opzione selezionata!");

@@ -1194,7 +1194,7 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
          else if ( thisicon == 2 ) {
             if ( persistObject.toggle_showUnvisitIcon ) {
                //iconTargetElement.insertBefore( createUnvisitButton(doc, threadid, thisel, unvisitDecolors), topictitletd.firstChild );
-               iconTargetElement.appendChild( createUnvisitButton(doc, threadid, thisel, unvisitDecolors) );
+               iconTargetElement.appendChild( createUnvisitButton(doc, threadid, thisel, unvisitDecolors, forumid) );
             }
          }
       }
@@ -1443,12 +1443,12 @@ function createGoToLastReadPostButton(doc, lkpid) {
    return golink;
 }
 
-function createUnvisitButton(doc, threadid, topicrow, unvisitDecolors) {
+function createUnvisitButton(doc, threadid, topicrow, unvisitDecolors, forumid) {
    var dellink = doc.createElement("A");
    dellink.href = "javascript:void(0);";
    dellink.className = "salastreadicon";
    dellink.id = "salastread_dellink" + threadid;
-   dellink.addEventListener("click", function(ce) { unvisitThread(doc, persistObject, threadid, topicrow, unvisitDecolors); }, true);
+   dellink.addEventListener("click", function(ce) { unvisitThread(doc, persistObject, threadid, topicrow, unvisitDecolors, forumid); }, true);
    var delimg = doc.createElement("IMG");
    delimg.src = persistObject.url_markThreadUnvisited;
    //delimg.style.cssFloat = "right";
@@ -1458,7 +1458,7 @@ function createUnvisitButton(doc, threadid, topicrow, unvisitDecolors) {
    return dellink;
 }
 
-function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors) {
+function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) {
    //alert("unvisiting "+threadid);
    try {
    var xmlDoc = pobj.xmlDoc;
@@ -1466,7 +1466,17 @@ function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors) {
    for (var i=0; i<threads.length; i++) {
       threads[i].parentNode.removeChild(threads[i]);
    }
-   resetUnreadColors(unvisitDecolors);
+   if ( forumid == 0 ) {
+      resetUnreadColors(unvisitDecolors);
+   } else {
+      if ( !persistObject.toggle_dontHighlightThreads ) { 
+         var threadrows = selectNodes(doc, topicrow, ".");
+         for (var x=0; x<threadrows.length; x++) {
+            threadrows[x].className = "thread salastread_thread_" + threadid + " salastread_unreadthread";
+         }
+     }
+   }
+
    var icons = selectNodes(doc, topicrow, ".//A[@class='salastreadicon']");
    for (var j=0; j<icons.length; j++) {
       icons[j].parentNode.removeChild(icons[j]);
