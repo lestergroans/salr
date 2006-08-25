@@ -2894,7 +2894,7 @@ function setRegReplyFillOn() {
 
 function handleNewReply(e) {
    var doc = e.originalTarget;
-   var threadlink = selectSingleNode(doc, doc.body, "DIV[contains(@id, 'container')]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/SPAN[1]/B[1]/A[contains(@href,'showthread.php')][contains(@href,'threadid=')]");
+   var threadlink = selectSingleNode(doc, doc.body, "DIV[contains(@id, 'container')]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/SPAN[1]/B/A[contains(@href,'showthread.php')][contains(@href,'threadid=')]");
    if (threadlink) {
       var tlmatch = threadlink.href.match( /threadid=(\d+)/ );
       if ( tlmatch ) {
