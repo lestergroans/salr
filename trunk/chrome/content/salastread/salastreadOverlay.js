@@ -1813,8 +1813,10 @@ function SALR_ProcessPostImages(thisel) {
          SALR_TextToImage(thisel);
    }
 
+
    if (persistObject.toggle_thumbnailAllImages) {
       setTimeout(function() {
+
          var bodyimagenodes = selectNodes(doc, thisel, "TBODY/TR[1]/TD[2]/descendant::IMG");
          for (var lnum=0; lnum<bodyimagenodes.length; lnum++) {
             var thisimage = bodyimagenodes[lnum];
@@ -1862,6 +1864,22 @@ function SALR_PostImageMouseOut(e) {
 function SALR_PostImageResizerShowHide(show, e) {
    var image = e.target;
    var doc = image.ownerDocument;
+   if (!image.__SALR_ThumbnailControl) {
+	SALR_BuildThumbnailControl(doc,image);
+    SALR_ToggleThumbnailControl(image,true)
+   }
+   if (image.SALR_imageResizable == undefined && image.className.indexOf("SALR_thumbnail_fullsize") == -1) {
+	  if(image.offsetWidth == image.naturalWidth && image.offsetHeight == image.naturalHeight) {
+		  image.SALR_imageResizable = false
+	  } else {
+		  image.SALR_imageResizable = true
+	  }
+   }
+
+   if(image.SALR_imageResizable != undefined && !image.SALR_imageResizable) { 
+	   return
+   }
+
    if (image.__SALR_ThumbnailControl) {
       if (show) {
          image.__SALR_ThumbnailControl.style.display = "block";
@@ -1878,53 +1896,53 @@ function SALR_PostImageResizerShowHide(show, e) {
    }
 }
 
+
 function SALR_PostImageResize(e) {
    var image = e.target;
    var doc = image.ownerDocument;
-   if (image.naturalWidth && image.naturalHeight) {
-      var nWidth = image.naturalWidth;
-      var nHeight = image.naturalHeight;
-      var cWidth = image.offsetWidth;
-      var cHeight = image.offsetHeight;
-      if (nWidth != cWidth || nHeight != cHeight) {
-         //image.style.border = "2px solid blue";
-         if (!image.__SALR_ThumbnailControl) {
-            var outer = doc.createElement("div");
-            outer.style.position = "absolute";
-            outer.style.display = "none";
-            var inner = doc.createElement("img");
-            inner.src = "chrome://salastread/content/scale_image_up.png";
-            inner.style.position = "relative";
-            inner.style.top = "-11px";
-            inner.style.left = "-11px";
-            inner.style.width = "22px";
-            inner.style.height = "22px";
-            inner.style.border = "none";
-            inner.style.cursor = "pointer";
-            inner.onclick = function() { SALR_PostImageClick( {target: image} ); return false; };
-            inner.onmouseover = function() { SALR_PostImageMouseOver( {target: image} ); return false; };
-            inner.onmouseout = function() { SALR_PostImageMouseOut( {target: image} ); return false; };
-            outer.appendChild(inner);
-            image.parentNode.insertBefore(outer, image);
-            image.__SALR_ThumbnailControl = outer;
-         }
-         var tc = image.__SALR_ThumbnailControl;
-         var tci = tc.firstChild;
-         tci.__up = true;
-         tci.src = "chrome://salastread/content/scale_image_up.png";
-         //tci.style.top = (cHeight - 10) + "px";
-         //tci.style.left = (cWidth - 10) + "px";
-      } else {
-         if (image.__SALR_ThumbnailControl) {
-            var tc = image.__SALR_ThumbnailControl;
-            var tci = tc.firstChild;
-            tci.__up = false;
-            tci.src = "chrome://salastread/content/scale_image.png";
-            //tci.style.top = (cHeight - 10) + "px";
-            //tci.style.left = (cWidth - 10) + "px";
-         }
-      }
+
+   if (!image.__SALR_ThumbnailControl) {
+	 SALR_BuildThumbnailControl(doc,image);
    }
+
+   if (image.className.indexOf("SALR_thumbnail_fullsize")!=-1) {
+	 SALR_ToggleThumbnailControl(image,true)
+   } else {
+	 SALR_ToggleThumbnailControl(image,false)
+   }
+}
+
+function SALR_ToggleThumbnailControl(image,up) {
+	var tc = image.__SALR_ThumbnailControl;
+	var tci = tc.firstChild;
+	if(up) {
+		tci.__up = true;
+		tci.src = "chrome://salastread/content/scale_image_up.png";
+	} else {
+		tci.__up = false;
+		tci.src = "chrome://salastread/content/scale_image.png";
+	}
+}
+
+function SALR_BuildThumbnailControl(doc,image) {
+	var outer = doc.createElement("div");
+	outer.style.position = "absolute";
+	outer.style.display = "none";
+	var inner = doc.createElement("img");
+	inner.src = "chrome://salastread/content/scale_image_up.png";
+	inner.style.position = "relative";
+	inner.style.top = "-11px";
+	inner.style.left = "-11px";
+	inner.style.width = "22px";
+	inner.style.height = "22px";
+	inner.style.border = "none";
+	inner.style.cursor = "pointer";
+	inner.onclick = function() { SALR_PostImageClick( {target: image} ); return false; };
+	inner.onmouseover = function() { SALR_PostImageMouseOver( {target: image} ); return false; };
+	inner.onmouseout = function() { SALR_PostImageMouseOut( {target: image} ); return false; };
+	outer.appendChild(inner);
+	image.parentNode.insertBefore(outer, image);
+	image.__SALR_ThumbnailControl = outer;
 }
 
 function SALR_TextToImage(thisel) {
