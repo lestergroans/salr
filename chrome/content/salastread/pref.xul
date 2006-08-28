@@ -45,6 +45,8 @@
    <button orient="vertical" class="buttonBoxButton" id="catAboutButton"
            type="radio" group="categories" label="About"
            url="chrome://salastread/content/pref/pref-about.xul"/>
+  <spacer height="50" />
+  
   </vbox>
   <vbox flex="1">
    <dialogheader id="header"/>

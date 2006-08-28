@@ -160,6 +160,9 @@ salrPersistObject.prototype = {
    get defaulttoggle_props() { return true; },
    get defaulttoggle_removeHeaderAndFooter() { return false; },
    get defaulttoggle_contextMenuOnBottom() { return true; },
+   get defaulttoggle_hideSignature() { return false; },
+   get defaulttoggle_hideTitle() { return false; },
+	   
    get defaulttoggle_insertPostLastMarkLink() { return true; },
    get defaulttoggle_disableGradients() { return false; },
    get defaulttoggle_resizeCustomTitleText() { return true; },
