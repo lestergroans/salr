@@ -91,6 +91,10 @@
            label="Shrink Large Custom Title Texts" />
  <checkbox id="toggle_contextMenuOnBottom"
            label="Put the SALR context submenu on the bottom of the context menu instead of the top" />
+ <checkbox id="toggle_hideSignature"
+           label="Hide user signatures in posts" />
+ <checkbox id="toggle_hideTitle"
+           label="Hide custom titles in posts" />
 
 <!--
  <groupbox>

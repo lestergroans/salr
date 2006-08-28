@@ -375,9 +375,19 @@ function SALR_MakeShowThreadCSS() {
    csstxt += "table.salastread_seenpost.salastread_even tr { background-color: "+persistObject.color_seenPostLight+" !important; }\n\n";
    //csstxt += "table.salastread_unseenpost.salastread_odd tr { background-color: "+persistObject.color_unseenPostDark+" !important; }\n\n";
    //csstxt += "table.salastread_unseenpost.salastread_even tr { background-color: "+persistObject.color_unseenPostLight+" !important; }\n\n";
-   if ( persistObject.toggle_resizeCustomTitleText ) {
+   if ( persistObject.toggle_hideTitle ) {
+      csstxt += "dd.title * { display: none; }\n\n";
+   } else if ( persistObject.toggle_resizeCustomTitleText ) {
       csstxt += "dd.title * { font-size: 8pt; }\n\n";
    }
+
+   if ( persistObject.toggle_hideSignature)
+   {
+	   //So yeah firefox comes up with a pretty unique way of
+	   //interpretting SA's invalid HTML......
+      csstxt += ".signature + p + div { display: none; }\n\n"
+   }
+
    // HEREHERE
    return csstxt;
 }
