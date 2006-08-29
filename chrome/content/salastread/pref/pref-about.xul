@@ -19,7 +19,7 @@
    <vbox>
     <spacer flex="1"/>
     <text value="SA Last Read" style="font-weight: bold; font-size: 120%"/>
-    <text value="Version 1.15.1912"/>
+    <text value="Version 1.15.1914"/>
     <separator class="thin"/>
     <hbox>
      <text value="Created by: " style="font-weight: bold"/>

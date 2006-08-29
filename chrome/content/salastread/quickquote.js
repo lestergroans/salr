@@ -220,6 +220,8 @@ function finalizeTextGrab(restext) {
    var tnode = selectSingleNode(document.getElementById("replypage").contentDocument, el, "//TEXTAREA[@name='message']");
    document.getElementById("messagearea").value = before +  tnode.value;
 
+   doPreview();
+
    var fknode = selectSingleNode(document.getElementById("replypage").contentDocument, el, "//INPUT[@name='formkey']");
    sa_formkey = fknode.value;
    persistObject.__cachedFormKey = sa_formkey;
@@ -302,6 +304,7 @@ function importData() {
       document.getElementById("submit-normal").style.display = "-moz-box";
       document.getElementById("submit-swap").style.display = "none";
    }
+   togglePreview();
    if ( !window.opener.__salastread_needretrieval ) {
       document.getElementById("messagearea").value = window.opener.__salastread_quotetext;
       if (sa_formkey=="" || !sa_formkey) {
@@ -318,7 +321,6 @@ function importData() {
       document.getElementById("messagearea").value = quoteWaitString;
       startPostTextGrab(false);
    }
-
    document.getElementById("messagearea").focus();
    if ( typeof(opener.sbOverlay) != "undefined" ||
         typeof(Components.classes["@mozilla.org/spellbound;1"]) != "undefined") {
@@ -467,10 +469,11 @@ function insertTextAtCursor(emotlabel) {
    var ebtext = document.getElementById("messagearea").value;
    var selstart = document.getElementById("messagearea").selectionStart;
    var selend = document.getElementById("messagearea").selectionEnd;
-   ebtext = ebtext.substring(0,selstart) + emotlabel + ebtext.substring(selend+1);
+   ebtext = ebtext.substring(0,selstart) + emotlabel + ebtext.substring(selend);
    document.getElementById("messagearea").focus();
    document.getElementById("messagearea").value = ebtext;
    document.getElementById("messagearea").setSelectionRange(selstart+emotlabel.length, selstart+emotlabel.length);
+   doPreview();
 }
 
 function doAttach() {
@@ -492,84 +495,162 @@ function doAttach() {
 }
 
 function getvBcode(command) {
-
-			//A questo punto widgetTrasferibile contiene il contenuto degli appunti
+   var str = null;
     
-			var str = null;
-    
-			var theBox = document.getElementById("messagearea");
-			var oPosition = theBox.scrollTop;
-			var oHeight = theBox.scrollHeight;
-    
-    
-    		//Recupera il testo selezionato e lo memorizza in str
-      		var startPos = theBox.selectionStart;
-      		var endPos = theBox.selectionEnd;
-      		str = theBox.value.substring(startPos, endPos);
-						
-    		//bbcodextra.insertAtCursorSetup(myCommand, str_clipboard, str, theBox, extraParam);
-			var nHeight = theBox.scrollHeight - oHeight;
-			theBox.scrollTop = oPosition + nHeight;
+   var theBox = document.getElementById("messagearea");
+   var oPosition = theBox.scrollTop;
+   var oHeight = theBox.scrollHeight;
 
+   var startPos = theBox.selectionStart;
+   var endPos = theBox.selectionEnd;
+   str = theBox.value.substring(startPos, endPos);
+			
+   var nHeight = theBox.scrollHeight - oHeight;
+   theBox.scrollTop = oPosition + nHeight;
 
-		  switch (command) {
-        
-      		case "img":
-        		insertTextAtCursor("[img]" + str + "[/img]");
-        	break;
+   switch (command) {
+      case "img":
+         var menuch = str.match(/^(http:\/\/)|(https:\/\/)|(ftp:\/\/)/i);
+         if(menuch) {
+            insertTextAtCursor("[img]" + str + "[/img]");
+         } else {
+            var url = prompt('Enter a URL to an image below.', ' ');
+            if(url) {
+               insertTextAtCursor("[img]" + url + "[/img]");
+            }
+         }
+      break;
 
-	       	case "urltag":
-				var menuch = str.match(/^(http:\/\/)|(https:\/\/)|(ftp:\/\/)/i);
-				if(menuch)
-				{
-					insertTextAtCursor("[url]" + str + "[/url]");
-				}
-				else 
-				{
-					var url = prompt('You have selected text that may not be a URL.  Enter a URL to link to with the selected text or press cancel to make the selected text a link.', ' ')
-					if(!url)
-					{
-						insertTextAtCursor("[url]" + str + "[/url]");
-					}
-					else
-					{
-						insertTextAtCursor("[url=" + url + "]" + str + "[/url]");
-					}
-				}
-        	break;  
+      case "urltag":
+         var menuch = str.match(/^(http:\/\/)|(https:\/\/)|(ftp:\/\/)/i);
+         if(menuch) {
+            insertTextAtCursor("[url]" + str + "[/url]");
+         } else {
+            var url = prompt('You have selected text that may not be a URL. Enter a URL to link to with the selected text or press cancel to make the selected text a link.', ' ');
+            if(!url) {
+               insertTextAtCursor("[url]" + str + "[/url]");
+            } else {
+               insertTextAtCursor("[url=" + url + "]" + str + "[/url]");
+            }
+         }
+      break;  
 
-      		case "bold":
-        		insertTextAtCursor("[b]" + str + "[/b]");
-        	break;
+      case "bold":
+         insertTextAtCursor("[b]" + str + "[/b]");
+      break;
 
-			case "code":
-        		insertTextAtCursor("[code]" + str + "[/code]");
-        	break;
+      case "code":
+         insertTextAtCursor("[code]" + str + "[/code]");
+      break;
 
-			case "quote":
-        		insertTextAtCursor("[quote]" + str + "[/quote]");
-        	break;
+      case "quote":
+         insertTextAtCursor("[quote]" + str + "[/quote]");
+      break;
 
-      		case "italic":
-        		insertTextAtCursor("[i]" + str + "[/i]");
-        	break;
-        
-      		case "underline":
-        		insertTextAtCursor("[u]" + str + "[/u]");
-        	break;
+      case "italic":
+         insertTextAtCursor("[i]" + str + "[/i]");
+      break;
 
-			case "strike":
-        		insertTextAtCursor("[s]" + str + "[/s]");
-        	break;
+      case "underline":
+         insertTextAtCursor("[u]" + str + "[/u]");
+      break;
 
-			case "sub":
-        		insertTextAtCursor("[sub]" + str + "[/sub]");
-        	break;
+      case "strike":
+         insertTextAtCursor("[s]" + str + "[/s]");
+      break;
 
-			case "super":
-        		insertTextAtCursor("[super]" + str + "[/super]");
-        	break;
-						
-      		default : alert("vBcode error! No menu option selected.");
-		  }//end switch		
+      case "sub":
+         insertTextAtCursor("[sub]" + str + "[/sub]");
+      break;
+
+      case "super":
+         insertTextAtCursor("[super]" + str + "[/super]");
+      break;
+
+      default : alert("vBcode error! No menu option selected.");
+   }	
+}
+
+function doPreview() {
+
+   if (!document.getElementById("livepreview").checked) {   
+      return;
+   }
+
+   if ( typeof(persistObject.emoticons)=="undefined" || persistObject.emoticons==null ) {
+      getEmoticonsFromServer();
+   }
+
+   var preview = document.getElementById("messagepreview");
+   var markup = document.getElementById("messagearea").value;
+
+   var vbcode = [];
+ 
+   // Text style
+   vbcode['<html:strong>$1</html:strong>'] = /\[b\](.*?)\[\/b\]/i;
+   vbcode['<html:em>$1</html:em>'] = /\[i\](.*?)\[\/i\]/i;
+   vbcode['<html:span style="text-decoration: underline">$1</html:span>'] = /\[u\](.*?)\[\/u\]/gi;
+   vbcode['<html:span style="vertical-align: sub">$1</html:span>'] = /\[sub\](.*?)\[\/sub\]/gi;
+   vbcode['<html:span style="vertical-align: super">$1</html:span>'] = /\[super\](.*?)\[\/super\]/gi;
+   vbcode['<html:span style="text-decoration: line-through">$1</html:span>'] = /\[s\](.*?)\[\/s\]/gi;
+   
+   // Code and quote
+   vbcode['<html:blockquote><html:pre><html:span style="font-family: verdana,arial,helvetica">code:</html:span><html:hr />$1<html:hr /></html:pre></html:blockquote>'] = /\[code\](.*?)\[\/code\]/gi;
+   vbcode['<html:blockquote class="qb2"><html:p>$1</html:p></html:blockquote>'] = /\[quote\](.*?)\[\/quote\]/gi;
+   vbcode['<html:blockquote class="qb2"><html:h4>$1 posted:</html:h4><html:p>$2</html:p></html:blockquote>'] = /\[quote=([^\]]+)\](.*?)\[\/quote\]/gi;
+ 
+   // Links and images
+   if (document.getElementById("parseurl").checked) {   
+      markup = markup.replace(/(^|\s|\r|\n)((((ht|f)tps?:\/\/)|(www|ftp)\.)[a-zA-Z0-9\.\#\@\:%&_/\?\=\~\-]+)/gi, "$1<html:a href=\"$2\">$2</html:a>");
+   }
+
+   vbcode['<html:a href="$1">$2</html:a>'] = /\[url=([^\]]+)\](.*?)\[\/url\]/gi;
+   vbcode['<html:a href="$1">$1</html:a>'] = /\[url\](.*?)\[\/url\]/gi;
+   vbcode['<html:a href="mailto:$1">$1</html:a>'] = /\[email\](.*?)\[\/email\]/gi;
+   vbcode['<html:img src="$1" alt="$1" />'] = /\[img\](.*?)\[\/img\]/gi;
+   vbcode['<html:a href="$1"><html:img width="100" border="0" src="$1" alt="$1"/></html:a>'] = /\[timg\](.*?)\[\/timg\]/gi;
+
+   // Smileys
+   if (!document.getElementById("disablesmilies").checked) {   
+      vbcode['<html:img src="http://forumimages.somethingawful.com/images/smilies/emot-goatse.gif"/>'] = /\&amp\;submit/g;
+      vbcode['<html:img src="http://forumimages.somethingawful.com/images/smilies/smile.gif"/>'] = /\:\)/g;
+      vbcode['<html:img src="http://forumimages.somethingawful.com/images/smilies/frown.gif"/>'] = /\:\(/g;
+      vbcode['<html:img src="http://forumimages.somethingawful.com/images/smilies/wink.gif"/>'] = /\;\)/g;
+      vbcode['<html:img src="http://i.somethingawful.com/mjolnir/images/livestock~01-14-04-whore.gif"/>'] = /\;\-\*/g;
+
+      var matches = markup.match(/\:(\w+|\?)\:/gi);
+   
+      if (matches) {
+         for (var i = 0; i < matches.length; i++) {
+            for (var j=0; j<persistObject.emoticons.length; j++) {
+               var thisemot = persistObject.emoticons[j];
+               if (thisemot[0]!=null && thisemot[0].length>0) {
+                  if (matches[i] == thisemot[0])
+                     markup = markup.replace(matches[i], '<html:img src="'+thisemot[1]+'"/>');
+               }
+            }
+         }
+      }
+   }
+
+   markup = markup.replace(/\n/g, "<html:br />");
+
+   for (var rplc in vbcode) {
+      markup = markup.replace(vbcode[rplc], rplc);
+   }
+
+   preview.innerHTML = "<html:p>"+ markup +"</html:p>";
+}
+
+function togglePreview() {
+   if (document.getElementById("livepreview").checked) {   
+      document.getElementById("messagepreview").style.display = "block";
+      if ( typeof(persistObject.emoticons)=="undefined" || persistObject.emoticons==null ) {
+         getEmoticonsFromServer();
+      }
+   } else {
+      document.getElementById("messagepreview").style.display = "none";      
+   }
+   sizeToContent();
+   doPreview();
 }

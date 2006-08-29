@@ -7,8 +7,7 @@
       title="Quick Reply"
       onload="importData()"
       onclose="releaseVars()"
-      id="thewindow"
-     >
+      id="thewindow">
 
  <xul:keyset>
   <xul:key id="close-key-ctrl" modifiers="control" key="W" onkeypress="releaseVars();window.close();"/>
@@ -24,7 +23,8 @@
        <xul:spacer flex="10"/>
        <xul:label class="recover" value="Recover Last Post" onclick="recoverLastPost();"/>
       </xul:hbox>
-      <xul:textbox onkeypress="checkKeys(event);" class="messagearea" id="messagearea" multiline="true" value="Asdf" flex="1" tabindex="1" />
+      <html:div id="messagepreview"></html:div>
+      <xul:textbox onkeyup="doPreview();" onkeypress="checkKeys(event);" class="messagearea" id="messagearea" multiline="true" value="THERE IS NOTHING TO FUCKING UNDO" flex="1" tabindex="1" />
       <!--
       <html:textarea class="messagearea" id="messagearea" tabindex="1"/>
       -->
@@ -33,12 +33,13 @@
         <xul:columns />
         <xul:rows>
          <xul:row>
-          <xul:checkbox class="qqcbox" id="parseurl" tabindex="8" label="Parse URLs" checked="true"/>
-          <xul:checkbox class="qqcbox" id="subscribe" tabindex="9" label="Subscribe"/>
+          <xul:checkbox class="qqcbox" id="parseurl" tabindex="10" label="Parse URLs" checked="true" oncommand="doPreview();"/>
+          <xul:checkbox class="qqcbox" id="subscribe" tabindex="11" label="Subscribe"/>
+          <xul:checkbox class="qqcbox" id="livepreview" tabindex="12" label="Live Preview" oncommand="togglePreview();"/>
          </xul:row>
          <xul:row>
-          <xul:checkbox class="qqcbox" id="disablesmilies" tabindex="10" label="Disable Smilies"/>
-          <xul:checkbox class="qqcbox" id="signature" tabindex="11" label="Show Signature"/>
+          <xul:checkbox class="qqcbox" id="disablesmilies" tabindex="13" label="Disable Smilies" oncommand="doPreview();"/>
+          <xul:checkbox class="qqcbox" id="signature" tabindex="14" label="Show Signature"/>
          </xul:row>
         </xul:rows>
        </xul:grid>
@@ -49,18 +50,20 @@
         <xul:spacer flex="1"/>
         <xul:hbox>
 
-         <xul:button class="qqbutton" id="vbcodebutton" label="vB code" tabindex="" type="menu">
+         <xul:button class="qqbutton" id="vbcodebutton" label="vB code" tabindex="9" type="menu">
           <xul:menupopup id="vbcodemenu"> 
-		<xul:menuitem id="vbcode_bold" style="font-weight: bold;" label="Bold" oncommand="getvBcode('bold');"/>
-		<xul:menuitem id="vbcode_code" label="Code" oncommand="getvBcode('code');"/>
-		<xul:menuitem id="vbcode_code" label="Quote" oncommand="getvBcode('quote');"/>
-		<xul:menuitem id="vbcode_italic" style="font-style: italic;" label="Italic" oncommand="getvBcode('italic');"/>
-		<xul:menuitem id="vbcode_underline" style="text-decoration: underline;" label="Underline" oncommand="getvBcode('underline');"/>
-		<xul:menuitem id="vbcode_strike" style="text-decoration: line-through;" label="Strikethrough" oncommand="getvBcode('strike');"/>
-		<xul:menuitem id="vbcode_sub" label="Subscript" oncommand="getvBcode('sub');"/>
-		<xul:menuitem id="vbcode_super" label="Superscript" oncommand="getvBcode('super');"/>
-		<xul:menuitem id="vbcode_img" label="Image" oncommand="getvBcode('img');"/>
-		<xul:menuitem id="vbcode_urltag" label="URL" oncommand="getvBcode('urltag');"/>
+		   <xul:menuitem id="vbcode_bold" style="font-weight: bold;" label="Bold" oncommand="getvBcode('bold');"/>
+		   <xul:menuitem id="vbcode_italic" style="font-style: italic;" label="Italic" oncommand="getvBcode('italic');"/>
+		   <xul:menuitem id="vbcode_strike" style="text-decoration: line-through;" label="Strikethrough" oncommand="getvBcode('strike');"/>
+		   <xul:menuitem id="vbcode_sub" label="Subscript" oncommand="getvBcode('sub');"/>
+		   <xul:menuitem id="vbcode_super" label="Superscript" oncommand="getvBcode('super');"/>
+		   <xul:menuitem id="vbcode_underline" style="text-decoration: underline;" label="Underline" oncommand="getvBcode('underline');"/>
+		   <xul:menuseparator/>
+		   <xul:menuitem id="vbcode_code" label="Code" oncommand="getvBcode('code');"/>
+		   <xul:menuitem id="vbcode_code" label="Quote" oncommand="getvBcode('quote');"/>
+		   <xul:menuseparator/>
+		   <xul:menuitem id="vbcode_img" label="Image" oncommand="getvBcode('img');"/>
+		   <xul:menuitem id="vbcode_urltag" label="URL" oncommand="getvBcode('urltag');"/>
           </xul:menupopup>
          </xul:button>
 
