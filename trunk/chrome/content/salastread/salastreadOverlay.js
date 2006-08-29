@@ -1754,12 +1754,12 @@ function quickQuoteButtonClick(evt/*,threadid,postername,isDoubleClick,hasQuote*
       } catch(ex) {
          quickquotewin = window.open("chrome://salastread/content/quickquote.xul",
                "quickquote",
-               "chrome, resizable=yes, width=800, height=400");
+               "chrome, resizable=yes, width=800, height=600");
       }
    } else {
       quickquotewin = window.open("chrome://salastread/content/quickquote.xul",
                "quickquote",
-               "chrome, resizable=yes, width=800, height=400");
+               "chrome, resizable=yes, width=800, height=600");
    }
    if (quickquotewin) {
       persistObject.__QuickQuoteWindowObject = quickquotewin;
