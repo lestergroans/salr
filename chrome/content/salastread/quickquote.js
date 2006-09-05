@@ -219,7 +219,6 @@ function finalizeTextGrab(restext) {
    el.innerHTML = restext;
    var tnode = selectSingleNode(document.getElementById("replypage").contentDocument, el, "//TEXTAREA[@name='message']");
    document.getElementById("messagearea").value = before +  tnode.value;
-
    doPreview();
 
    var fknode = selectSingleNode(document.getElementById("replypage").contentDocument, el, "//INPUT[@name='formkey']");
@@ -283,7 +282,6 @@ function finalizeTextGrab(restext) {
       document.getElementById("submit-swap").disabled = false;
       document.getElementById("submit-normal").disabled = false;
    }
-
    return;
 }
 
@@ -304,7 +302,6 @@ function importData() {
       document.getElementById("submit-normal").style.display = "-moz-box";
       document.getElementById("submit-swap").style.display = "none";
    }
-   togglePreview();
    if ( !window.opener.__salastread_needretrieval ) {
       document.getElementById("messagearea").value = window.opener.__salastread_quotetext;
       if (sa_formkey=="" || !sa_formkey) {
@@ -335,6 +332,10 @@ function importData() {
    }
    if ( persistObject.toggle_quickQuoteSignatureDefault && !window.opener.__salastread_alreadypostedinthread ) {
       document.getElementById("signature").setAttribute("checked",true);
+   }
+   if ( persistObject.toggle_quickQuoteLivePreview ) {
+      document.getElementById("preview").setAttribute("checked",true);
+      togglePreview();
    }
    }
    catch (e) { alert(e); }
@@ -573,50 +574,60 @@ function getvBcode(command) {
 
 function doPreview() {
 
-   if (!document.getElementById("livepreview").checked) {   
-      return;
-   }
-
-   if ( typeof(persistObject.emoticons)=="undefined" || persistObject.emoticons==null ) {
-      getEmoticonsFromServer();
-   }
-
-   var preview = document.getElementById("messagepreview");
+   var preview = document.getElementById("previewiframe").contentDocument.getElementById("messagepreview");
    var markup = document.getElementById("messagearea").value;
 
+	markup = markup.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
    var vbcode = [];
- 
+
    // Text style
-   vbcode['<html:strong>$1</html:strong>'] = /\[b\](.*?)\[\/b\]/i;
-   vbcode['<html:em>$1</html:em>'] = /\[i\](.*?)\[\/i\]/i;
-   vbcode['<html:span style="text-decoration: underline">$1</html:span>'] = /\[u\](.*?)\[\/u\]/gi;
-   vbcode['<html:span style="vertical-align: sub">$1</html:span>'] = /\[sub\](.*?)\[\/sub\]/gi;
-   vbcode['<html:span style="vertical-align: super">$1</html:span>'] = /\[super\](.*?)\[\/super\]/gi;
-   vbcode['<html:span style="text-decoration: line-through">$1</html:span>'] = /\[s\](.*?)\[\/s\]/gi;
-   
+   vbcode['<b>$1</b>'] = /\[b\](.*?)\[\/b\]/gi;
+   vbcode['<i>$1</i>'] = /\[i\](.*?)\[\/i\]/gi;
+   vbcode['<u>$1</u>'] = /\[u\](.*?)\[\/u\]/gi;
+   vbcode['<s>$1</s>'] = /\[s\](.*?)\[\/s\]/gi;
+
+	markup = markup.replace(/\[sub\]|\[\/sub\]|\[super\]|\[\/super\]/gi, function (strMatch){
+		var strReturn = null;
+		if(strMatch == "[sub]")
+			strReturn = "<span style=\"vertical-align: sub;\">";
+		else if(strMatch == "[super]")
+			strReturn = "<span style=\"vertical-align: super;\">";
+
+      if(strMatch.match(/\[\/.*?\]/gi))
+         strReturn = "</span>";
+
+		return strReturn;
+	});
+
    // Code and quote
-   vbcode['<html:blockquote><html:pre><html:span style="font-family: verdana,arial,helvetica">code:</html:span><html:hr />$1<html:hr /></html:pre></html:blockquote>'] = /\[code\](.*?)\[\/code\]/gi;
-   vbcode['<html:blockquote class="qb2"><html:p>$1</html:p></html:blockquote>'] = /\[quote\](.*?)\[\/quote\]/gi;
-   vbcode['<html:blockquote class="qb2"><html:h4>$1 posted:</html:h4><html:p>$2</html:p></html:blockquote>'] = /\[quote=([^\]]+)\](.*?)\[\/quote\]/gi;
+   vbcode['<blockquote><pre><span style="font-family: verdana,arial,helvetica">code:</span><hr />$1<hr /></pre></blockquote>'] = /\[code\](.*?)\[\/code\]/gi;
+   vbcode['<blockquote class="qb2"><p>$1</p></blockquote>'] = /\[quote\](.*?)\[\/quote\]/gi;
+   vbcode['<blockquote class="qb2"><h4>$1 posted:</h4><p>$2</p></blockquote>'] = /\[quote=([^\]]+)\](.*?)\[\/quote\]/gi;
  
    // Links and images
    if (document.getElementById("parseurl").checked) {   
-      markup = markup.replace(/(^|\s|\r|\n)((((ht|f)tps?:\/\/)|(www|ftp)\.)[a-zA-Z0-9\.\#\@\:%&_/\?\=\~\-]+)/gi, "$1<html:a href=\"$2\">$2</html:a>");
+      markup = markup.replace(/(^|\s)((((ht|f)tps?:\/\/)|(www|ftp)\.)[a-zA-Z0-9\.\#\@\:%&_/\?\=\~\-]+)/gim, "$1<a href=\"$2\" target=\"_blank\">$2</a>");
    }
 
-   vbcode['<html:a href="$1">$2</html:a>'] = /\[url=([^\]]+)\](.*?)\[\/url\]/gi;
-   vbcode['<html:a href="$1">$1</html:a>'] = /\[url\](.*?)\[\/url\]/gi;
-   vbcode['<html:a href="mailto:$1">$1</html:a>'] = /\[email\](.*?)\[\/email\]/gi;
-   vbcode['<html:img src="$1" alt="$1" />'] = /\[img\](.*?)\[\/img\]/gi;
-   vbcode['<html:a href="$1"><html:img width="100" border="0" src="$1" alt="$1"/></html:a>'] = /\[timg\](.*?)\[\/timg\]/gi;
+   vbcode['<a href="$1" target=\"_blank\">$2</a>'] = /\[url=([^\]]+)\](.*?)\[\/url\]/gi;
+   vbcode['<a href="$1" target=\"_blank\">$1</a>'] = /\[url\](.*?)\[\/url\]/gi;
+   vbcode['<a href="mailto:$1">$1</a>'] = /\[email\](.*?)\[\/email\]/gi;
+   vbcode['<img src="$1" alt="$1" />'] = /\[img\](.*?)\[\/img\]/gi;
+   vbcode['<a title="$1" target=\"_blank\"><img width="100" border="0" src="$1" alt="$1"/></a>'] = /\[timg\](.*?)\[\/timg\]/gi;
 
    // Smileys
    if (!document.getElementById("disablesmilies").checked) {   
-      vbcode['<html:img src="http://forumimages.somethingawful.com/images/smilies/emot-goatse.gif"/>'] = /\&amp\;submit/g;
-      vbcode['<html:img src="http://forumimages.somethingawful.com/images/smilies/smile.gif"/>'] = /\:\)/g;
-      vbcode['<html:img src="http://forumimages.somethingawful.com/images/smilies/frown.gif"/>'] = /\:\(/g;
-      vbcode['<html:img src="http://forumimages.somethingawful.com/images/smilies/wink.gif"/>'] = /\;\)/g;
-      vbcode['<html:img src="http://i.somethingawful.com/mjolnir/images/livestock~01-14-04-whore.gif"/>'] = /\;\-\*/g;
+
+      if ( typeof(persistObject.emoticons)=="undefined" || persistObject.emoticons==null ) {
+         getEmoticonsFromServer();
+      }
+
+      vbcode['<img src="http://forumimages.somethingawful.com/images/smilies/emot-goatse.gif"/>'] = /&amp;submit/gi;
+      vbcode['<img src="http://forumimages.somethingawful.com/images/smilies/smile.gif"/>'] = /:\)/gi;
+      vbcode['<img src="http://forumimages.somethingawful.com/images/smilies/frown.gif"/>'] = /:\(/gi;
+      vbcode['<img src="http://forumimages.somethingawful.com/images/smilies/wink.gif"/>'] = /;\)/gi;
+      vbcode['<img src="http://i.somethingawful.com/mjolnir/images/livestock~01-14-04-whore.gif"/>'] = /;-\*/gi;
 
       var matches = markup.match(/\:(\w+|\?)\:/gi);
    
@@ -626,31 +637,34 @@ function doPreview() {
                var thisemot = persistObject.emoticons[j];
                if (thisemot[0]!=null && thisemot[0].length>0) {
                   if (matches[i] == thisemot[0])
-                     markup = markup.replace(matches[i], '<html:img src="'+thisemot[1]+'"/>');
+                     markup = markup.replace(matches[i], '<img src="'+thisemot[1]+'"/>');
                }
             }
          }
       }
    }
 
-   markup = markup.replace(/\n/g, "<html:br />");
+   markup = markup.replace(/\n/g, "<br />");
 
    for (var rplc in vbcode) {
       markup = markup.replace(vbcode[rplc], rplc);
    }
 
-   preview.innerHTML = "<html:p>"+ markup +"</html:p>";
+   var iframe = document.getElementById("previewiframe").contentWindow;
+   iframe.scrollBy(0, iframe.document.body.scrollHeight);
+
+   preview.innerHTML = "<p>"+ markup +"</p>";
 }
 
 function togglePreview() {
-   if (document.getElementById("livepreview").checked) {   
-      document.getElementById("messagepreview").style.display = "block";
-      if ( typeof(persistObject.emoticons)=="undefined" || persistObject.emoticons==null ) {
-         getEmoticonsFromServer();
-      }
-   } else {
-      document.getElementById("messagepreview").style.display = "none";      
-   }
-   sizeToContent();
+   if (document.getElementById("preview").checked)
+      document.getElementById("previewbox").removeAttribute('collapsed');
+   else
+      document.getElementById("previewbox").setAttribute('collapsed', 'true');
+
+   persistObject.toggle_quickQuoteLivePreview = document.getElementById("preview").checked;
+   persistObject.SavePrefs();
+
+   window.sizeToContent();
    doPreview();
 }

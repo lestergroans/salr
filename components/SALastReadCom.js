@@ -140,6 +140,7 @@ salrPersistObject.prototype = {
    get defaulttoggle_quickQuoteSubscribeDefault() { return false; },
    get defaulttoggle_quickQuoteSignatureDefault() { return false; },
    get defaulttoggle_quickQuoteDisableSmiliesDefault() { return false; },
+   get defaulttoggle_quickQuoteLivePreview() { return false; },
    get defaulttoggle_showSAForumMenu() { return true; },
    get defaulttoggle_nestSAForumMenu() { return true; },
    get defaulttoggle_useSAForumMenuBackground() { return true; },

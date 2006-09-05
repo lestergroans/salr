@@ -1,5 +1,6 @@
 window {
  background-color: #069 !important;
+ width: 800px;
 }
 .htitle, .hoptions {
  background-color: #069 !important;
@@ -29,8 +30,7 @@ window {
 .messagearea {
  font-family: "Courier New", monospace;
  font-size: 10pt;
- min-height: 300px;
- min-width: 800px; 
+ height: 300px;
 } 
 .qqcbox {
  font-family: Tahoma, Arial, Helvetica, sans-serif;
@@ -67,51 +67,8 @@ window {
  display: none;
 }
 
-#messagepreview {
- min-height: 300px; 
- min-width: 800px;
+#previewiframe {
+ height: 300px;
  overflow: auto;
- font-size: 12px;
- font-family: verdana, arial, helvetica;
- background-color: #F1F1F1 !important;
- border: 1px solid #C1C1C1;
- color: #000;
  margin: 4px 4px 4px 4px;
- padding: 4px;
-}
-
-#messagepreview blockquote.qb2
-{
- border-color: #999;
- border-style: groove;
- border-width: 2px 0;
- margin: 1em 3em;
- padding: 5px 0;
-}
-
-#messagepreview blockquote.qb2 h4
-{
- font-size: 1em;
- font-weight: bold;
- font-style: italic;
- margin: 0;
- padding: 0;
-}
-
-#messagepreview blockquote.qb2 p
-{
- margin: 0;
- padding: 0;
-}
-
-#messagepreview a
-{
- text-decoration: underline;
- color: #036;
-}
-
-#messagepreview a:hover
-{
- text-decoration: underline;
- color: #c60;
 }

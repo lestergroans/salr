@@ -23,8 +23,8 @@
        <xul:spacer flex="10"/>
        <xul:label class="recover" value="Recover Last Post" onclick="recoverLastPost();"/>
       </xul:hbox>
-      <html:div id="messagepreview"></html:div>
-      <xul:textbox onkeyup="doPreview();" onkeypress="checkKeys(event);" class="messagearea" id="messagearea" multiline="true" value="THERE IS NOTHING TO FUCKING UNDO" flex="1" tabindex="1" />
+      <xul:box id="previewbox" collapsed="true" flex="1"><xul:iframe name="previewiframe" id="previewiframe" src="quickpreview.html" flex="1"/></xul:box>
+      <xul:textbox onkeyup="doPreview();" onkeypress="checkKeys(event);" class="messagearea" id="messagearea" multiline="true" value="THERE IS NOTHING TO FUCKING UNDO" flex="1" tabindex="2" />
       <!--
       <html:textarea class="messagearea" id="messagearea" tabindex="1"/>
       -->
@@ -33,13 +33,13 @@
         <xul:columns />
         <xul:rows>
          <xul:row>
-          <xul:checkbox class="qqcbox" id="parseurl" tabindex="10" label="Parse URLs" checked="true" oncommand="doPreview();"/>
-          <xul:checkbox class="qqcbox" id="subscribe" tabindex="11" label="Subscribe"/>
-          <xul:checkbox class="qqcbox" id="livepreview" tabindex="12" label="Live Preview" oncommand="togglePreview();"/>
+          <xul:checkbox class="qqcbox" id="parseurl" tabindex="3" label="Parse URLs" checked="true" oncommand="doPreview();"/>
+          <xul:checkbox class="qqcbox" id="subscribe" tabindex="5" label="Subscribe"/>
+          <xul:checkbox class="qqcbox" id="preview" tabindex="7" label="Live Preview" oncommand="togglePreview();"/>
          </xul:row>
          <xul:row>
-          <xul:checkbox class="qqcbox" id="disablesmilies" tabindex="13" label="Disable Smilies" oncommand="doPreview();"/>
-          <xul:checkbox class="qqcbox" id="signature" tabindex="14" label="Show Signature"/>
+          <xul:checkbox class="qqcbox" id="disablesmilies" tabindex="4" label="Disable Smilies" oncommand="doPreview();"/>
+          <xul:checkbox class="qqcbox" id="signature" tabindex="6" label="Show Signature"/>
          </xul:row>
         </xul:rows>
        </xul:grid>
@@ -50,7 +50,7 @@
         <xul:spacer flex="1"/>
         <xul:hbox>
 
-         <xul:button class="qqbutton" id="vbcodebutton" label="vB code" tabindex="9" type="menu">
+         <xul:button class="qqbutton" id="vbcodebutton" label="vB code" tabindex="8" type="menu">
           <xul:menupopup id="vbcodemenu"> 
 		   <xul:menuitem id="vbcode_bold" style="font-weight: bold;" label="Bold" oncommand="getvBcode('bold');"/>
 		   <xul:menuitem id="vbcode_italic" style="font-style: italic;" label="Italic" oncommand="getvBcode('italic');"/>
@@ -67,7 +67,7 @@
           </xul:menupopup>
          </xul:button>
 
-         <xul:button class="qqbutton" id="emoticonbutton" image="chrome://salastread/content/cool.gif" tabindex="8" type="menu">
+         <xul:button class="qqbutton" id="emoticonbutton" image="chrome://salastread/content/cool.gif" tabindex="9" type="menu">
           <xul:menupopup id="emoticonmenu" onpopupshowing="getEmoticons();">
            <xul:menu id="menu_a" label="ABC">
             <xul:menupopup />
@@ -101,12 +101,12 @@
 
          <!-- <xul:button class="qqbutton" accesskey="c" id="spellcheckbutton" label="test" oncommand="document.getElementById('floatsubmitter').submit();" /> -->
 
-         <xul:button class="qqbutton" accesskey="c" id="spellcheckbutton" label="Spellcheck" tabindex="7" oncommand="performSpellCheck();" style="display: none" />
-         <xul:button class="qqbutton" accesskey="a" id="attachbtn" label="Attach..." tabindex="6" oncommand="doAttach();" />
-         <xul:button class="qqbutton" accesskey="a" id="waffleimagesbtn" xxlabel="IMG" image="http://www.waffleimages.com/favicon.ico" tabindex="5" oncommand="doWaffleImages();" />
-         <xul:button class="qqbutton" accesskey="s" disabled="true" id="submit-swap" label="Submit" style="display: none" tabindex="4" oncommand="doSubmit('submit');" />
-         <xul:button class="qqbutton" accesskey="p" id="previewbtn" label="Preview" tabindex="3" oncommand="doSubmit('preview');" />
-         <xul:button class="qqbutton" accesskey="s" disabled="true" id="submit-normal" label="Submit" tabindex="2" oncommand="doSubmit('submit');" />
+         <xul:button class="qqbutton" accesskey="c" id="spellcheckbutton" label="Spellcheck" tabindex="10" oncommand="performSpellCheck();" style="display: none" />
+         <xul:button class="qqbutton" accesskey="a" id="attachbtn" label="Attach..." tabindex="11" oncommand="doAttach();" />
+         <xul:button class="qqbutton" accesskey="a" id="waffleimagesbtn" xxlabel="IMG" image="http://www.waffleimages.com/favicon.ico" tabindex="12" oncommand="doWaffleImages();" />
+         <xul:button class="qqbutton" accesskey="s" disabled="true" id="submit-swap" label="Submit" style="display: none" tabindex="13" oncommand="doSubmit('submit');" />
+         <xul:button class="qqbutton" accesskey="p" id="previewbtn" label="Preview" tabindex="14" oncommand="doSubmit('preview');" />
+         <xul:button class="qqbutton" accesskey="s" disabled="true" id="submit-normal" label="Submit" tabindex="15" oncommand="doSubmit('submit');" />
         </xul:hbox>
        </xul:vbox>
       </xul:hbox>
