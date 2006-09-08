@@ -83,6 +83,8 @@
              label="Add a page navigator to the lower-right corner of the browser" />
    <checkbox id="toggle_gestureEnable"
              label="Allow mouse gestures to navigate around threads and forums" />
+   <checkbox id="toggle_scrollPostEnable"
+             label="Use scroll position to set last-read post" />
   </vbox>
  </groupbox>
  <checkbox id="toggle_removeHeaderAndFooter"
