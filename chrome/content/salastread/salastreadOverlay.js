@@ -2498,7 +2498,7 @@ function SALR_CheckScrollPostPosition(doc) {
     var scrollpos = doc.defaultView.scrollY + doc.defaultView.innerHeight;
     var i;
     var a;
-    var l = doc.evaluate("//a[is_salr_post_anchor='yes']", doc, null, 0, null);
+    var l = doc.evaluate("//a[@is_salr_post_anchor='yes']", doc, null, 0, null);
     a = l.iterateNext();
     while (a) {
       if (a.postid && (doc.__salastread_loading || !a.absolutepos)) 
