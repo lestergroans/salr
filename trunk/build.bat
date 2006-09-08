@@ -1,4 +1,6 @@
-set x=%cd%
+set PATH=%PATH%;C:\Program Files\7-Zip
+
+set x=salastread
 md build\chrome
 md build\components
 cd chrome
@@ -6,7 +8,7 @@ cd chrome
 move "%x%.jar" ..\build\chrome
 cd ..
 copy install.* build
-copy chrome.manifest build
+copy chrome.manifest-jar build\chrome.manifest
 copy components build\components
 cd build
 7z a -tzip "%x%.xpi" * -r -mx=9 

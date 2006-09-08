@@ -187,6 +187,7 @@ salrPersistObject.prototype = {
 
    get defaultint_gestureButton() { return 2; },
    get defaulttoggle_gestureEnable() { return true; },
+   get defaulttoggle_scrollPostEnable() { return true; },
 
    SET_toggle_thumbnailAllImages: function(value) {
       if(!("@mozilla.org/content/style-sheet-service;1" in Components.classes))

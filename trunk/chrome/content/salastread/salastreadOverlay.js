@@ -2392,8 +2392,10 @@ function handleShowThread(e) {
 					   plink.threadid = threadid;
 					   plink.postid = postid;
 					   plink.postdt = postdtvalue;
+					   plink.parentpost = resarray[x];
 					   plink.onclick = SALR_ChangeLastReadOnThread;
 					   plink.appendChild( doc.createTextNode("<") );
+					   plink.setAttribute("is_salr_post_anchor", "yes");
 					   posttimenode.parentNode.insertBefore(plink, posttimenode);
 					   posttimenode.parentNode.insertBefore(doc.createTextNode(" "), posttimenode);
 					}
@@ -2421,7 +2423,7 @@ function handleShowThread(e) {
       sel.innerHTML = csstxt;
       doc.getElementsByTagName('head')[0].appendChild(sel);
    }
-   if (needUpdate) {
+   if (needUpdate && !persistObject.toggle_scrollPostEnable) {
       UpdateLPDateTime(updateTo, threadid, updateLastPostID);
    }
 
@@ -2475,11 +2477,65 @@ function handleShowThread(e) {
    try { SALR_InsertThreadKeyboardNavigation(doc); } catch (e) { }
 
    reanchorThreadToLink(doc);
+   
+   doc.__salastread_loading = true;
+   window.addEventListener("load", SALR_PageFinishedLoading, true);
+   if (persistObject.toggle_scrollPostEnable)
+     setTimeout(function () { SALR_CheckScrollPostPosition(doc); }, 1000);
 
    addInternalDebugLog("showthread.php handler, thread #"+threadid+", lpbefore="+lpbefore+", lpafter="+lpafter);
 }
 
 var specialDoc;
+
+function SALR_PageFinishedLoading(e) {
+  var doc = e.originalTarget;
+  doc.__salastread_loading = false;
+}
+
+function SALR_CheckScrollPostPosition(doc) {
+  if (doc.__salastread_processed) {
+    var scrollpos = doc.defaultView.scrollY + doc.defaultView.innerHeight;
+    var i;
+    var a;
+    var l = doc.evaluate("//a[is_salr_post_anchor='yes']", doc, null, 0, null);
+    a = l.iterateNext();
+    while (a) {
+      if (a.postid && (doc.__salastread_loading || !a.absolutepos)) 
+        a.absolutepos = SALR_GetVerticalPos(a.parentpost);
+      if (a.absolutepos && scrollpos > a.absolutepos) {
+        SALR_SetNewLastReadIfLarger(a.threadid, a.postdt, a.postid);
+      }
+      a = l.iterateNext();
+    }
+  setTimeout(function () { SALR_CheckScrollPostPosition(doc); }, 5000);
+  }
+}
+
+function SALR_SetNewLastReadIfLarger(threadid, postdt, postid) {
+   slurpIntoThreadCache(threadid);
+   if (cachedThreadEntry) {
+      var lastdt = cachedThreadEntry.getBypassAttribute("lastpostdt");
+      if (lastdt && postdt > lastdt) {
+        cachedThreadEntry.setAttribute("lastpostdt", postdt);
+        cachedThreadEntry.setAttribute("lastpostid", postid);
+        persistObject.SaveXML();
+      }
+    }
+}
+
+function SALR_GetVerticalPos(element) {
+  //var x = 0;
+  var y = 0;
+  var p = element;
+  while (p) {
+    //x += p.offsetLeft;
+    y += p.offsetTop;
+    p = p.offsetParent;
+    }
+  return y;
+}
+
 
 function SALR_InsertThreadKeyboardNavigation(doc) {
    // XXX: temporarily disabled
