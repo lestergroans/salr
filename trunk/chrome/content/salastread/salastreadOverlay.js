@@ -2146,6 +2146,7 @@ function handleShowThread(e) {
    var updateTo = null;
    var updateLastPostID = null;
    var isEven = false;
+   doc.postlinks = new Array;
    for (var x=0; x<resarray.length; x++) {
       if (!(resarray[x].className.match(/ignored/))) {
 			  //var postdate = resarray[x].firstChild.nodeValue;
@@ -2395,7 +2396,7 @@ function handleShowThread(e) {
 					   plink.parentpost = resarray[x];
 					   plink.onclick = SALR_ChangeLastReadOnThread;
 					   plink.appendChild( doc.createTextNode("<") );
-					   plink.setAttribute("is_salr_post_anchor", "yes");
+					   doc.postlinks[doc.postlinks.length] = plink;
 					   posttimenode.parentNode.insertBefore(plink, posttimenode);
 					   posttimenode.parentNode.insertBefore(doc.createTextNode(" "), posttimenode);
 					}
@@ -2498,15 +2499,13 @@ function SALR_CheckScrollPostPosition(doc) {
     var scrollpos = doc.defaultView.scrollY + doc.defaultView.innerHeight;
     var i;
     var a;
-    var l = doc.evaluate("//a[@is_salr_post_anchor='yes']", doc, null, 0, null);
-    a = l.iterateNext();
-    while (a) {
+    for (i = 0; i < doc.postlinks.length; i++) {
+      a = doc.postlinks[i];
       if (a.postid && (doc.__salastread_loading || !a.absolutepos)) 
         a.absolutepos = SALR_GetVerticalPos(a.parentpost);
       if (a.absolutepos && scrollpos > a.absolutepos) {
         SALR_SetNewLastReadIfLarger(a.threadid, a.postdt, a.postid);
       }
-      a = l.iterateNext();
     }
   setTimeout(function () { SALR_CheckScrollPostPosition(doc); }, 5000);
   }
