@@ -84,7 +84,7 @@
    <checkbox id="toggle_gestureEnable"
              label="Allow mouse gestures to navigate around threads and forums" />
    <checkbox id="toggle_scrollPostEnable"
-             label="Use scroll position to set last-read post" />
+             label="Use scroll position to set last-read post (might slow browsing)" />
   </vbox>
  </groupbox>
  <checkbox id="toggle_removeHeaderAndFooter"
