@@ -123,6 +123,11 @@ function startPostTextGrab(getFormKeyOnly, postid) {
       getter_isquote = 0;
       targeturl = "http://forums.somethingawful.com/newreply.php?s=&action=newreply&threadid=" + window.opener.__salastread_quotethreadid;
    }
+   if (window.__salastread_quickpost_forumid) {
+      getter_isquote = 0;
+      targeturl = "http://forums.somethingawful.com/newthread.php?forumid=" + window.__salastread_quickpost_forumid;     
+     getter_getFormKeyOnly = 1;
+   }
    //alert("targeturl = "+targeturl);
    pageGetter.open("GET", targeturl, true);
    pageGetter.onreadystatechange = postTextGrabCallback;
@@ -210,6 +215,13 @@ function replaceQuoteIntroText(restext,postid) {
    return restext;
 }
 
+function qpSetPostIcon(e) {
+  var el = e.originalTarget;
+  var pib = document.getElementById('posticonbutton');
+  pib.setAttribute('image', el.getAttribute('image'));
+  pib.iconid = el.iconid;
+}
+
 function finalizeTextGrab(restext) {
 
 	var before = document.getElementById("messagearea").value
@@ -228,6 +240,38 @@ function finalizeTextGrab(restext) {
    if (!isDetached) {
       document.getElementById("submit-swap").disabled = false;
       document.getElementById("submit-normal").disabled = false;
+   }
+   
+   if (window.__salastread_quickpost_forumid) {
+     //This is a Quick Post window - look the part!
+     document.title = 'Quick Post';
+     document.getElementById('qrtitle').setAttribute('value', 'Quick Post');
+     document.getElementById('quickpostoptions').setAttribute('collapsed', 'false');
+     //Uh, also load the post icons
+     var iconz = selectNodes(document.getElementById("replypage").contentDocument, el, "//INPUT[@name='iconid']");
+     var iconmenu = document.getElementById('posticonmenu');
+     var hbox = document.getElementById('posticonmenuhbox');
+     document.getElementById('posticonbutton').iconid = 0;
+     for (var i = 0; i < iconz.length; i++) {
+       var l = iconz[i];
+       var iconid = l.value;
+       while (l.nextSibling) {
+         l = l.nextSibling;
+         if (l.src) {
+           var newel = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul","menuitem");
+           newel.className = "menuitem-iconic";
+           newel.setAttribute("image", l.src);
+           newel.iconid = iconid;
+           newel.addEventListener('click', qpSetPostIcon, false);
+           hbox.appendChild(newel);
+           if (i % 5 == 0) {
+             hbox = document.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul","hbox");
+             iconmenu.appendChild(hbox);
+           }
+           break;
+         }
+       }
+     }
    }
    
    return; 
