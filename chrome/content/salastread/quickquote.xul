@@ -24,6 +24,16 @@
        <xul:label class="recover" value="Recover Last Post" onclick="recoverLastPost();"/>
       </xul:hbox>
       <xul:box id="previewbox" collapsed="true" flex="1"><xul:iframe name="previewiframe" id="previewiframe" src="quickpreview.html" flex="1"/></xul:box>
+      <xul:hbox class='hoptions' id="quickpostoptions" collapsed="true">
+       <xul:label value="Subject:" />
+       <xul:textbox id="subject" flex="10" />
+       <xul:label value="Post icon:" />
+       <xul:button id='posticonbutton' class="qqbutton" image="http://fi.somethingawful.com/forums/posticons/byob-salt.gif" type="menu">
+        <xul:menupopup id="posticonmenu">
+         <xul:hbox id='posticonmenuhbox' />
+        </xul:menupopup>
+       </xul:button>
+      </xul:hbox>
       <xul:textbox onkeyup="doPreview();" onkeypress="checkKeys(event);" class="messagearea" id="messagearea" multiline="true" value="THERE IS NOTHING TO FUCKING UNDO" flex="1" tabindex="2" />
       <!--
       <html:textarea class="messagearea" id="messagearea" tabindex="1"/>
