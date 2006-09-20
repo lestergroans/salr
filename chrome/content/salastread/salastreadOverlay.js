@@ -3540,9 +3540,11 @@ function salastread_windowOnLoad(e) {
             for ( var tn in ex ) {
                errstr += tn+": "+ex[tn]+"\n";
             }
-            alert("SALastRead application err: "+errstr);
+            if (!persistObject || !persistObject.toggle_suppressErrors)
+              alert("SALastRead application err: "+errstr);
          } else {
-            alert("SALastRead application err: "+ex);
+            if (!persistObject || !persistObject.toggle_suppressErrors)
+              alert("SALastRead application err: "+ex);
          }
       } else {
          throw ex;

@@ -97,6 +97,8 @@
            label="Hide user signatures in posts" />
  <checkbox id="toggle_hideTitle"
            label="Hide custom titles in posts" />
+ <checkbox id="toggle_suppressErrors"
+           label="Don't display error popup messages" />
 
 <!--
  <groupbox>
