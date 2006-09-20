@@ -163,6 +163,7 @@ salrPersistObject.prototype = {
    get defaulttoggle_contextMenuOnBottom() { return true; },
    get defaulttoggle_hideSignature() { return false; },
    get defaulttoggle_hideTitle() { return false; },
+   get defaulttoggle_suppressErrors() { return true; },
 	   
    get defaulttoggle_insertPostLastMarkLink() { return true; },
    get defaulttoggle_disableGradients() { return false; },
