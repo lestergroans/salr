@@ -128,6 +128,10 @@ function startPostTextGrab(getFormKeyOnly, postid) {
       targeturl = "http://forums.somethingawful.com/newthread.php?forumid=" + window.__salastread_quickpost_forumid;     
      getter_getFormKeyOnly = 1;
    }
+   if (window.__salastread_is_edit) {
+      getter_isquote = 1;
+      targeturl = "http://forums.somethingawful.com/editpost.php?s=&action=editpost&postid=" + postid;     
+   }
    //alert("targeturl = "+targeturl);
    pageGetter.open("GET", targeturl, true);
    pageGetter.onreadystatechange = postTextGrabCallback;
@@ -223,7 +227,6 @@ function qpSetPostIcon(e) {
 }
 
 function finalizeTextGrab(restext) {
-
 	var before = document.getElementById("messagearea").value
 	before = before.replace(quoteWaitString, "");
 
@@ -234,14 +237,22 @@ function finalizeTextGrab(restext) {
    doPreview();
 
    var fknode = selectSingleNode(document.getElementById("replypage").contentDocument, el, "//INPUT[@name='formkey']");
-   sa_formkey = fknode.value;
-   persistObject.__cachedFormKey = sa_formkey;
+   if (fknode) {
+     sa_formkey = fknode.value;
+     persistObject.__cachedFormKey = sa_formkey;
+   }
 
    if (!isDetached) {
       document.getElementById("submit-swap").disabled = false;
       document.getElementById("submit-normal").disabled = false;
    }
    
+   if (window.__salastread_is_edit) {
+      document.title = 'Quick Edit';
+      document.getElementById('qrtitle').setAttribute('value', 'Quick Edit');
+      document.getElementById('previewbtn').disabled = true;
+   }
+      
    if (window.__salastread_quickpost_forumid) {
      //This is a Quick Post window - look the part!
      document.title = 'Quick Post';
