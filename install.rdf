@@ -6,7 +6,7 @@
 	
 		<em:id>{fc6339b8-9581-4fc7-b824-dffcb091fcb7}</em:id>
 		<em:name>SomethingAwful Last Read Enhancement</em:name>
-		<em:version>1.15.1914</em:version>
+		<em:version>1.15.1915</em:version>
 		<em:description>Adds "Last Read" support to the Something Awful forums</em:description>
 		<em:creator>Tim Fries (biznatchio)</em:creator>
 		<em:contributor>Joseph Wain (uncut product)</em:contributor>
@@ -33,7 +33,7 @@
 			<Description>
 				<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
 				<em:minVersion>1.0</em:minVersion>
-				<em:maxVersion>9.9</em:maxVersion>
+				<em:maxVersion>2.9</em:maxVersion>
 			</Description>
 		</em:targetApplication>
 	
