@@ -2057,6 +2057,7 @@ function handleShowThread(e) {
    if (doc.body.id != "something_awful" && doc.body.id != "all")
       return;
    var inFYAD = false;
+   var inBYOB = false;
 
    var isloggedin = true;
    //if ( selectSingleNode(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]//A[contains(@href,'action=loginform')]") ) {
@@ -2086,7 +2087,10 @@ function handleShowThread(e) {
    doc.__SALR_forumid = forumid;
    doc.body.className += " salastread_forum"+forumid
    //alert("forumid = "+forumid);
-
+   if (forumid == 174)
+   	{
+   	 inBYOB = true;
+   	}
    // Figure out the current threadid
    var threadid;
    var timatch = doc.location.href.match( /threadid=(\d+)/ );
@@ -2367,13 +2371,21 @@ function handleShowThread(e) {
 				 //   // to / when font tags are closed
 				 var quotebutton = selectSingleNode(doc, postbarnode, "TD[@class='postlinks']/UL[@class='postbuttons']/LI//A/IMG[contains(@src,'quote')]");
 				 if (quotebutton) {
-					quotebutton.style.width = "14px !important";
+					quotebutton.style.width = "12px !important";
 					quotebutton.style.height = "20px !important";
-					quotebutton.src = "chrome://salastread/content/button-normalquote.gif";
+					if(inBYOB){
+						quotebutton.src = "chrome://salastread/content/byobarrow.gif";
+					}else{
+						quotebutton.src = "chrome://salastread/content/button-normalquote.gif";
+					}
 					quotebutton.alt = "Normal Reply w/Quote";
 
 					var newquote = doc.createElement("IMG");
-					newquote.src = "chrome://salastread/content/button-quickquote.gif";
+					if(inBYOB){
+						newquote.src = "chrome://salastread/content/byob-qquote.gif";	
+					}else{
+						newquote.src = "chrome://salastread/content/button-quickquote.gif";
+					}
 					newquote.alt = "Quick Reply w/Quote";
 					newquote.border = "0"
 					newquote.style.cursor = "pointer";
@@ -2383,13 +2395,21 @@ function handleShowThread(e) {
 				 }
 				 var quotebutton = selectSingleNode(doc, postbarnode, "TD[@class='postlinks']/UL[@class='postbuttons']/LI//A/IMG[contains(@src,'edit')]");
 				 if (quotebutton) {
-					quotebutton.style.width = "14px !important";
+					quotebutton.style.width = "12px !important";
 					quotebutton.style.height = "20px !important";
-					quotebutton.src = "chrome://salastread/content/button-normaledit.gif";
+					if(inBYOB){
+						quotebutton.src = "chrome://salastread/content/byobarrow.gif";
+					}else{
+						quotebutton.src = "chrome://salastread/content/button-normaledit.gif";
+					}
 					quotebutton.alt = "Normal Reply w/Quote";
 
 					var newquote = doc.createElement("IMG");
-					newquote.src = "chrome://salastread/content/button-quickedit.gif";
+					if(inBYOB){
+						newquote.src = "chrome://salastread/content/byob-qedit.gif";
+					}else{
+						newquote.src = "chrome://salastread/content/button-quickedit.gif";
+					}
 					newquote.alt = "Quick Reply w/Quote";
 					newquote.border = "0"
 					newquote.style.cursor = "pointer";
@@ -2488,9 +2508,9 @@ function handleShowThread(e) {
       //        "TABLE/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[2]/DIV[1]/A[2][contains(@href,'newreply.php')]/IMG[@alt='Post A Reply'][contains(@src,'forum-reply')]"
       //);
       // XXX: // to / when fonts are closed
-      var replybutton = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='threadbar top']/UL[@class='postbuttons']//LI//A/IMG[contains(@src,'forum-reply')]");
+      var replybutton = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='threadbar top']/UL[@class='postbuttons']//LI//A/IMG[contains(@src,'reply')]");
       if (replybutton) {
-         makeQuickReplyButton(threadid, doc, replybutton);
+         makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
       
       var postbuttons = selectNodes(doc, doc.body, "//IMG[@alt='Post']");
@@ -2503,9 +2523,11 @@ function handleShowThread(e) {
       //replybutton = selectSingleNode(doc, doc.body,
       //    "TABLE/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[4]/A[1][contains(@href,'newreply.php')]/IMG[@alt='Post A Reply'][contains(@src,'forum-reply')]"
       //);
-      replybutton = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='threadbar bottom']/UL[@class='postbuttons']//LI//A/IMG[contains(@src,'forum-reply')]");
+      replybutton = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='threadbar bottom']/UL[@class='postbuttons']//LI//A/IMG[contains(@src,'reply')]");
       if (replybutton) {
-         makeQuickReplyButton(threadid, doc, replybutton);
+      	   
+
+         makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
    }
 
@@ -2918,14 +2940,24 @@ function SALR_NoteFade(targetEl) {
    }
 }
 
-function makeQuickReplyButton(threadid,doc,replybutton) {
-   replybutton.style.width = "14px !important";
+function makeQuickReplyButton(threadid,doc,replybutton, inBYOB) {
+
+    
+   replybutton.style.width = "12px !important";
    replybutton.style.height = "20px !important";
-   replybutton.src = "chrome://salastread/content/button-normalreply.gif";
+   if(inBYOB){
+   	replybutton.src = "chrome://salastread/content/byobarrow.gif";
+   }else{
+   	replybutton.src = "chrome://salastread/content/button-normalreply.gif";
+   }
    replybutton.alt = "Normal Reply";
 
    var newreply = doc.createElement("IMG");
-   newreply.src = "chrome://salastread/content/button-quickreply.gif";
+   if(inBYOB){
+   	newreply.src = "chrome://salastread/content/byob-qreply.gif";
+   }else{
+   	newreply.src = "chrome://salastread/content/button-quickreply.gif";
+   }
    newreply.alt = "Quick Reply";
    newreply.border = "0"
    newreply.style.cursor = "pointer";
@@ -2940,13 +2972,21 @@ function makeQuickPostButton(threadid,doc,replybutton) {
    if (forumid.length) forumid = forumid[1];
    else return;
 
-   replybutton.style.width = "14px !important";
+   replybutton.style.width = "12px !important";
    replybutton.style.height = "20px !important";
-   replybutton.src = "chrome://salastread/content/button-normalpost.gif";
+   if(forumid== 174){
+   	replybutton.src = "chrome://salastread/content/byobarrow.gif";
+   }else{
+   	replybutton.src = "chrome://salastread/content/button-normalpost.gif";
+   }
    replybutton.alt = "Normal Post";
 
    var newreply = doc.createElement("IMG");
-   newreply.src = "chrome://salastread/content/button-quickpost.gif";
+   if(forumid== 174){
+      	newreply.src = "chrome://salastread/content/byob-qpost.gif";
+   }else{
+   	newreply.src = "chrome://salastread/content/button-quickpost.gif";
+   }
    newreply.alt = "Quick Post";
    newreply.border = "0"
    newreply.style.cursor = "pointer";
