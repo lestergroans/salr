@@ -2369,11 +2369,11 @@ function handleShowThread(e) {
 				 if (quotebutton) {
 					quotebutton.style.width = "14px !important";
 					quotebutton.style.height = "20px !important";
-					quotebutton.src = "chrome://salastread/content/button-normalquote.png";
+					quotebutton.src = "chrome://salastread/content/button-normalquote.gif";
 					quotebutton.alt = "Normal Reply w/Quote";
 
 					var newquote = doc.createElement("IMG");
-					newquote.src = "chrome://salastread/content/button-quickquote.png";
+					newquote.src = "chrome://salastread/content/button-quickquote.gif";
 					newquote.alt = "Quick Reply w/Quote";
 					newquote.border = "0"
 					newquote.style.cursor = "pointer";
@@ -2385,11 +2385,11 @@ function handleShowThread(e) {
 				 if (quotebutton) {
 					quotebutton.style.width = "14px !important";
 					quotebutton.style.height = "20px !important";
-					quotebutton.src = "chrome://salastread/content/button-normaledit.png";
+					quotebutton.src = "chrome://salastread/content/button-normaledit.gif";
 					quotebutton.alt = "Normal Reply w/Quote";
 
 					var newquote = doc.createElement("IMG");
-					newquote.src = "chrome://salastread/content/button-quickedit.png";
+					newquote.src = "chrome://salastread/content/button-quickedit.gif";
 					newquote.alt = "Quick Reply w/Quote";
 					newquote.border = "0"
 					newquote.style.cursor = "pointer";
@@ -2921,11 +2921,11 @@ function SALR_NoteFade(targetEl) {
 function makeQuickReplyButton(threadid,doc,replybutton) {
    replybutton.style.width = "14px !important";
    replybutton.style.height = "20px !important";
-   replybutton.src = "chrome://salastread/content/button-normalreply.png";
+   replybutton.src = "chrome://salastread/content/button-normalreply.gif";
    replybutton.alt = "Normal Reply";
 
    var newreply = doc.createElement("IMG");
-   newreply.src = "chrome://salastread/content/button-quickreply.png";
+   newreply.src = "chrome://salastread/content/button-quickreply.gif";
    newreply.alt = "Quick Reply";
    newreply.border = "0"
    newreply.style.cursor = "pointer";
@@ -2942,11 +2942,11 @@ function makeQuickPostButton(threadid,doc,replybutton) {
 
    replybutton.style.width = "14px !important";
    replybutton.style.height = "20px !important";
-   replybutton.src = "chrome://salastread/content/button-normalpost.png";
+   replybutton.src = "chrome://salastread/content/button-normalpost.gif";
    replybutton.alt = "Normal Post";
 
    var newreply = doc.createElement("IMG");
-   newreply.src = "chrome://salastread/content/button-quickpost.png";
+   newreply.src = "chrome://salastread/content/button-quickpost.gif";
    newreply.alt = "Quick Post";
    newreply.border = "0"
    newreply.style.cursor = "pointer";
