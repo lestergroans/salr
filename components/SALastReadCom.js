@@ -176,6 +176,7 @@ salrPersistObject.prototype = {
    get defaulttoggle_enableDebugMarkup() { return false; },
 
    get defaultstring_threadIconOrder() { return "12"; },
+   get defaultstring_databaseStoragePath() { return "%profile%salastread.sqlite"; },
    get defaultstring_persistStoragePath() { return "%profile%salastread.xml"; },
    get defaultstring_forumListStoragePath() { return "%profile%saforumlist.xml"; },
    get defaultstring_menuPinnedForums() { return "1,22,44"; },
@@ -213,6 +214,8 @@ salrPersistObject.prototype = {
    //get expireMinAge() { return 7; },
 
    get storeFileName() { return this._fn; },
+
+   get storedbFileName() { return this._dbfn; },
 
    get SALRversion() { return "1.15.1912"; },
 
@@ -361,7 +364,7 @@ salrPersistObject.prototype = {
       var sto = this._syncTransferObject;
       this._syncTrace = trace;
       trace("Getting remote file...");
-      sto.getFile(this.GetSyncUrl(), this._fn, function(status) { that._AsyncSync1(status); });
+      sto.getFile(this.GetSyncUrl(), this._dbfn, function(status) { that._AsyncSync1(status); });
    },
 
    _AsyncComplete: function(status)
@@ -513,100 +516,8 @@ salrPersistObject.prototype = {
 
    LoadThreadDataV2: function(merge)
    {
-      var processingdata = false;
-
-      // Initialize the empty document...
-      this.InitializeEmptySALRXML(merge);
-
-      var fn = this.storeFileName; // + ".txt";
-      var file = Components.classes["@mozilla.org/file/local;1"]
-            .createInstance(Components.interfaces.nsILocalFile);
-      file.initWithPath(fn);
-      if ( file.exists() == false ) {
-         this.SaveXML();
-         return;
-      }
-
-      // See: http://kb.mozillazine.org/File_IO
-      var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-                        .createInstance(Components.interfaces.nsIFileInputStream);
-      istream.init(file, 0x01, 0444, 0);
-      istream.QueryInterface(Components.interfaces.nsILineInputStream);
-
-      var hasmore;
-      do {
-         var line = {};
-
-         hasmore = istream.readLine(line);
-         line = line.value;
-
-         if ( line == this.THREADDATA_FILE_HEADER_V2 ) {
-            processingdata = true;
-         }
-         else if ( processingdata ) {
-            var newEl = this.xmlDoc.createElement("thread");
-            var elOk = false;
-            var elId = null;
-            var elLpId = 0;
-            var myattrs = line.split("&");
-            for (var x=0; x<myattrs.length; x++) {
-               var adata = myattrs[x].split("=");
-               if (adata.length==2) {
-                  var thisName = unescape(adata[0]);
-                  var thisValue = unescape(adata[1]);
-                  newEl.setAttribute(thisName, thisValue);
-                  if (thisName=="id") {
-                     elOk = true;
-                     elId = thisValue;
-                  }
-                  if (thisName=="lastpostid") {
-                     elLpId = Number(thisValue);
-                  }
-               }
-            }
-            if (elOk) {
-               var doAppend = true;
-               if (merge) {
-                  var curEl = this.selectSingleNode(this.xmlDoc, this.xmlDoc.documentElement, "thread[@id='"+elId+"']");
-                  if (curEl) {
-                     if ( Number(curEl.getAttribute("lastpostid")) > elLpId ) {
-                        // In-memory data is newer than data from file, keep the in-memory data
-                        doAppend = false;
-                     } else {
-                        // File data is newer than in-memory data, update the in-memory data
-                        // TODO: merge in op/title data from curEl to newEl if it doesn't have it maybe?
-                        curEl.parentNode.removeChild(curEl);
-                        doAppend = true;
-                     }
-                  } else {
-                     doAppend = true;
-                  }
-               }
-               if (doAppend)
-                  this.xmlDoc.documentElement.appendChild(newEl);
-            }
-         }
-
-        // hasmore = false;
-      } while (hasmore);
-
-      istream.close();
-
-      if (!processingdata) {
-         // Couldn't recognize the data in the file. Try the legacy XML loader.
-         this.LoadXMLLegacy();
-      }
-   },
-
-   selectSingleNode: function(doc, context, xpath)
-   {
-      var nodeList = doc.evaluate(xpath, context, null, 9 /* XPathResult.FIRST_ORDERED_NODE_TYPE */, null);
-      return nodeList.singleNodeValue;
-   },
-
-   SaveThreadDataV2: function()
-   {
-      var fn = this.storeFileName; // + ".txt";
+      
+      var fn = this.storedbFileName;
       var file = Components.classes["@mozilla.org/file/local;1"]
             .createInstance(Components.interfaces.nsILocalFile);
       file.initWithPath(fn);
@@ -617,35 +528,234 @@ salrPersistObject.prototype = {
          catch (ex) {
             throw "file.create error ("+ex.name+") on "+fn;
          }
-         //alert("The SALastRead extension is initializing a new settings file. You should only see this once, after you first install the extension.");
+         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
       }
-      var outputStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-            .createInstance(Components.interfaces.nsIFileOutputStream);
-      outputStream.init(file, 0x04 | 0x08 | 0x20, 420, 0);
-      //var result = outputStream.write( fdata, fdata.length );
+      var storageService = Components.classes["@mozilla.org/storage/service;1"]
+                                     .getService(Components.interfaces.mozIStorageService);
+      var mDBConn = storageService.openDatabase(file);
+      
+      if (!mDBConn.tableExists('threaddata'))
+      {
+        
+        var processingdata = false;
 
-      var fileHeader = this.THREADDATA_FILE_HEADER_V2 + "\n";
-      outputStream.write( fileHeader, fileHeader.length );
+        // Initialize the empty document...
+        this.InitializeEmptySALRXML(merge);
 
+        var fn = this.storeFileName; // + ".txt";
+        var file = Components.classes["@mozilla.org/file/local;1"]
+              .createInstance(Components.interfaces.nsILocalFile);
+        file.initWithPath(fn);
+        if ( file.exists() == false ) {
+           this.SaveXML();
+          return;
+        }
+
+        // See: http://kb.mozillazine.org/File_IO
+        var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+                          .createInstance(Components.interfaces.nsIFileInputStream);
+        istream.init(file, 0x01, 0444, 0);
+        istream.QueryInterface(Components.interfaces.nsILineInputStream);
+
+        var hasmore;
+        do {
+           var line = {};
+
+           hasmore = istream.readLine(line);
+           line = line.value;
+
+           if ( line == this.THREADDATA_FILE_HEADER_V2 ) {
+             processingdata = true;
+           }
+           else if ( processingdata ) {
+              var newEl = this.xmlDoc.createElement("thread");
+              var elOk = false;
+              var elId = null;
+              var elLpId = 0;
+              var myattrs = line.split("&");
+              for (var x=0; x<myattrs.length; x++) {
+                 var adata = myattrs[x].split("=");
+                 if (adata.length==2) {
+                    var thisName = unescape(adata[0]);
+                    var thisValue = unescape(adata[1]);
+                    newEl.setAttribute(thisName, thisValue);
+                    if (thisName=="id") {
+                      elOk = true;
+                      elId = thisValue;
+                    }
+                    if (thisName=="lastpostid") {
+                      elLpId = Number(thisValue);
+                    }
+                }
+              }
+              if (elOk) {
+                var doAppend = true;
+                if (merge) {
+                    var curEl = this.selectSingleNode(this.xmlDoc, this.xmlDoc.documentElement, "thread[@id='"+elId+"']");
+                    if (curEl) {
+                      if ( Number(curEl.getAttribute("lastpostid")) > elLpId ) {
+                          // In-memory data is newer than data from file, keep the in-memory data
+                          doAppend = false;
+                      } else {
+                          // File data is newer than in-memory data, update the in-memory data
+                          // TODO: merge in op/title data from curEl to newEl if it doesn't have it maybe?
+                          curEl.parentNode.removeChild(curEl);
+                          doAppend = true;
+                      }
+                    } else {
+                      doAppend = true;
+                    }
+                }
+                if (doAppend) {
+                  this.xmlDoc.documentElement.appendChild(newEl);
+                }
+              }
+          }
+
+          // hasmore = false;
+        } while (hasmore);
+
+        istream.close();
+
+        if (!processingdata) {
+          // Couldn't recognize the data in the file. Try the legacy XML loader.
+          this.LoadXMLLegacy();
+        }
+
+      } else {
+        
+        // Initialize the empty document...
+        this.InitializeEmptySALRXML(merge);
+        
+        var statement = mDBConn.createStatement("SELECT * FROM `threaddata`");
+        while (statement.executeStep()) {
+          var newEl = this.xmlDoc.createElement("thread");
+          var elOk = false;
+          var elId = null;
+          var elLpId = 0;
+          for (var x=0; x<statement.columnCount; x++) {
+            if (!statement.getIsNull(x)) {
+              var thisName = statement.getColumnName(x);
+              var thisValue = statement.getString(x);
+              newEl.setAttribute(thisName, thisValue);
+              if (thisName=="id") {
+                elOk = true;
+                elId = thisValue;
+              }
+              if (thisName=="lastpostid") {
+                elLpId = Number(thisValue);
+              }
+            }
+          }
+          if (elOk) {
+            var doAppend = true;
+            if (merge) {
+              var curEl = this.selectSingleNode(this.xmlDoc, this.xmlDoc.documentElement, "thread[@id='"+elId+"']");
+              if (curEl) {
+                if ( Number(curEl.getAttribute("lastpostid")) > elLpId ) {
+                  // In-memory data is newer than data from file, keep the in-memory data
+                  doAppend = false;
+                } else {
+                  // File data is newer than in-memory data, update the in-memory data
+                  // TODO: merge in op/title data from curEl to newEl if it doesn't have it maybe?
+                  curEl.parentNode.removeChild(curEl);
+                  doAppend = true;
+                }
+              } else {
+                doAppend = true;
+              }
+            }
+            if (doAppend) {
+              this.xmlDoc.documentElement.appendChild(newEl);
+            }
+          }
+        }
+        statement.reset();
+      }
+
+   },
+
+   selectSingleNode: function(doc, context, xpath)
+   {
+      var nodeList = doc.evaluate(xpath, context, null, 9 /* XPathResult.FIRST_ORDERED_NODE_TYPE */, null);
+      return nodeList.singleNodeValue;
+   },
+
+   SaveThreadDataV2: function()
+   {
+      var fn = this.storedbFileName;
+      var file = Components.classes["@mozilla.org/file/local;1"]
+            .createInstance(Components.interfaces.nsILocalFile);
+      file.initWithPath(fn);
+      if ( file.exists() == false ) {
+         try {
+            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
+         }
+         catch (ex) {
+            throw "file.create error ("+ex.name+") on "+fn;
+         }
+         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
+      }
+      var storageService = Components.classes["@mozilla.org/storage/service;1"]
+                                     .getService(Components.interfaces.mozIStorageService);
+      var mDBConn = storageService.openDatabase(file);
+      
+      if (!mDBConn.tableExists('threaddata'))
+      {
+        mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
+      }
       var nodes = this.xmlDoc.evaluate("/salastread/thread", this.xmlDoc, null, 7 /* XPathResult.ORDERED_NODE_SNAPSHOT_TYPE */, null);
       for (var x=0; x<nodes.snapshotLength; x++) {
          var thisLineDataArray = new Array();
-
+        
          var thisNode = nodes.snapshotItem(x);
          var tnChildren = thisNode.attributes;
          for (var i=0; i<tnChildren.length; i++) {
-            if ( tnChildren[i].nodeType == 2 ) {  // ATTRIBUTE_NODE
+           if ( tnChildren[i].nodeType == 2 ) {  // ATTRIBUTE_NODE
                var thisName = tnChildren.item(i).nodeName;
                var thisValue = tnChildren.item(i).nodeValue;
-               thisLineDataArray.push( escape(thisName)+"="+escape(thisValue) );
+               thisLineDataArray[thisName] = thisValue;
             }
          }
-
-         var thisLineData = thisLineDataArray.join("&") + "\n";
-         outputStream.write( thisLineData, thisLineData.length );
+         
+         var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
+         statement.bindInt32Parameter(0,thisLineDataArray['id']);
+         if (statement.executeStep()) {
+           statement.reset();
+           var sqlstatement = "UPDATE `threaddata` SET ";
+           var i = 1;
+           for (thisName in thisLineDataArray) {
+             sqlstatement += (i>1?",":"") + "`" + thisName + "` = ?" + i++ + " ";
+           }
+           sqlstatement += "WHERE `id` = ?1";
+           var statement = mDBConn.createStatement(sqlstatement);
+           var i = 0;
+           for (thisName in thisLineDataArray) {
+             statement.bindStringParameter(i++, thisLineDataArray[thisName]);
+           }
+           statement.execute();
+         } else {
+           statement.reset();
+           var sqlstatement = "INSERT INTO `threaddata` (";
+           var i = 1;
+           for (thisName in thisLineDataArray) {
+             sqlstatement += (i++>1?",":"") + "`" + thisName + "` ";
+           }
+           sqlstatement += ") VALUES (";
+           var i = 1;
+           for (thisName in thisLineDataArray) {
+             sqlstatement += (i>1?",":"") + " ?" + i++;
+           }
+           sqlstatement += ")";
+           var statement = mDBConn.createStatement(sqlstatement);
+           var i = 0;
+           for (thisName in thisLineDataArray) {
+             statement.bindStringParameter(i++, thisLineDataArray[thisName]);
+           }
+           statement.execute();
+         }
       }
 
-      outputStream.close();
    },
 
    CleanupXML: function()
@@ -711,12 +821,17 @@ salrPersistObject.prototype = {
       try {
          this.AttachShutdownObserver();
          this.LoadPrefs();
+         if ( this.string_databaseStoragePath.indexOf("%profile%")==0 ) {
+            this._dbfn = GetUserProfileDirectory( this.string_databaseStoragePath.substring(9), this._isWindows );
+         } else {
+            this._dbfn = this.string_databaseStoragePath;
+         }
          if ( this.string_persistStoragePath.indexOf("%profile%")==0 ) {
             this._fn = GetUserProfileDirectory( this.string_persistStoragePath.substring(9), this._isWindows );
          } else {
             this._fn = this.string_persistStoragePath;
          }
-         if ( this.string_persistStoragePath.indexOf("%profile%")==0 ) {
+         if ( this.string_forumListStoragePath.indexOf("%profile%")==0 ) {
             this._flfn = GetUserProfileDirectory( this.string_forumListStoragePath.substring(9), this._isWindows );
          } else {
             this._flfn = this.string_forumListStoragePath;
