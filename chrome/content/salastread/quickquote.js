@@ -655,6 +655,9 @@ function doPreview() {
 		return strReturn;
 	});
 
+   // Spoiler
+   vbcode['<span style="background: #000000;" onmouseover="this.style.color=\'#FFFFFF\';" onmouseout="this.style.color=this.style.backgroundColor=\'#000000\'">$1</span>'] = /\[spoiler\](.*?)\[\/spoiler\]/gi;
+
    // Code and quote
    vbcode['<blockquote><pre><span style="font-family: verdana,arial,helvetica">code:</span><hr />$1<hr /></pre></blockquote>'] = /\[code\](.*?)\[\/code\]/gi;
    vbcode['<blockquote class="qb2"><p>$1</p></blockquote>'] = /\[quote\](.*?)\[\/quote\]/gi;
