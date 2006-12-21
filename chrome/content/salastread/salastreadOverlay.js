@@ -2460,6 +2460,14 @@ function handleShowThread(e) {
 					   posttimenode.appendChild(plink);
 					}
 		*/
+					if (posttimenode) {
+					   var slink = doc.createElement("A");
+					   slink.href = "http://forums.somethingawful.com/showthread.php?action=showpost&postid="+postid;
+					   slink.title = "Show Single Post";
+					   slink.appendChild( doc.createTextNode("1") );
+					   posttimenode.parentNode.insertBefore(slink, posttimenode);
+					   posttimenode.parentNode.insertBefore(doc.createTextNode(" "), posttimenode);
+					}
 					if (posttimenode && persistObject.toggle_insertPostLastMarkLink ) {
 					   var plink = doc.createElement("A");
 					   plink.href = "javascript:void('lr',"+postid+");";
