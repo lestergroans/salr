@@ -275,7 +275,7 @@ function invalidateThreadCache() {
 function IsThreadIgnored(threadid) {
    slurpIntoThreadCache(threadid);
    if (cachedThreadEntry) {
-      return (cachedThreadEntry.getAttribute("ignore")=="true");
+      return (cachedThreadEntry.getAttribute("ignore")=="1");
    } else {
       return false;
    }
@@ -340,7 +340,12 @@ function UpdateLPDateTime(updateTo, threadid, lastpostid) {
       newel.setAttribute("lastpostid", lastpostid);
       persistObject.xmlDoc.documentElement.insertBefore(newel, persistObject.xmlDoc.documentElement.firstChild);
    }
-   persistObject.SaveXML();
+   //persistObject.SaveXML();
+   var threaddetails = new Array();
+   threaddetails['id'] = threadid;
+   threaddetails['lastpostdt'] = updateTo;
+   threaddetails['lastpostid'] = lastpostid;
+   persistObject.SavePostDataSQL(threaddetails);
 }
 
 function SALRHexToNumber(hex) {
@@ -1501,7 +1506,8 @@ function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) 
       icons[j].parentNode.removeChild(icons[j]);
    }
    invalidateThreadCache();
-   pobj.SaveXML();
+   //pobj.SaveXML();
+   persistObject.RemovePostDataSQL(threadid);
    } catch(e) { alert ("SALastRead unvisit fail: "+e); };
 }
 
@@ -2156,7 +2162,12 @@ function handleShowThread(e) {
       }
 
       if (needSave) {
-         persistObject.SaveXML();
+         //persistObject.SaveXML();
+         var threaddetails = new Array();
+         threaddetails['id'] = threadid;
+         threaddetails['title'] = cachedThreadEntry.getAttribute("title");
+         threaddetails['op'] = cachedThreadEntry.getAttribute("op");
+         persistObject.SavePostDataSQL(threaddetails);
       }
    }
    var lpbefore = 0;
@@ -2609,7 +2620,12 @@ function SALR_SetNewLastReadIfLarger(threadid, postdt, postid) {
       if (lastdt && postdt > lastdt) {
         cachedThreadEntry.setAttribute("lastpostdt", postdt);
         cachedThreadEntry.setAttribute("lastpostid", postid);
-        persistObject.SaveXML();
+        //persistObject.SaveXML();
+         var threaddetails = new Array();
+         threaddetails['id'] = threadid;
+         threaddetails['lastpostdt'] = postdt;
+         threaddetails['lastpostid'] = postid;
+         persistObject.SavePostDataSQL(threaddetails);
       }
     }
 }
@@ -2910,7 +2926,12 @@ function SALR_ChangeLastReadOnThread(e) {
    if (cachedThreadEntry) {
       cachedThreadEntry.setAttribute("lastpostdt", e.originalTarget.postdt);
       cachedThreadEntry.setAttribute("lastpostid", e.originalTarget.postid);
-      persistObject.SaveXML();
+      //persistObject.SaveXML();
+      var threaddetails = new Array();
+      threaddetails['id'] = threadid;
+      threaddetails['lastpostdt'] = e.originalTarget.postdt;
+      threaddetails['lastpostid'] = e.originalTarget.postid;
+      persistObject.SavePostDataSQL(threaddetails);
 
       var doc = e.originalTarget.ownerDocument;
       var notel = doc.createElement("DIV");
@@ -3164,7 +3185,11 @@ function markThreadReplied(pobj, threadid) {
       threads[i].setAttribute("posted","1");
    }
    invalidateThreadCache();
-   pobj.SaveXML();
+   //pobj.SaveXML();
+   var threaddetails = new Array();
+   threaddetails['id'] = threadid;
+   threaddetails['posted'] = 1;
+   persistObject.SavePostDataSQL(threaddetails);
 }
 
 function handleConfigLinkInsertion(e) {
@@ -3815,7 +3840,11 @@ function SALR_StarThread() {
    if (threadid) {
       slurpIntoThreadCache(threadid);
       cachedThreadEntry.setAttribute("star", (cachedThreadEntry.getAttribute("star")=="1") ? "0" : "1");
-      persistObject.SaveXML();
+      //persistObject.SaveXML();
+      var threaddetails = new Array();
+      threaddetails['id'] = threadid;
+      threaddetails['star'] = cachedThreadEntry.getAttribute("star");
+      persistObject.SavePostDataSQL(threaddetails);
       if ( target.ownerDocument.location.href.indexOf("showthread.php")==-1 ) {
          target.ownerDocument.location = target.ownerDocument.location;
       } else {
@@ -3832,12 +3861,18 @@ function SALR_IgnoreThread() {
    if (threadid) {
       if ( confirm("Are you sure you want to ignore thread #"+threadid+"?") ) {
          slurpIntoThreadCache(threadid);
-         cachedThreadEntry.setAttribute("ignore", "true");
+         cachedThreadEntry.setAttribute("ignore", "1");
          if ( cachedThreadEntry.getBypassAttribute("lastpostdt")==0 ) {
             cachedThreadEntry.setAttribute("lastpostdt", GetCurrentLPDateTime());
             cachedThreadEntry.setAttribute("lastpostid", "1");
          }
-         persistObject.SaveXML();
+         //persistObject.SaveXML();
+         var threaddetails = new Array();
+         threaddetails['id'] = threadid;
+         threaddetails['ignore'] = 1;
+         threaddetails['lastpostdt'] = GetCurrentLPDateTime();
+         threaddetails['lastpostid'] = 1;
+         persistObject.SavePostDataSQL(threaddetails);
          target.style.display = "none";
       }
    } else {

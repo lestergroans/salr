@@ -579,6 +579,11 @@ salrPersistObject.prototype = {
                     var thisName = unescape(adata[0]);
                     var thisValue = unescape(adata[1]);
                     newEl.setAttribute(thisName, thisValue);
+                    if (thisName=="ignore") {
+                      if (thisValue=="true") {
+                        thisValue="1";
+                      }
+                    }
                     if (thisName=="id") {
                       elOk = true;
                       elId = thisValue;
@@ -638,6 +643,11 @@ salrPersistObject.prototype = {
               var thisName = statement.getColumnName(x);
               var thisValue = statement.getString(x);
               newEl.setAttribute(thisName, thisValue);
+              if (thisName=="ignore") {
+                if (thisValue=="true") {
+                  thisValue="1";
+                }
+              }
               if (thisName=="id") {
                 elOk = true;
                 elId = thisValue;
@@ -755,6 +765,104 @@ salrPersistObject.prototype = {
            statement.execute();
          }
       }
+
+   },
+
+   RemovePostDataSQL: function(threadid)
+   {
+      var fn = this.storedbFileName;
+      var file = Components.classes["@mozilla.org/file/local;1"]
+            .createInstance(Components.interfaces.nsILocalFile);
+      file.initWithPath(fn);
+      if ( file.exists() == false ) {
+         try {
+            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
+         }
+         catch (ex) {
+            throw "file.create error ("+ex.name+") on "+fn;
+         }
+         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
+      }
+      var storageService = Components.classes["@mozilla.org/storage/service;1"]
+                                     .getService(Components.interfaces.mozIStorageService);
+      var mDBConn = storageService.openDatabase(file);
+      
+      if (!mDBConn.tableExists('threaddata'))
+      {
+        mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
+      }
+      
+      var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
+      statement.bindInt32Parameter(0,threadid);
+      if (statement.executeStep()) {
+        statement.reset();
+        var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `id` = ?1");
+        statement.bindInt32Parameter(0,threadid);
+        statement.execute();
+      }
+   },
+   
+   SavePostDataSQL: function(threaddetails)
+   {
+      var fn = this.storedbFileName;
+      var file = Components.classes["@mozilla.org/file/local;1"]
+            .createInstance(Components.interfaces.nsILocalFile);
+      file.initWithPath(fn);
+      if ( file.exists() == false ) {
+         try {
+            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
+         }
+         catch (ex) {
+            throw "file.create error ("+ex.name+") on "+fn;
+         }
+         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
+      }
+      var storageService = Components.classes["@mozilla.org/storage/service;1"]
+                                     .getService(Components.interfaces.mozIStorageService);
+      var mDBConn = storageService.openDatabase(file);
+      
+      if (!mDBConn.tableExists('threaddata'))
+      {
+        mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
+      }
+      
+      var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
+      statement.bindInt32Parameter(0,threaddetails['id']);
+      if (statement.executeStep()) {
+         statement.reset();
+         var sqlstatement = "UPDATE `threaddata` SET ";
+         var i = 1;
+         for (thisName in threaddetails) {
+           sqlstatement += (i>1?",":"") + "`" + thisName + "` = ?" + i++ + " ";
+         }
+         sqlstatement += "WHERE `id` = ?1";
+         var statement = mDBConn.createStatement(sqlstatement);
+         var i = 0;
+         for (thisName in threaddetails) {
+           statement.bindStringParameter(i++, threaddetails[thisName]);
+         }
+         statement.execute();
+       } else {
+           statement.reset();
+           var sqlstatement = "INSERT INTO `threaddata` (";
+           var i = 1;
+           for (thisName in threaddetails) {
+             sqlstatement += (i++>1?",":"") + "`" + thisName + "` ";
+           }
+           sqlstatement += ") VALUES (";
+           var i = 1;
+           for (thisName in threaddetails) {
+             sqlstatement += (i>1?",":"") + " ?" + i++;
+           }
+           sqlstatement += ")";
+           var statement = mDBConn.createStatement(sqlstatement);
+           var i = 0;
+           for (thisName in threaddetails) {
+             statement.bindStringParameter(i++, threaddetails[thisName]);
+           }
+           statement.execute();
+       }
+      
 
    },
 
