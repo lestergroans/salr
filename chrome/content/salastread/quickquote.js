@@ -60,8 +60,11 @@ function grabComplete() {
    alert("got it");
 }
 
-//var emotRe = /^.*?<tr align="center">.*?<td.*?size="2">(.*?)<\/font><\/td>.*?<td.*?<\/td>.*?<td.*?><img src="(.*?)".*?<\/tr>(.*)$/i;
-var emotRe = /<tr.*?<\/tr>(.*)$/i;
+function emotRegex(s) {
+      emotRe = /src="(.*?)".*?<br \/>(.*?)<\/td>/i;
+      emotRe.exec(s);
+      persistObject.emoticons.push( new Array(RegExp.$2, RegExp.$1) );
+}
 
 function getEmoticonsFromServer() {
    try {
@@ -69,29 +72,13 @@ function getEmoticonsFromServer() {
       xht.open("GET", "http://forums.somethingawful.com/misc.php?s=&action=showsmilies", false);
       xht.send(null);
       var restext = xht.responseText;
-      restext = restext.substring( restext.indexOf("Graphic That Will Appear")+30 );
-      restext = restext.substring(0, restext.indexOf("</table>"));
-      restext = restext.replace(/[\n\r]/g,"");
 
-      //document.getElementById("messagearea").value = restext; //return;
-      
-      //var emots = "Emoticons:\n";
-      persistObject.emoticons = new Array();
-      var minfo = restext.match(emotRe);
-      while ( restext.indexOf("</tr>")!=-1 ) {
-         var thisrow = restext.substring(0, restext.indexOf("</tr>"));
-         thisrow = thisrow.substring( thisrow.indexOf("size=\"2\">")+9 );
-         var emotcode = thisrow.substring(0, thisrow.indexOf("</"));
-         thisrow = thisrow.substring( thisrow.indexOf("</td>")+5 );
-         thisrow = thisrow.substring( thisrow.indexOf("src=\"")+5 );
-         var emoturl = thisrow.substring(0, thisrow.indexOf("\""));
-         persistObject.emoticons.push( new Array(emotcode, emoturl) );
-         restext = restext.substring(restext.indexOf("</tr>")+5);
-         //emots += emotcode+" "+emoturl+"\n";
-         //minfo = restext.match(emotRe);
-      }
-      //alert(emots);
-      //alert("done");
+      persistObject.emoticons = new Array();  
+
+      emotRe = /<td class="smtxt">(.*?)<\/td>/gi;
+      emotArray = restext.match(emotRe);
+
+      emotArray.forEach(emotRegex);
    }
    catch (e) {
       alert("getEmoticonsFromServer() error:\n" + e);
@@ -660,7 +647,7 @@ function doPreview() {
 
    // Code and quote
    vbcode['<blockquote><pre><span style="font-family: verdana,arial,helvetica">code:</span><hr />$1<hr /></pre></blockquote>'] = /\[code\](.*?)\[\/code\]/gi;
-   vbcode['<blockquote class="qb2"><p>$1</p></blockquote>'] = /\[quote\](.*?)\[\/quote\]/gi;
+   vbcode['<blockquote class="qb2"><h4>quote:</h4><p>$1</p></blockquote>'] = /\[quote\](.*?)\[\/quote\]/gi;
    vbcode['<blockquote class="qb2"><h4>$1 posted:</h4><p>$2</p></blockquote>'] = /\[quote=([^\]]+)\](.*?)\[\/quote\]/gi;
  
    // Links and images
