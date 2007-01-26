@@ -20,4 +20,4 @@ SALastRead is a Firefox extension that enhances your Something Awful forums brow
   *[http://www.mozilla.org/products/firefox/ Mozilla Firefox Website]
   *[http://forums.somethingawful.com/showthread.php?s=&threadid=1903701 SA Last Read for Opera]
   *[http://forums.somethingawful.com/showthread.php?s=&threadid=1706787 SA Last Read for Safari]
-  *[http://forums.somethingawful.com/showthread.php?s=&threadid=1543330 SA Last Read for Konqueror] (doesn't work, probably archived)
+  *[http://archives.somethingawful.com/showthread.php?s=&threadid=1543330 "SA Last Read for Konqueror"] 
