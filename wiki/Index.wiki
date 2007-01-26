@@ -1,7 +1,7 @@
-<div style="border: 1px solid #005E86;background-color:#D0E2FF;padding:3px;">If your Last Read is not working, it is due to template changes on somethingawful. See the development thread for an updated version.</div>
 
-<br />The SALastRead Firefox extension was created by Something Awful Forums member '''biznatchio'''. If you enjoy this extension, feel free to send a [https://www.paypal.com/xclick/business=drysart@evercrest.com&item_name=SALastRead+Extension&no_note=1&tax=0&currency_code=USD donation] his way.<br />
-This Wiki is not official and is run by Something Awful Forums member '''Fagalicious'''.
+
+<br />The SALastRead Firefox extension was created by Something Awful Forums member '''biznatchio'''. 
+
 
 
 
