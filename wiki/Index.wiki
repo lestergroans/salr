@@ -1,6 +1,5 @@
 
-
-<br />The SALastRead Firefox extension was created by Something Awful Forums member '''biznatchio'''. 
+The SALastRead Firefox extension was created by Something Awful Forums member '''biznatchio'''. 
 
 
 
