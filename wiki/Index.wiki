@@ -1,8 +1,25 @@
-#summary This is the first page
+<div style="border: 1px solid #005E86;background-color:#D0E2FF;padding:3px;">If your Last Read is not working, it is due to template changes on somethingawful. See the development thread for an updated version.</div>
 
-= Introduction =
+<br />The SALastRead Firefox extension was created by Something Awful Forums member '''biznatchio'''. If you enjoy this extension, feel free to send a [https://www.paypal.com/xclick/business=drysart@evercrest.com&item_name=SALastRead+Extension&no_note=1&tax=0&currency_code=USD donation] his way.<br />
+This Wiki is not official and is run by Something Awful Forums member '''Fagalicious'''.
 
+
+
+== What is SA Last Read? ==
 SALastRead is a Firefox extension that enhances your Something Awful forums browsing experience. It adds several features to the forums, including highlighting threads and posts you've already thread, adding a "Jump to New Posts" button to threads on the thread list page, Quick Quote and Quick Reply windows to post new replies to the forums without having to wait for the forum reply page, Text-to-Image functionality to convert links to images into inline images, tracking threads you've posted in, and a SA Menu allowing quick access to your favorite forums.
 
+== Sections ==
+* [[FAQ]]<br />
+* [[:Category: CSS_Tricks|CSS_Tricks]]
+* [[:Category:Customizing|Customizing]]
+* [[Changes]]
+* [[:Category:Other_Extensions|Other_Extensions]]
 
-= Details =
+== External links ==
+*[http://forums.somethingawful.com/ Something Awful Forums]
+*[http://forums.somethingawful.com/showthread.php?s=&threadid=1723782 SA Last Read Forums Thread - "Development" version] (See FAQ) (archives)
+*[http://forums.somethingawful.com/showthread.php?s=&threadid=2015554 SA Last Read Forums Thread - "Stable" version] (See FAQ)
+*[http://www.mozilla.org/products/firefox/ Mozilla Firefox Website]
+*[http://forums.somethingawful.com/showthread.php?s=&threadid=1903701 SA Last Read for Opera]
+*[http://forums.somethingawful.com/showthread.php?s=&threadid=1706787 SA Last Read for Safari]
+*[http://forums.somethingawful.com/showthread.php?s=&threadid=1543330 SA Last Read for Konqueror] (doesn't work, probably archived)
