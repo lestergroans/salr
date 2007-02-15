@@ -8,7 +8,7 @@
 
 //var postedInThreadReColor = "#fcfd99";
 
-var SALR_CURRENT_VERSION = "1.15.1916";
+var SALR_CURRENT_VERSION = "1.15.1918";
 var needToShowChangeLog = false;
 var upgradeFromVersion = null;
 
@@ -2141,11 +2141,11 @@ function handleShowThread(e) {
       }
 
       var threadtitle = "";
-      var titlematch = doc.title.match( /^The Awful Forums \- (.*)$/ );
+      var titlematch = doc.title.match( /^The Something Awful Forums \- (.*)$/ );
       if (titlematch) {
          threadtitle = titlematch[1];
       } else {
-         var titlematchb = doc.title.match( /^(.*) \- The Awful Forums$/ );
+         var titlematchb = doc.title.match( /^(.*) \- The Something Awful Forums$/ );
          if (titlematchb) {
             threadtitle = titlematchb[1];
          }
@@ -2166,6 +2166,7 @@ function handleShowThread(e) {
          var threaddetails = new Array();
          threaddetails['id'] = threadid;
          threaddetails['title'] = cachedThreadEntry.getAttribute("title");
+         threaddetails['lastviewdt'] = cachedThreadEntry.getAttribute("lastviewdt");
          threaddetails['op'] = cachedThreadEntry.getAttribute("op");
          persistObject.SavePostDataSQL(threaddetails);
       }

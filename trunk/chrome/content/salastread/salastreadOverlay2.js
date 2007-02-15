@@ -1,7 +1,7 @@
 
 function SALRClass()
 {
-    var SALR_CURRENT_VERSION = "1.15.1914";
+    var SALR_CURRENT_VERSION = "1.15.1918";
     var persistObject = null;
 
     var SALR_QuickQuoteWindow = null;           // Reference to the quick quote window object

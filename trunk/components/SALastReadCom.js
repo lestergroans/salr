@@ -902,6 +902,47 @@ salrPersistObject.prototype = {
       this.SaveXML();
    },
 
+   CleanupSQL: function(threaddetails)
+   {
+      var fn = this.storedbFileName;
+      var file = Components.classes["@mozilla.org/file/local;1"]
+            .createInstance(Components.interfaces.nsILocalFile);
+      file.initWithPath(fn);
+      if ( file.exists() == false ) {
+         try {
+            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
+         }
+         catch (ex) {
+            throw "file.create error ("+ex.name+") on "+fn;
+         }
+         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
+      }
+      var storageService = Components.classes["@mozilla.org/storage/service;1"]
+                                     .getService(Components.interfaces.mozIStorageService);
+      var mDBConn = storageService.openDatabase(file);
+      
+      if (!mDBConn.tableExists('threaddata'))
+      {
+        mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
+      }
+
+      var expireDate = new Date( (new Date().getTime()) - (this.int_expireMinAge * (1000*60*60*24)) );
+      var expireyear = new String( expireDate.getYear()+1900 );
+      var expiremonth = new String( expireDate.getMonth()+1 );
+      var expireday = new String( expireDate.getDate() );
+      while (expireyear.length<4) expireyear = "0"+expireyear;
+      while (expiremonth.length<2) expiremonth = "0"+expiremonth;
+      while (expireday.length<2) expireday = "0"+expireday;
+      var expiredt = expireyear + expiremonth + expireday + "0000";
+      
+      var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` <= ?1");
+      statement.bindStringParameter(0,expiredt);
+      statement.execute();
+      var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` IS NULL");
+      statement.execute();
+      
+   },
+
    LoadPrefs: function()
    {
       this._LoadTypePrefs("color","char");
@@ -945,7 +986,7 @@ salrPersistObject.prototype = {
             this._flfn = this.string_forumListStoragePath;
          }
          this.LoadXML();
-         this.CleanupXML();
+         this.CleanupSQL();
          this.LoadForumListXML();
 
          // Get Timer Value
