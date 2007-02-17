@@ -3665,9 +3665,9 @@ function salastread_windowOnLoad(e) {
                doc.body.appendChild(dbg);
             }
             if ( persistObject.toggle_removePageTitlePrefix ) {
-               var titlematch = doc.title.match( /^The Awful Forums \- (.*)$/ );
+               var titlematch = doc.title.match( /^The Something Awful Forums \- (.*)$/ );
                if (titlematch) {
-                  doc.title = titlematch[1] + " - The Awful Forums";
+                  doc.title = titlematch[1] + " - The Something Awful Forums";
                }
             }
             if (persistObject.toggle_removeHeaderAndFooter) {

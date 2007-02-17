@@ -19,7 +19,7 @@ function showChangeLog() {
 <groupbox align="center" orient="horizontal">
 <vbox>
   <text value="SALastRead" style="font-weight: bold; font-size: x-large;"/>
-  <text value="ver. 1.15.1914"/>
+  <text value="ver. 1.15.1918"/>
   <separator class="thin"/>
   <text value="Created By:" style="font-weight: bold;"/>
   <text value="Tim Fries" class="url"
