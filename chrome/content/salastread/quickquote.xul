@@ -34,7 +34,7 @@
         </xul:menupopup>
        </xul:button>
       </xul:hbox>
-      <html:textarea spellcheck="true" onkeyup="doPreview();" onkeypress="checkKeys(event);" class="messagearea" id="messagearea" multiline="true" flex="1" tabindex="2">THERE IS NOTHING TO FUCKING UNDO</html:textarea>
+      <xul:textbox spellcheck="true" onkeyup="doPreview();" onkeypress="checkKeys(event);" class="messagearea" id="messagearea" multiline="true" value="THERE IS NOTHING TO FUCKING UNDO" flex="1" tabindex="2" />
       <!--
       <html:textarea class="messagearea" id="messagearea" tabindex="1"/>
       -->

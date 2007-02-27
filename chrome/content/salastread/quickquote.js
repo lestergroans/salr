@@ -79,6 +79,7 @@ function getEmoticonsFromServer() {
       emotArray = restext.match(emotRe);
 
       emotArray.forEach(emotRegex);
+      persistObject.emoticons.sort();
    }
    catch (e) {
       alert("getEmoticonsFromServer() error:\n" + e);
