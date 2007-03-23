@@ -2307,6 +2307,10 @@ function handleShowThread(e) {
 				 postername = posternode.firstChild.nodeValue;
 				 if ( posternode.lastChild != posternode.firstChild )
 				   postername = posternode.lastChild.nodeValue;
+				   
+				 if ( !postername ) { // to deal with radiums new name
+				 	postername = posternode.childNodes[2].childNodes[0].nodeValue;
+				 }
 				 posterarray = postername.split(/&nbsp;/);
 				 postername = posterarray.length == 1 ? posterarray[0] : posterarray[1];
 				 rawpostername = postername;
