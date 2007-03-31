@@ -1,14 +1,5 @@
-// These will all be prefs eventually
-//var readLightColor = "#ddeeff";
-//var readDarkColor = "#bbccdd";
-//var readWithNewLightColor = "#e1f1e1";
-//var readWithNewDarkColor = "#cfdfcf";
-//var unreadLightColor = "#f1f1f1";
-//var unreadDarkColor = "#dfdfdf";
+// <script> This line added because my IDE has problems detecting JS ~ 0330 ~ duz
 
-//var postedInThreadReColor = "#fcfd99";
-
-var SALR_CURRENT_VERSION = "1.15.1918";
 var needToShowChangeLog = false;
 var upgradeFromVersion = null;
 
@@ -877,7 +868,7 @@ function buildSAForumMenu() {
    menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','click');");
    menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','command');");
    menuel.setAttribute("class","menuitem-iconic lastread_menu_frontpage");
-   menuel.setAttribute("accesskey","s");
+   menuel.setAttribute("accesskey","a");
    menupopup.appendChild(menuel);
    menupopup.appendChild(document.createElement("menuseparator"));
 
@@ -1256,10 +1247,13 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
    }
 }
 
+//
+//
+//
 function handleForumDisplay(e) {
    //alert("forumdisplay");
    var doc = e.originalTarget;
-   
+
    //Replace post button
    if (persistObject.toggle_useQuickQuote) {
     var postbutton = selectSingleNode(doc, doc, "//UL[@class='postbuttons']//LI//A/IMG[contains(@src,'forum-post')]");
@@ -1320,7 +1314,7 @@ function handleForumDisplay(e) {
          var threadLink = selectSingleNode(doc, titleNode, "A[1]");
          if (threadLink==null)
             continue;
-       
+
          var timatch = threadLink.href.match(/threadid=(\d+)/);
          var threadid = timatch[1];
          gotOne = true;
@@ -1493,7 +1487,7 @@ function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) 
    if ( forumid == 0 ) {
       resetUnreadColors(unvisitDecolors);
    } else {
-      if ( !persistObject.toggle_dontHighlightThreads ) { 
+      if ( !persistObject.toggle_dontHighlightThreads ) {
          var threadrows = selectNodes(doc, topicrow, ".");
          for (var x=0; x<threadrows.length; x++) {
             threadrows[x].className = "thread salastread_thread_" + threadid + " salastread_unreadthread";
@@ -1623,7 +1617,7 @@ function quickQuoteSubmit(message, parseurl, subscribe, disablesmilies, signatur
     quickQuoteAddHidden(doc,newform,"action","postthread");
     quickQuoteAddHidden(doc, newform, "forumid",  quickquotewin.__salastread_quickpost_forumid);
     quickQuoteAddHidden(doc, newform, "iconid", quickquotewin.document.getElementById('posticonbutton').iconid);
-    quickQuoteAddHidden(doc, newform, "subject", quickquotewin.document.getElementById('subject').value);   
+    quickQuoteAddHidden(doc, newform, "subject", quickquotewin.document.getElementById('subject').value);
    }
    quickQuoteAddHidden(doc,newform,"parseurl", parseurl ? "yes" : "");
    quickQuoteAddHidden(doc,newform,"email", subscribe ? "yes" : "");
@@ -1929,7 +1923,7 @@ function SALR_PostImageResizerShowHide(show, e) {
 	  }
    }
 
-   if(image.SALR_imageResizable != undefined && !image.SALR_imageResizable) { 
+   if(image.SALR_imageResizable != undefined && !image.SALR_imageResizable) {
 	   return
    }
 
@@ -2218,7 +2212,7 @@ function handleShowThread(e) {
 				 postdatenode = postdatenode.firstChild;
 			  }
 			  var postdate = postdatenode.lastChild.nodeValue;
-			  
+
 			  postdate = StripSpaces(postdate.substring(0, postdate.length));
 			  //alert("postdate = "+postdate);
 			  //try {
@@ -2307,7 +2301,7 @@ function handleShowThread(e) {
 				 postername = posternode.firstChild.nodeValue;
 				 if ( posternode.lastChild != posternode.firstChild )
 				   postername = posternode.lastChild.nodeValue;
-				   
+
 				 if ( !postername ) { // to deal with radiums new name
 				 	postername = posternode.childNodes[2].childNodes[0].nodeValue;
 				 }
@@ -2334,7 +2328,7 @@ function handleShowThread(e) {
 					posternodeparentClassNameAdd += " somethingawfulforum_parentusernameMODERATOR";
 				 }
 				 //var admincheck = selectNodes(doc, thisel, "TBODY/TR[2]/TD[2]/TABLE/TBODY/TR[1]/TD[2]/DIV/A[contains(@href,'modalert.php')]")[0];
-				 
+
 				 //Checking for admins is harder than it used to be :argh:
 				var admincheck = selectSingleNode(doc, postbarnode, "TD[@class='postlinks']/UL[@class='postbuttons']/LI/A/IMG[contains(@src,'report')]");
 				// check for an admin star, make sure it isn't a mod star
@@ -2398,7 +2392,7 @@ function handleShowThread(e) {
 
 					var newquote = doc.createElement("IMG");
 					if(inBYOB){
-						newquote.src = "chrome://salastread/content/byob-qquote.gif";	
+						newquote.src = "chrome://salastread/content/byob-qquote.gif";
 					}else{
 						newquote.src = "chrome://salastread/content/button-quickquote.gif";
 					}
@@ -2536,7 +2530,7 @@ function handleShowThread(e) {
       if (replybutton) {
          makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
-      
+
       var postbuttons = selectNodes(doc, doc.body, "//IMG[@alt='Post']");
       if (postbuttons.length) {
         for (var uiego = 0; uiego < postbuttons.length; uiego++) {
@@ -2549,7 +2543,7 @@ function handleShowThread(e) {
       //);
       replybutton = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='threadbar bottom']/UL[@class='postbuttons']//LI//A/IMG[contains(@src,'reply')]");
       if (replybutton) {
-      	   
+
 
          makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
@@ -2585,7 +2579,7 @@ function handleShowThread(e) {
    try { SALR_InsertThreadKeyboardNavigation(doc); } catch (e) { }
 
    reanchorThreadToLink(doc);
-   
+
    doc.__salastread_loading = true;
    window.addEventListener("load", SALR_PageFinishedLoading, true);
    if (persistObject.toggle_scrollPostEnable)
@@ -2608,7 +2602,7 @@ function SALR_CheckScrollPostPosition(doc) {
     var a;
     for (i = 0; i < doc.postlinks.length; i++) {
       a = doc.postlinks[i];
-      if (a.postid && (doc.__salastread_loading || !a.absolutepos)) 
+      if (a.postid && (doc.__salastread_loading || !a.absolutepos))
         a.absolutepos = SALR_GetVerticalPos(a.parentpost);
       if (a.absolutepos && scrollpos > a.absolutepos) {
         SALR_SetNewLastReadIfLarger(a.threadid, a.postdt, a.postid);
@@ -2664,7 +2658,7 @@ function SALR_CheckForSpaceScroll(doc, oldTop) {
    var newTop = doc.body.scrollTop;
    if (oldTop==newTop) {
       var bclassmatch = doc.body.className.match(/salastread_thread_(\d+)/);
-      if (bclassmatch) { 
+      if (bclassmatch) {
          var curPage = doc._SALR_curPage;
          var maxPages = doc._SALR_maxPages;
          var threadid = Number(bclassmatch[1]);
@@ -2976,7 +2970,7 @@ function SALR_NoteFade(targetEl) {
 
 function makeQuickReplyButton(threadid,doc,replybutton, inBYOB) {
 
-    
+
    replybutton.style.width = "12px !important";
    replybutton.style.height = "20px !important";
    if(inBYOB){
@@ -3277,7 +3271,7 @@ function __TEST__docloaded(e) {
    try {
       // copyright notice at bottom of page is the only <p> in the main body of a forum page
       //var copyrightnotice = selectNodes(doc, doc.body, "P/FONT")[0];
-      
+
       var commentnodes = selectNodes(doc, doc.body, "child::comment()");
       var count=0;
       for (var i=0; i<commentnodes.length; i++) {
@@ -3556,6 +3550,10 @@ var loadCount = 0;
  *
  */
 function salastread_windowOnLoad(e) {
+
+// This IF statement included to help debugging, change the pref value to disable without restarting FF
+if (Components.classes["@mozilla.org/preferences;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.salastread.").getBoolPref("disabled") == false) {
+
    //alert("e is "+e+"\ne.originalTarget.location.href is "+e.originalTarget.location.href);
    //if ( e.originalTarget == "[Object HTMLDocument]" ) {
    //   alert("originalTarget is " + e.originalTarget + "\ntypeof = "+typeof(e.originalTarget));
@@ -3630,8 +3628,11 @@ function salastread_windowOnLoad(e) {
             //doc.addEventListener("unload", function() { alert("a"); doc.__SALASTREAD_PAGETIMER.Finalize(); }, true);
             var hresult = 0;
             if ( location.href.indexOf("forumdisplay.php?") != -1 ) {
-               hresult = handleForumDisplay(e);
-               addInternalDebugLog("forumdisplay.php handler");
+            	if (doc.getElementById('forum') != null) {
+	            	// Only do if there is a list of posts
+              	hresult = handleForumDisplay(e);
+              	addInternalDebugLog("forumdisplay.php handler");
+              }
             }
             else if ( location.href.indexOf("showthread.php?") != -1 ) {
                handleShowThread(e);
@@ -3712,6 +3713,8 @@ function salastread_windowOnLoad(e) {
       }
    }
 //   cleanupLostPageTimers();
+
+}
 }
 
 function SALR_PageUnloadHandler() {
@@ -3961,7 +3964,10 @@ try {
    persistObject = persistObject.wrappedJSObject;
    if (!persistObject)
       throw "Failed to create persistObject.";
-   if (persistObject.SALRversion != "1.15.1912") {
+
+	SALR_CURRENT_VERSION = persistObject.getPreference('lastRunVersion');
+
+   if (persistObject.SALRversion != "1.15.1912") { // Yeah, don't touch this without updating the corresponding code in the com
       persistObject = null;
       throw "XPCOM/Overlay version mismatch. Your Firefox profile is probably corrupt. Google for \"firefox profile support\" for help in setting up a new, clean profile.";
    }

@@ -1,3 +1,4 @@
+// <script> This line added because my IDE has problems detecting JS ~ 0330 ~ duz
 
 const SALR_CONTRACTID = "@evercrest.com/salastread/persist-object;1";
 const SALR_CID = Components.ID("{f5d9093b-8210-4a26-89ba-4c987de04efc}");
@@ -97,6 +98,7 @@ function salrPersistObject()
 }
 
 salrPersistObject.prototype = {
+	//	This property is superceded by .preferences, do not use for new code ~ 0330 ~ duz
    get pref() { return Components.classes["@mozilla.org/preferences-service;1"].
                    getService(Components.interfaces.nsIPrefBranch); },
 
@@ -164,7 +166,7 @@ salrPersistObject.prototype = {
    get defaulttoggle_hideSignature() { return false; },
    get defaulttoggle_hideTitle() { return false; },
    get defaulttoggle_suppressErrors() { return true; },
-	   
+
    get defaulttoggle_insertPostLastMarkLink() { return true; },
    get defaulttoggle_disableGradients() { return false; },
    get defaulttoggle_resizeCustomTitleText() { return true; },
@@ -217,7 +219,7 @@ salrPersistObject.prototype = {
 
    get storedbFileName() { return this._dbfn; },
 
-   get SALRversion() { return "1.15.1912"; },
+   get SALRversion() { return "1.15.1912"; }, // Yeah, don't touch this without updating the corresponding code in the overlay
 
    get xmlDoc()
    {
@@ -516,7 +518,7 @@ salrPersistObject.prototype = {
 
    LoadThreadDataV2: function(merge)
    {
-      
+
       var fn = this.storedbFileName;
       var file = Components.classes["@mozilla.org/file/local;1"]
             .createInstance(Components.interfaces.nsILocalFile);
@@ -533,10 +535,10 @@ salrPersistObject.prototype = {
       var storageService = Components.classes["@mozilla.org/storage/service;1"]
                                      .getService(Components.interfaces.mozIStorageService);
       var mDBConn = storageService.openDatabase(file);
-      
+
       if (!mDBConn.tableExists('threaddata'))
       {
-        
+
         var processingdata = false;
 
         // Initialize the empty document...
@@ -628,10 +630,10 @@ salrPersistObject.prototype = {
         }
 
       } else {
-        
+
         // Initialize the empty document...
         this.InitializeEmptySALRXML(merge);
-        
+
         var statement = mDBConn.createStatement("SELECT * FROM `threaddata`");
         while (statement.executeStep()) {
           var newEl = this.xmlDoc.createElement("thread");
@@ -709,7 +711,7 @@ salrPersistObject.prototype = {
       var storageService = Components.classes["@mozilla.org/storage/service;1"]
                                      .getService(Components.interfaces.mozIStorageService);
       var mDBConn = storageService.openDatabase(file);
-      
+
       if (!mDBConn.tableExists('threaddata'))
       {
         mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
@@ -717,7 +719,7 @@ salrPersistObject.prototype = {
       var nodes = this.xmlDoc.evaluate("/salastread/thread", this.xmlDoc, null, 7 /* XPathResult.ORDERED_NODE_SNAPSHOT_TYPE */, null);
       for (var x=0; x<nodes.snapshotLength; x++) {
          var thisLineDataArray = new Array();
-        
+
          var thisNode = nodes.snapshotItem(x);
          var tnChildren = thisNode.attributes;
          for (var i=0; i<tnChildren.length; i++) {
@@ -727,7 +729,7 @@ salrPersistObject.prototype = {
                thisLineDataArray[thisName] = thisValue;
             }
          }
-         
+
          var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
          statement.bindInt32Parameter(0,thisLineDataArray['id']);
          if (statement.executeStep()) {
@@ -786,12 +788,12 @@ salrPersistObject.prototype = {
       var storageService = Components.classes["@mozilla.org/storage/service;1"]
                                      .getService(Components.interfaces.mozIStorageService);
       var mDBConn = storageService.openDatabase(file);
-      
+
       if (!mDBConn.tableExists('threaddata'))
       {
         mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
       }
-      
+
       var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
       statement.bindInt32Parameter(0,threadid);
       if (statement.executeStep()) {
@@ -801,7 +803,7 @@ salrPersistObject.prototype = {
         statement.execute();
       }
    },
-   
+
    SavePostDataSQL: function(threaddetails)
    {
       var fn = this.storedbFileName;
@@ -820,12 +822,12 @@ salrPersistObject.prototype = {
       var storageService = Components.classes["@mozilla.org/storage/service;1"]
                                      .getService(Components.interfaces.mozIStorageService);
       var mDBConn = storageService.openDatabase(file);
-      
+
       if (!mDBConn.tableExists('threaddata'))
       {
         mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
       }
-      
+
       var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
       statement.bindInt32Parameter(0,threaddetails['id']);
       if (statement.executeStep()) {
@@ -862,7 +864,7 @@ salrPersistObject.prototype = {
            }
            statement.execute();
        }
-      
+
 
    },
 
@@ -920,7 +922,7 @@ salrPersistObject.prototype = {
       var storageService = Components.classes["@mozilla.org/storage/service;1"]
                                      .getService(Components.interfaces.mozIStorageService);
       var mDBConn = storageService.openDatabase(file);
-      
+
       if (!mDBConn.tableExists('threaddata'))
       {
         mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
@@ -934,13 +936,13 @@ salrPersistObject.prototype = {
       while (expiremonth.length<2) expiremonth = "0"+expiremonth;
       while (expireday.length<2) expireday = "0"+expireday;
       var expiredt = expireyear + expiremonth + expireday + "0000";
-      
+
       var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` <= ?1");
       statement.bindStringParameter(0,expiredt);
       statement.execute();
       var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` IS NULL");
       statement.execute();
-      
+
    },
 
    LoadPrefs: function()
@@ -1119,7 +1121,7 @@ salrPersistObject.prototype = {
          }
       }
    },
-  
+
    _OLDSaveTypePrefs: function(prefType,dataType)
    {
       var propname;
@@ -1271,7 +1273,91 @@ salrPersistObject.prototype = {
       return this;
    },
 
-   get wrappedJSObject() { return this; }
+   get wrappedJSObject() { return this; },
+
+	//
+	// Here begins new functions for the 2.0 rewrite ~ 0330 ~ duz
+	//
+
+	// Return a resource pointing to the proper preferences branch
+	get preferences() { return Components.classes["@mozilla.org/preferences;1"].
+		getService(Components.interfaces.nsIPrefService).
+		getBranch("extensions.salastread."); },
+
+	// Return a connection to the database
+	// TODO: Error handling, Improving(?) file handling
+	get database() {
+		var fn = this.storedbFileName;
+		var file = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		file.initWithPath(fn);
+		if (file.exists() == false) {
+			try {
+				file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
+			} catch (ex) {
+				throw "file.create error ("+ex.name+") on "+fn;
+			}
+		}
+		var storageService = Components.classes["@mozilla.org/storage/service;1"]
+			.getService(Components.interfaces.mozIStorageService);
+		return storageService.openDatabase(file);
+	},
+
+	// Returns the value at the given preference from the branch in the preference property
+	// @param: (string) Preference name
+	// @return: (boolean, string or int) Preference value or NULL if not found
+	getPreference: function(prefName)
+	{
+		var prefValue, prefType = this.preferences.getPrefType(prefName);
+		switch (prefType)
+		{
+			case this.preferences.PREF_BOOL:
+				prefValue = this.preferences.getBoolPref(prefName);
+				break;
+			case this.preferences.PREF_INT:
+				prefValue = this.preferences.getIntPref(prefName);
+				break;
+			case this.preferences.PREF_STRING:
+				prefValue = this.preferences.getCharPref(prefName);
+				break;
+			case this.preferences.PREF_INVALID:
+				// If preference was not found, it may be because it's still in the old location
+				// TODO: Add code to check the old location, it's in the form of "salastread.{kind}.{prefName}
+				//	where {kind} is one of color, int, string, toggle or url; lastRunVersion has no {kind}
+			default:
+				prefValue = null;
+		}
+		return prefValue;
+	},
+
+	// Set the given preference to the given value in the branch in the preference property
+	// @param: (string) Preference name, (boolean, string or int) Preference value
+	// @return: (boolean) Success in updating preference
+	setPreference: function(prefName, prefValue)
+	{
+		var success = true, prefType = this.preferences.getPrefType(prefName);
+		switch (prefType)
+		{
+			case this.preferences.PREF_BOOL:
+				prefValue = this.preferences.setBoolPref(prefValue);
+				break;
+			case this.preferences.PREF_INT:
+				prefValue = this.preferences.setIntPref(prefValue);
+				break;
+			case this.preferences.PREF_STRING:
+				prefValue = this.preferences.setCharPref(prefValue);
+				break;
+			case this.preferences.PREF_INVALID:
+			default:
+				success = false;
+		}
+		// Now update old preferences for the legacy code, Can remove once all legacy code is gone (HA!)
+		// TODO: Add code to update the old location, it's in the form of "salastread.{kind}.{prefName}
+		//	where {kind} is one of color, int, string, toggle or url; lastRunVersion has no {kind}
+		return success;
+	}
+
+	// Don't forget the trailing comma when adding a new function/property
 };
 
 // Component registration
