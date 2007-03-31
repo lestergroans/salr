@@ -838,7 +838,7 @@ function buildSAForumMenu() {
       var menuel = document.createElement("menu");
       menuel.id = "menu_SAforums";
       menuel.setAttribute("label", "SA");
-      menuel.setAttribute("accesskey","S");
+      menuel.setAttribute("accesskey","A");
       menuel.style.display = "none";
       menupopup = document.createElement("menupopup");
       menupopup.id = "menupopup_SAforums";
