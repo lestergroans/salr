@@ -1298,55 +1298,19 @@ function handleForumDisplay(e) {
    // Highlight Threads
    var gotOne = false;
    var resarray = selectNodes(doc, doc, "//TR[@class='thread']");
-   //var resarray = selectNodes(doc, doc, "//A[@class='thread']");
    for (var x=0; x<resarray.length; x++) {
       var thisel = resarray[x];
-      //while ( thisel.nodeName != "TR" ) {
-      //   thisel = thisel.parentNode;
-      //}
       if ( thisel.nodeName == "TR" ) {
-         //var threadratingicon = selectSingleNode(doc, thisel, "TD[6]/IMG[contains(@src,'stars.gif')]");
-         //if (threadratingicon) {
-         //   threadratingicon.title = threadratingicon.alt;
-         //}
          var isunread = false;
          var titleNode = selectSingleNode(doc, thisel, "TD[@class='title']");
          var threadLink = selectSingleNode(doc, titleNode, "A[1]");
          if (threadLink==null)
             continue;
-
          var timatch = threadLink.href.match(/threadid=(\d+)/);
          var threadid = timatch[1];
          gotOne = true;
-
-/*
-         var oldnode = 0;
-         var lpdtnode = selectSingleNode(doc, thisel, "TD/TABLE[@id='ltlink']/TBODY/TR/TD/DIV[@class='mainbodytextsmall']");
-         if (!lpdtnode) {
-            // We're in Film Dump or something equally unrecognizable ... abort the mission
-            // Well, maybe it's FYAD on the old HTML template, let's see..
-            lpdtnode = selectSingleNode(doc, thisel, "TD/TABLE[@id='ltlink']/TBODY/TR/TD/FONT/FONT");
-            oldnode = 1;
-            if (!lpdtnode) {
-               // Nope. Now we can abort.
-               return;
-            }
-         }
-
-         var lptime = "";
-         var lpdate = "";
-         if (oldnode==1) {
-            lptime = StripSpaces(lpdtnode.firstChild.nodeValue);
-            lpdate = StripSpaces(lpdtnode.nextSibling.nodeValue);
-         } else {
-            var lpdttext = lpdtnode.firstChild.nodeValue;
-            lptime = StripSpaces( lpdttext.substring(0,5) );
-            lpdate = StripSpaces( lpdttext.substring(6) );
-         }
-*/
          var lpdtnode = selectSingleNode(doc, thisel, "TD[@class='lastpost']/DIV[@class='date']");
          var lpdttext = lpdtnode.innerHTML;
-         //alert("lpdttext="+lpdttext);
          lpdttext = StripSpaces(lpdttext);
          var lpdtm = lpdttext.match(/^(\d\d\:\d\d) (...) (\d\d), (\d\d\d\d)$/);
          if (!lpdtm) {
@@ -1366,23 +1330,13 @@ function handleForumDisplay(e) {
             SALR_SilenceLoadErrors = true;
          }
          var setClasses = 1;
-/*
-         var rowTds = selectNodes(doc, thisel, "TD");
-         var topictitletd = rowTds[1];
-         var topicretd = rowTds[3];
-         var topicAuthorTDIndex = 3;
-         if ( isAskTell ) {
-            topictitletd = rowTds[2];
-            topicretd = rowTds[4];
-            topicAuthorTDIndex = 4;
-         }
-*/
          var topictitletd = selectSingleNode(doc, thisel, "TD[@class='title']");
          var topicretd = selectSingleNode(doc, thisel, "TD[@class='replies']");
 
+				// Here be where last read icons and new posts counts gets inserted
          setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,topictitletd,topicretd,forumid);
 
-         //var ulinknode = selectSingleNode(doc, thisel, "TD["+topicAuthorTDIndex+"]/DIV/A[contains(@href,'action=getinfo')]");
+				// Here be where to grab OP
          var ulinknode = selectSingleNode(doc, thisel, "TD[@class='author']/A[contains(@href,'action=getinfo')]");
          if (ulinknode) {
             var userid = 0;
@@ -1396,21 +1350,10 @@ function handleForumDisplay(e) {
             if ( SALR_IsModerator(userid, forumid) ) {
                ulinknode.className += " somethingawfulforum_userlinkMODERATOR";
             }
-
             persistObject.StoreOPData(threadid, userid);
-/*
-            var renewOPFunc = SALR_CreateOPFunc(threadid, uid);
-
-            var linkslist = selectNodes(doc, thisel, ".//A");
-            for (var i=0; i<linkslist.length; i++) {
-               linkslist[i].addEventListener("focus", renewOPFunc, false);
-               linkslist[i].addEventListener("click", renewOPFunc, false);
-               linkslist[i].addEventListener("contextmenu", renewOPFunc, false);
-               //linkslist[i].style.background = "red";
-            }
-*/
          }
 
+				// Here be insertion of class name in the killed by column
          var ulinknodeb = selectSingleNode(doc, thisel, "TD[@class='lastpost']/A[@class='author'][contains(@href,'goto=lastpost')]");
          if (ulinknodeb) {
             var uname = ulinknodeb.firstChild.nodeValue;
@@ -1423,6 +1366,8 @@ function handleForumDisplay(e) {
 
       }
    }
+   
+   
    if (gotOne) {
       var csstxt = SALR_MakeForumDisplayCSS();
       //alert("csstxt =\n"+csstxt);

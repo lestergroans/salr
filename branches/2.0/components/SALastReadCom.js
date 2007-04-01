@@ -1010,6 +1010,8 @@ salrPersistObject.prototype = {
    MAX_OPDATA_LENGTH: 400,
    _opData: null,
 
+		/*
+		This function has been rewritten for 2.0, remove before release
    StoreOPData: function(threadid, op)
    {
       var i;
@@ -1031,7 +1033,9 @@ salrPersistObject.prototype = {
 
       this._opData.unshift( { t: threadid, o: op } );
    },
-
+		*/
+		/*
+		This function has been rewritten for 2.0, remove before release
    GetOPFromData: function(threadid)
    {
       if ( this._opData == null )
@@ -1045,6 +1049,7 @@ salrPersistObject.prototype = {
 
       return null;
    },
+   */
 
    _killed: false,
    _killChecked: false,
@@ -1285,22 +1290,32 @@ salrPersistObject.prototype = {
 		getBranch("extensions.salastread."); },
 
 	// Return a connection to the database
+	// Create database if it doesn't exist yet
 	// TODO: Error handling, Improving(?) file handling
 	get database() {
 		var fn = this.storedbFileName;
 		var file = Components.classes["@mozilla.org/file/local;1"]
 			.createInstance(Components.interfaces.nsILocalFile);
 		file.initWithPath(fn);
-		if (file.exists() == false) {
-			try {
+		if (file.exists() == false)
+		{
+			try
+			{
 				file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
-			} catch (ex) {
+			}
+			catch (ex)
+			{
 				throw "file.create error ("+ex.name+") on "+fn;
 			}
 		}
 		var storageService = Components.classes["@mozilla.org/storage/service;1"]
 			.getService(Components.interfaces.mozIStorageService);
-		return storageService.openDatabase(file);
+		var mDBConn = storageService.openDatabase(file);
+		if (!mDBConn.tableExists('threaddata'))
+		{
+			mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
+		}
+		return mDBConn;
 	},
 
 	// Returns the value at the given preference from the branch in the preference property
@@ -1355,6 +1370,36 @@ salrPersistObject.prototype = {
 		// TODO: Add code to update the old location, it's in the form of "salastread.{kind}.{prefName}
 		//	where {kind} is one of color, int, string, toggle or url; lastRunVersion has no {kind}
 		return success;
+	},
+	
+	// Updates the OP UID in the database
+	// @param: (int) Thread ID #, (int) User ID # of Original Poster
+	// @return: nothing
+	StoreOPData: function(threadid, userid)
+	{
+		var statement = this.database.createStatement("UPDATE `threaddata` SET `op` = ?1 WHERE `id` = ?2");
+		statement.bindInt32Parameter(0,userid);
+		statement.bindInt32Parameter(1,threadid);
+		statement.execute();
+	},
+
+	// Retrieve the OP UID from the database
+	// @param: (int) Thread ID #
+	// @return: (int) User ID # of Original Poster; or (boolean) false if not found in database
+	GetOPFromData: function(threadid)
+	{
+		var statement = this.database.createStatement("SELECT `op` FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			userid = statement.getInt32(0);
+		}
+		else
+		{
+			userid = false;
+		}
+		statement.reset();
+		return userid;
 	}
 
 	// Don't forget the trailing comma when adding a new function/property
