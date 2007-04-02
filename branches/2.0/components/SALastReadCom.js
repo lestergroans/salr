@@ -98,7 +98,8 @@ function salrPersistObject()
 }
 
 salrPersistObject.prototype = {
-	//	This property is superceded by .preferences, do not use for new code ~ 0330 ~ duz
+	// This property is superseded by .preferences, do not use for new code
+	// this property has been left in for legacy compatability
    get pref() { return Components.classes["@mozilla.org/preferences-service;1"].
                    getService(Components.interfaces.nsIPrefBranch); },
 
@@ -166,11 +167,12 @@ salrPersistObject.prototype = {
    get defaulttoggle_hideSignature() { return false; },
    get defaulttoggle_hideTitle() { return false; },
    get defaulttoggle_suppressErrors() { return true; },
-
+	   
    get defaulttoggle_insertPostLastMarkLink() { return true; },
    get defaulttoggle_disableGradients() { return false; },
    get defaulttoggle_resizeCustomTitleText() { return true; },
    get defaulttoggle_enablePageNavigator() { return true; },
+   get defaulttoggle_enableForumNavigator() { return true; },
    get defaulttoggle_thumbnailAllImages() { return true; },
 
    get defaulttoggle_showMenuPinHelper() { return true; },
@@ -219,7 +221,7 @@ salrPersistObject.prototype = {
 
    get storedbFileName() { return this._dbfn; },
 
-   get SALRversion() { return "1.15.1912"; }, // Yeah, don't touch this without updating the corresponding code in the overlay
+   get SALRversion() { return this.getPreference('currentVersion'); },
 
    get xmlDoc()
    {
@@ -245,6 +247,7 @@ salrPersistObject.prototype = {
    get gotForumList() { return this._gotForumList; },
    set gotForumList(value) { this._gotForumList = value; },
 
+	/* This function has been rewritten for 2.0, remove before release
    get LastRunVersion() {
       if ( this.pref.getPrefType("salastread.lastRunVersion") == this.pref.PREF_STRING )
       {
@@ -252,8 +255,10 @@ salrPersistObject.prototype = {
       }
       return "";
    },
+	*/
+	/* This function has been rewritten for 2.0, remove before release
    set LastRunVersion(ver) { this.pref.setCharPref("salastread.lastRunVersion", ver); },
-
+	*/
    _TimeManager: null,
    get TimeManager() { return this._TimeManager; },
    set TimeManager(value) {
@@ -539,95 +544,95 @@ salrPersistObject.prototype = {
       if (!mDBConn.tableExists('threaddata'))
       {
 
-        var processingdata = false;
+      var processingdata = false;
 
-        // Initialize the empty document...
-        this.InitializeEmptySALRXML(merge);
+      // Initialize the empty document...
+      this.InitializeEmptySALRXML(merge);
 
-        var fn = this.storeFileName; // + ".txt";
-        var file = Components.classes["@mozilla.org/file/local;1"]
-              .createInstance(Components.interfaces.nsILocalFile);
-        file.initWithPath(fn);
-        if ( file.exists() == false ) {
-           this.SaveXML();
-          return;
-        }
+      var fn = this.storeFileName; // + ".txt";
+      var file = Components.classes["@mozilla.org/file/local;1"]
+            .createInstance(Components.interfaces.nsILocalFile);
+      file.initWithPath(fn);
+      if ( file.exists() == false ) {
+         this.SaveXML();
+         return;
+      }
 
-        // See: http://kb.mozillazine.org/File_IO
-        var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-                          .createInstance(Components.interfaces.nsIFileInputStream);
-        istream.init(file, 0x01, 0444, 0);
-        istream.QueryInterface(Components.interfaces.nsILineInputStream);
+      // See: http://kb.mozillazine.org/File_IO
+      var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+                        .createInstance(Components.interfaces.nsIFileInputStream);
+      istream.init(file, 0x01, 0444, 0);
+      istream.QueryInterface(Components.interfaces.nsILineInputStream);
 
-        var hasmore;
-        do {
-           var line = {};
+      var hasmore;
+      do {
+         var line = {};
 
-           hasmore = istream.readLine(line);
-           line = line.value;
+         hasmore = istream.readLine(line);
+         line = line.value;
 
-           if ( line == this.THREADDATA_FILE_HEADER_V2 ) {
-             processingdata = true;
-           }
-           else if ( processingdata ) {
-              var newEl = this.xmlDoc.createElement("thread");
-              var elOk = false;
-              var elId = null;
-              var elLpId = 0;
-              var myattrs = line.split("&");
-              for (var x=0; x<myattrs.length; x++) {
-                 var adata = myattrs[x].split("=");
-                 if (adata.length==2) {
-                    var thisName = unescape(adata[0]);
-                    var thisValue = unescape(adata[1]);
-                    newEl.setAttribute(thisName, thisValue);
+         if ( line == this.THREADDATA_FILE_HEADER_V2 ) {
+            processingdata = true;
+         }
+         else if ( processingdata ) {
+            var newEl = this.xmlDoc.createElement("thread");
+            var elOk = false;
+            var elId = null;
+            var elLpId = 0;
+            var myattrs = line.split("&");
+            for (var x=0; x<myattrs.length; x++) {
+               var adata = myattrs[x].split("=");
+               if (adata.length==2) {
+                  var thisName = unescape(adata[0]);
+                  var thisValue = unescape(adata[1]);
+                  newEl.setAttribute(thisName, thisValue);
                     if (thisName=="ignore") {
                       if (thisValue=="true") {
                         thisValue="1";
                       }
                     }
-                    if (thisName=="id") {
-                      elOk = true;
-                      elId = thisValue;
-                    }
-                    if (thisName=="lastpostid") {
-                      elLpId = Number(thisValue);
-                    }
-                }
-              }
-              if (elOk) {
-                var doAppend = true;
-                if (merge) {
-                    var curEl = this.selectSingleNode(this.xmlDoc, this.xmlDoc.documentElement, "thread[@id='"+elId+"']");
-                    if (curEl) {
-                      if ( Number(curEl.getAttribute("lastpostid")) > elLpId ) {
-                          // In-memory data is newer than data from file, keep the in-memory data
-                          doAppend = false;
-                      } else {
-                          // File data is newer than in-memory data, update the in-memory data
-                          // TODO: merge in op/title data from curEl to newEl if it doesn't have it maybe?
-                          curEl.parentNode.removeChild(curEl);
-                          doAppend = true;
-                      }
-                    } else {
-                      doAppend = true;
-                    }
-                }
+                  if (thisName=="id") {
+                     elOk = true;
+                     elId = thisValue;
+                  }
+                  if (thisName=="lastpostid") {
+                     elLpId = Number(thisValue);
+                  }
+               }
+            }
+            if (elOk) {
+               var doAppend = true;
+               if (merge) {
+                  var curEl = this.selectSingleNode(this.xmlDoc, this.xmlDoc.documentElement, "thread[@id='"+elId+"']");
+                  if (curEl) {
+                     if ( Number(curEl.getAttribute("lastpostid")) > elLpId ) {
+                        // In-memory data is newer than data from file, keep the in-memory data
+                        doAppend = false;
+                     } else {
+                        // File data is newer than in-memory data, update the in-memory data
+                        // TODO: merge in op/title data from curEl to newEl if it doesn't have it maybe?
+                        curEl.parentNode.removeChild(curEl);
+                        doAppend = true;
+                     }
+                  } else {
+                     doAppend = true;
+                  }
+               }
                 if (doAppend) {
                   this.xmlDoc.documentElement.appendChild(newEl);
-                }
-              }
+            }
+         }
           }
 
-          // hasmore = false;
-        } while (hasmore);
+        // hasmore = false;
+      } while (hasmore);
 
-        istream.close();
+      istream.close();
 
-        if (!processingdata) {
-          // Couldn't recognize the data in the file. Try the legacy XML loader.
-          this.LoadXMLLegacy();
-        }
+      if (!processingdata) {
+         // Couldn't recognize the data in the file. Try the legacy XML loader.
+         this.LoadXMLLegacy();
+      }
 
       } else {
 
@@ -723,7 +728,7 @@ salrPersistObject.prototype = {
          var thisNode = nodes.snapshotItem(x);
          var tnChildren = thisNode.attributes;
          for (var i=0; i<tnChildren.length; i++) {
-           if ( tnChildren[i].nodeType == 2 ) {  // ATTRIBUTE_NODE
+            if ( tnChildren[i].nodeType == 2 ) {  // ATTRIBUTE_NODE
                var thisName = tnChildren.item(i).nodeName;
                var thisValue = tnChildren.item(i).nodeValue;
                thisLineDataArray[thisName] = thisValue;
@@ -992,7 +997,7 @@ salrPersistObject.prototype = {
          this.LoadForumListXML();
 
          // Get Timer Value
-         try { this._TimerValue = this.pref.getIntPref("salastread.int.timeSpentOnForums"); } catch(xx) { }
+         try { this._TimerValue = this.getPreference("timeSpentOnForums"); } catch(xx) { }
          if ( ! this._TimerValue ) {
             this._TimerValue = 0;
          }
@@ -1010,8 +1015,7 @@ salrPersistObject.prototype = {
    MAX_OPDATA_LENGTH: 400,
    _opData: null,
 
-		/*
-		This function has been rewritten for 2.0, remove before release
+	/* This function has been rewritten for 2.0, remove before release
    StoreOPData: function(threadid, op)
    {
       var i;
@@ -1033,9 +1037,8 @@ salrPersistObject.prototype = {
 
       this._opData.unshift( { t: threadid, o: op } );
    },
-		*/
-		/*
-		This function has been rewritten for 2.0, remove before release
+	*/
+	/* This function has been rewritten for 2.0, remove before release
    GetOPFromData: function(threadid)
    {
       if ( this._opData == null )
@@ -1049,7 +1052,7 @@ salrPersistObject.prototype = {
 
       return null;
    },
-   */
+	*/
 
    _killed: false,
    _killChecked: false,
@@ -1126,7 +1129,8 @@ salrPersistObject.prototype = {
          }
       }
    },
-
+  
+	/* Is this function safe to delete?
    _OLDSaveTypePrefs: function(prefType,dataType)
    {
       var propname;
@@ -1150,7 +1154,9 @@ salrPersistObject.prototype = {
          }
       }
    },
-
+	*/
+	/* This preference has been rewritten for 2.0, remove before release
+			This preference has been superseded by getPreference, do not use this function for new code
    _ReadPrefOrDefault: function(prefname, defaultvalue, preftype)
    {
       var typeval = this.pref.PREF_STRING;
@@ -1212,7 +1218,7 @@ salrPersistObject.prototype = {
       }
       return result;
    },
-
+	*/
    EscapeMenuURL: function(murl)
    {
       var res = murl.replace("&","&amp;");
@@ -1242,6 +1248,7 @@ salrPersistObject.prototype = {
       }
    },
 
+	/* This function has been rewritten for 2.0, remove before release
    SaveTimerValue: function()
    {
       if ( this._TimerValueLoaded ) {
@@ -1249,7 +1256,8 @@ salrPersistObject.prototype = {
       }
       this._TimerValueSaveAt = this._TimerValue + 60;
    },
-
+	*/
+	/* This function has been rewritten for 2.0, remove before release	
    IsDevelopmentRelease: function()
    {
       var ver = "1.15.1912";
@@ -1264,7 +1272,7 @@ salrPersistObject.prototype = {
          return false;
       }
    },
-
+	*/
    IsDebugEnabled: function()
    {
       return this.IsDevelopmentRelease();
@@ -1285,14 +1293,18 @@ salrPersistObject.prototype = {
 	//
 
 	// Return a resource pointing to the proper preferences branch
-	get preferences() { return Components.classes["@mozilla.org/preferences;1"].
+	get preferences()
+	{
+		return Components.classes["@mozilla.org/preferences;1"].
 		getService(Components.interfaces.nsIPrefService).
-		getBranch("extensions.salastread."); },
+		getBranch("extensions.salastread.");
+	},
 
 	// Return a connection to the database
 	// Create database if it doesn't exist yet
 	// TODO: Error handling, Improving(?) file handling
-	get database() {
+	get database()
+	{
 		var fn = this.storedbFileName;
 		var file = Components.classes["@mozilla.org/file/local;1"]
 			.createInstance(Components.interfaces.nsILocalFile);
@@ -1336,9 +1348,6 @@ salrPersistObject.prototype = {
 				prefValue = this.preferences.getCharPref(prefName);
 				break;
 			case this.preferences.PREF_INVALID:
-				// If preference was not found, it may be because it's still in the old location
-				// TODO: Add code to check the old location, it's in the form of "salastread.{kind}.{prefName}
-				//	where {kind} is one of color, int, string, toggle or url; lastRunVersion has no {kind}
 			default:
 				prefValue = null;
 		}
@@ -1354,21 +1363,18 @@ salrPersistObject.prototype = {
 		switch (prefType)
 		{
 			case this.preferences.PREF_BOOL:
-				prefValue = this.preferences.setBoolPref(prefValue);
+				prefValue = this.preferences.setBoolPref(prefName, prefValue);
 				break;
 			case this.preferences.PREF_INT:
-				prefValue = this.preferences.setIntPref(prefValue);
+				prefValue = this.preferences.setIntPref(prefName, prefValue);
 				break;
 			case this.preferences.PREF_STRING:
-				prefValue = this.preferences.setCharPref(prefValue);
+				prefValue = this.preferences.setCharPref(prefName, prefValue);
 				break;
 			case this.preferences.PREF_INVALID:
 			default:
 				success = false;
 		}
-		// Now update old preferences for the legacy code, Can remove once all legacy code is gone (HA!)
-		// TODO: Add code to update the old location, it's in the form of "salastread.{kind}.{prefName}
-		//	where {kind} is one of color, int, string, toggle or url; lastRunVersion has no {kind}
 		return success;
 	},
 	
@@ -1388,6 +1394,7 @@ salrPersistObject.prototype = {
 	// @return: (int) User ID # of Original Poster; or (boolean) false if not found in database
 	GetOPFromData: function(threadid)
 	{
+		var userid;
 		var statement = this.database.createStatement("SELECT `op` FROM `threaddata` WHERE `id` = ?1");
 		statement.bindInt32Parameter(0,threadid);
 		if (statement.executeStep())
@@ -1400,6 +1407,98 @@ salrPersistObject.prototype = {
 		}
 		statement.reset();
 		return userid;
+	},
+	
+	// Returns the last version ran
+	// @param: nothing
+	// @return: (string) Version number
+	get LastRunVersion()
+	{
+		return this.getPreference("lastRunVersion");
+	},
+	
+	// Sets the last version ran
+	// @param: (string) Version number
+	// @return: nothing
+	set LastRunVersion(ver)
+	{
+		this.setPreference("lastRunVersion", ver);
+	},
+
+	// Saves the time spent on the forums so far and flags to save in another 60 seconds
+	// @param: nothing
+	// @return: nothing
+	SaveTimerValue: function()
+	{
+		if (this._TimerValueLoaded)
+		{
+			// Check to see if they have a value stored in the old location
+			var prefType = this.pref.getPrefType("salastread.int.timeSpentOnForums");
+			if (prefType != this.pref.PREF_INVALID)
+			{
+				this._TimerValue = this.pref.getIntPref("salastread.int.timeSpentOnForums");
+				this.pref.deleteBranch("salastread.int.timeSpentOnForums");
+			}
+			this.setPreference("timeSpentOnForums", this._TimerValue);
+		}
+		this._TimerValueSaveAt = this._TimerValue + 60;
+	},
+
+	// If the build value is 6 digits (a date), then it's a development build
+	// @param: nothing
+	// @return: (boolean) true if development build, false otherwise
+	IsDevelopmentRelease: function()
+	{
+		var isDev = false;
+		var ver = this.getPreference("currentVersion");
+		var vm = ver.match(/^(\d+)\.(\d+)\.(\d+)$/);
+		if (vm)
+		{
+			var build = vm[3];
+			isDev = build.length == 6;
+		}
+		return isDev;
+	},
+
+	// This function has been superseded by getPreference, do not use for new code
+	// This function has been rewritten for legacy support
+	// @param: (string) Absolute preference name, (string) Default value
+	// @return: (boolean, string or int) Preference value or defaultValue if not found
+	_ReadPrefOrDefault: function(oldPrefName, defaultValue)
+	{
+		// prefName is in the form of "salastread."+prefType+"."+prefName
+		var prefValue, prefName = oldPrefName.split('.')[2];
+		// Since only legacy code calls this function,
+		// we have to check if the preference is in the old location
+		// and move it to the new location if it is
+		var prefType = this.pref.getPrefType(oldPrefName);
+		if (prefType != this.pref.PREF_INVALID)
+		{
+			switch (prefType)
+			{
+				case this.pref.PREF_BOOL:
+					prefValue = this.pref.getBoolPref(oldPrefName);
+					break;
+				case this.pref.PREF_INT:
+					prefValue = this.pref.getIntPref(oldPrefName);
+					break;
+				case this.pref.PREF_STRING:
+					prefValue = this.pref.getCharPref(oldPrefName);
+					break;
+				case this.pref.PREF_INVALID:
+				default:
+					prefValue = null;
+			}
+			this.setPreference(prefName, prefValue);
+			this.pref.deleteBranch(oldPrefName);
+		}
+		prefValue = this.getPreference(prefName);
+		if (prefValue == null) // In theory, should never be true
+		{
+			prefValue = defaultValue;
+			this.setPreference(prefName, defaultValue);
+		}
+		return prefValue;
 	}
 
 	// Don't forget the trailing comma when adding a new function/property

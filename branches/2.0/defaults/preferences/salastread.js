@@ -1,6 +1,6 @@
-pref('extensions.salastread.lastRunVersion', '1.99.070330');
-
+pref('extensions.salastread.currentVersion', '1.99.070401');
 pref('extensions.salastread.disabled', false);
+pref('extensions.salastread.postsPerPage', 40);
 
 pref('extensions.salastread.postedInThreadRe', '#fcfd99');
 pref('extensions.salastread.postedInThreadReHighlight', '#ffffcc');
@@ -79,6 +79,7 @@ pref('extensions.salastread.insertPostLastMarkLink', true);
 pref('extensions.salastread.disableGradients', false);
 pref('extensions.salastread.resizeCustomTitleText', true);
 pref('extensions.salastread.enablePageNavigator', true);
+pref('extensions.salastread.enableForumNavigator', true);
 pref('extensions.salastread.thumbnailAllImages', true);
 
 pref('extensions.salastread.showMenuPinHelper', true);

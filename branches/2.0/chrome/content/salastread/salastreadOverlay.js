@@ -868,7 +868,6 @@ function buildSAForumMenu() {
    menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','click');");
    menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','command');");
    menuel.setAttribute("class","menuitem-iconic lastread_menu_frontpage");
-   menuel.setAttribute("accesskey","a");
    menupopup.appendChild(menuel);
    menupopup.appendChild(document.createElement("menuseparator"));
 
@@ -1253,7 +1252,8 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
 function handleForumDisplay(e) {
    //alert("forumdisplay");
    var doc = e.originalTarget;
-
+   SALR_SearchForThreadPages(doc, "forum");
+   
    //Replace post button
    if (persistObject.toggle_useQuickQuote) {
     var postbutton = selectSingleNode(doc, doc, "//UL[@class='postbuttons']//LI//A/IMG[contains(@src,'forum-post')]");
@@ -1432,7 +1432,7 @@ function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) 
    if ( forumid == 0 ) {
       resetUnreadColors(unvisitDecolors);
    } else {
-      if ( !persistObject.toggle_dontHighlightThreads ) {
+      if ( !persistObject.toggle_dontHighlightThreads ) { 
          var threadrows = selectNodes(doc, topicrow, ".");
          for (var x=0; x<threadrows.length; x++) {
             threadrows[x].className = "thread salastread_thread_" + threadid + " salastread_unreadthread";
@@ -1562,7 +1562,7 @@ function quickQuoteSubmit(message, parseurl, subscribe, disablesmilies, signatur
     quickQuoteAddHidden(doc,newform,"action","postthread");
     quickQuoteAddHidden(doc, newform, "forumid",  quickquotewin.__salastread_quickpost_forumid);
     quickQuoteAddHidden(doc, newform, "iconid", quickquotewin.document.getElementById('posticonbutton').iconid);
-    quickQuoteAddHidden(doc, newform, "subject", quickquotewin.document.getElementById('subject').value);
+    quickQuoteAddHidden(doc, newform, "subject", quickquotewin.document.getElementById('subject').value);   
    }
    quickQuoteAddHidden(doc,newform,"parseurl", parseurl ? "yes" : "");
    quickQuoteAddHidden(doc,newform,"email", subscribe ? "yes" : "");
@@ -1868,7 +1868,7 @@ function SALR_PostImageResizerShowHide(show, e) {
 	  }
    }
 
-   if(image.SALR_imageResizable != undefined && !image.SALR_imageResizable) {
+   if(image.SALR_imageResizable != undefined && !image.SALR_imageResizable) { 
 	   return
    }
 
@@ -2157,7 +2157,7 @@ function handleShowThread(e) {
 				 postdatenode = postdatenode.firstChild;
 			  }
 			  var postdate = postdatenode.lastChild.nodeValue;
-
+			  
 			  postdate = StripSpaces(postdate.substring(0, postdate.length));
 			  //alert("postdate = "+postdate);
 			  //try {
@@ -2246,9 +2246,9 @@ function handleShowThread(e) {
 				 postername = posternode.firstChild.nodeValue;
 				 if ( posternode.lastChild != posternode.firstChild )
 				   postername = posternode.lastChild.nodeValue;
-
+				
 				 if ( !postername ) { // to deal with radiums new name
-				 	postername = posternode.childNodes[2].childNodes[0].nodeValue;
+					 postername = posternode.childNodes[2].childNodes[0].nodeValue;
 				 }
 				 posterarray = postername.split(/&nbsp;/);
 				 postername = posterarray.length == 1 ? posterarray[0] : posterarray[1];
@@ -2273,7 +2273,7 @@ function handleShowThread(e) {
 					posternodeparentClassNameAdd += " somethingawfulforum_parentusernameMODERATOR";
 				 }
 				 //var admincheck = selectNodes(doc, thisel, "TBODY/TR[2]/TD[2]/TABLE/TBODY/TR[1]/TD[2]/DIV/A[contains(@href,'modalert.php')]")[0];
-
+				 
 				 //Checking for admins is harder than it used to be :argh:
 				var admincheck = selectSingleNode(doc, postbarnode, "TD[@class='postlinks']/UL[@class='postbuttons']/LI/A/IMG[contains(@src,'report')]");
 				// check for an admin star, make sure it isn't a mod star
@@ -2337,7 +2337,7 @@ function handleShowThread(e) {
 
 					var newquote = doc.createElement("IMG");
 					if(inBYOB){
-						newquote.src = "chrome://salastread/content/byob-qquote.gif";
+						newquote.src = "chrome://salastread/content/byob-qquote.gif";	
 					}else{
 						newquote.src = "chrome://salastread/content/button-quickquote.gif";
 					}
@@ -2475,7 +2475,7 @@ function handleShowThread(e) {
       if (replybutton) {
          makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
-
+      
       var postbuttons = selectNodes(doc, doc.body, "//IMG[@alt='Post']");
       if (postbuttons.length) {
         for (var uiego = 0; uiego < postbuttons.length; uiego++) {
@@ -2488,7 +2488,7 @@ function handleShowThread(e) {
       //);
       replybutton = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='threadbar bottom']/UL[@class='postbuttons']//LI//A/IMG[contains(@src,'reply')]");
       if (replybutton) {
-
+      	   
 
          makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
@@ -2511,7 +2511,7 @@ function handleShowThread(e) {
 */
 
    try {
-      var isLastPage = SALR_SearchForThreadPages(doc);
+      var isLastPage = SALR_SearchForThreadPages(doc, "thread");
       if (typeof(isLastPage)=="object" && isLastPage.res == true) {
          var pcount = ((isLastPage.num-1) * 40) + resarray.length - 1;
          //alert("looks like "+pcount+" posts up in this bitch");
@@ -2524,7 +2524,7 @@ function handleShowThread(e) {
    try { SALR_InsertThreadKeyboardNavigation(doc); } catch (e) { }
 
    reanchorThreadToLink(doc);
-
+   
    doc.__salastread_loading = true;
    window.addEventListener("load", SALR_PageFinishedLoading, true);
    if (persistObject.toggle_scrollPostEnable)
@@ -2547,7 +2547,7 @@ function SALR_CheckScrollPostPosition(doc) {
     var a;
     for (i = 0; i < doc.postlinks.length; i++) {
       a = doc.postlinks[i];
-      if (a.postid && (doc.__salastread_loading || !a.absolutepos))
+      if (a.postid && (doc.__salastread_loading || !a.absolutepos)) 
         a.absolutepos = SALR_GetVerticalPos(a.parentpost);
       if (a.absolutepos && scrollpos > a.absolutepos) {
         SALR_SetNewLastReadIfLarger(a.threadid, a.postdt, a.postid);
@@ -2603,7 +2603,7 @@ function SALR_CheckForSpaceScroll(doc, oldTop) {
    var newTop = doc.body.scrollTop;
    if (oldTop==newTop) {
       var bclassmatch = doc.body.className.match(/salastread_thread_(\d+)/);
-      if (bclassmatch) {
+      if (bclassmatch) { 
          var curPage = doc._SALR_curPage;
          var maxPages = doc._SALR_maxPages;
          var threadid = Number(bclassmatch[1]);
@@ -2628,15 +2628,25 @@ function SALR_CheckForSpaceScroll(doc, oldTop) {
 }
 
 function SALR_DirectionalNavigate(doc, dir) {
+	var forumid = doc.location.href.match(/forumid=[0-9]+/);
+	var posticon = doc.location.href.match(/posticon=[0-9]+/);
+	if (!posticon) posticon = "posticon=0";
+
    if (dir == "top") {
       var tforum = doc.__SALR_forumid;
-      doc.location = "http://forums.somethingawful.com/forumdisplay.php?s=&forumid="+tforum;
+	  if (tforum)
+		  doc.location = "http://forums.somethingawful.com/forumdisplay.php?s=&forumid="+tforum;
+	  else
+		  doc.location = "http://forums.somethingawful.com/forumdisplay.php?s=&"+forumid+"&"+posticon;
    }
    else if (dir == "left") {
       var curPage = doc.__SALR_curPage;
       if (curPage > 1) {
          var threadid = doc.__SALR_threadid;
-         doc.location = "http://forums.somethingawful.com/showthread.php?s=&threadid="+threadid+"&perpage=40&pagenumber="+(curPage-1);
+		 if (threadid)
+			 doc.location = "http://forums.somethingawful.com/showthread.php?s=&threadid="+threadid+"&perpage=40&pagenumber="+(curPage-1);
+		 else
+			 doc.location = "http://forums.somethingawful.com/forumdisplay.php?"+forumid+"&daysprune=30&sortorder=desc&sortfield=lastpost&perpage=40&"+posticon+"&pagenumber="+(curPage-1);
       }
    }
    else if (dir == "right") {
@@ -2644,7 +2654,10 @@ function SALR_DirectionalNavigate(doc, dir) {
       var maxPage = doc.__SALR_maxPage;
       if (maxPage > curPage) {
          var threadid = doc.__SALR_threadid;
-         doc.location = "http://forums.somethingawful.com/showthread.php?s=&threadid="+threadid+"&perpage=40&pagenumber="+(curPage+1);
+		 if (threadid)
+			 doc.location = "http://forums.somethingawful.com/showthread.php?s=&threadid="+threadid+"&perpage=40&pagenumber="+(curPage+1);
+		 else
+			 doc.location = "http://forums.somethingawful.com/forumdisplay.php?"+forumid+"&daysprune=30&sortorder=desc&sortfield=lastpost&perpage=40&"+posticon+"&pagenumber="+(curPage+1);
       }
    }
 }
@@ -2698,10 +2711,11 @@ function SALR_PageMouseDown(event) {
          el.style.top = ((event.clientY - 36) + (77 * ofsy)) + "px";
          doc.body.appendChild(el);
          el.SALR_isGestureElement = true;
-         if (dir=="left" && doc.__SALR_curPage <= 1) {
+
+         if (dir=="left" && (doc.__SALR_curPage <= 1 || !doc.__SALR_curPage)) {
             el.className += " disab";
          }
-         else if (dir=="right" && doc.__SALR_maxPage <= doc.__SALR_curPage) {
+         else if (dir=="right" && (doc.__SALR_maxPage <= doc.__SALR_curPage || !doc.__SALR_maxPage)) {
             el.className += " disab";
          }
       };
@@ -2709,11 +2723,18 @@ function SALR_PageMouseDown(event) {
       cx("left", 0, -1);
       cx("right", 0, 1);
       cx("bottom", 1, 0);
+
+      if (!doc.__SALR_maxPage) {
+	        var ss = doc.createElement("link");
+            ss.rel = "stylesheet";
+            ss.href = "chrome://salastread/content/pagenavigator-content.css";
+            doc.getElementsByTagName('head')[0].appendChild(ss);
+      }
    }
 }
 
-function SALR_SearchForThreadPages(doc) {
-   if (!persistObject.toggle_enablePageNavigator)
+function SALR_SearchForThreadPages(doc, type) {
+   if ((!persistObject.toggle_enablePageNavigator && type=="thread") || ((!persistObject.toggle_enableForumNavigator && type=="forum")))
       return { res: false };
 
    doc.body.addEventListener('mousedown', SALR_PageMouseDown, false);
@@ -2722,7 +2743,7 @@ function SALR_SearchForThreadPages(doc) {
 
    var rval = { res: true, num: 1 };
    //var pel = selectSingleNode(doc, doc.body, "TABLE/TBODY/TR/TD/TABLE[1]/TBODY/TR/TD/DIV[@class='mainbodytext']/B[1]/A[@class='pagenumber']");
-   var pel = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='pages top']/B/A[@class='pagenumber']");
+   var pel = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='pages bottom']/B/A[@class='pagenumber']");
    if (pel) {
       //alert("found pel");
       var turl = pel.href;
@@ -2915,7 +2936,7 @@ function SALR_NoteFade(targetEl) {
 
 function makeQuickReplyButton(threadid,doc,replybutton, inBYOB) {
 
-
+    
    replybutton.style.width = "12px !important";
    replybutton.style.height = "20px !important";
    if(inBYOB){
@@ -3216,7 +3237,7 @@ function __TEST__docloaded(e) {
    try {
       // copyright notice at bottom of page is the only <p> in the main body of a forum page
       //var copyrightnotice = selectNodes(doc, doc.body, "P/FONT")[0];
-
+      
       var commentnodes = selectNodes(doc, doc.body, "child::comment()");
       var count=0;
       for (var i=0; i<commentnodes.length; i++) {
@@ -3575,9 +3596,9 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
             if ( location.href.indexOf("forumdisplay.php?") != -1 ) {
             	if (doc.getElementById('forum') != null) {
 	            	// Only do if there is a list of posts
-              	hresult = handleForumDisplay(e);
-              	addInternalDebugLog("forumdisplay.php handler");
-              }
+               hresult = handleForumDisplay(e);
+               addInternalDebugLog("forumdisplay.php handler");
+            }
             }
             else if ( location.href.indexOf("showthread.php?") != -1 ) {
                handleShowThread(e);
@@ -3910,9 +3931,9 @@ try {
    if (!persistObject)
       throw "Failed to create persistObject.";
 
-	SALR_CURRENT_VERSION = persistObject.getPreference('lastRunVersion');
+	SALR_CURRENT_VERSION = persistObject.getPreference('currentVersion');
 
-   if (persistObject.SALRversion != "1.15.1912") { // Yeah, don't touch this without updating the corresponding code in the com
+   if (persistObject.SALRversion != persistObject.getPreference('currentVersion')) {
       persistObject = null;
       throw "XPCOM/Overlay version mismatch. Your Firefox profile is probably corrupt. Google for \"firefox profile support\" for help in setting up a new, clean profile.";
    }
