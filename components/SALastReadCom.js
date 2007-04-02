@@ -167,7 +167,7 @@ salrPersistObject.prototype = {
    get defaulttoggle_hideSignature() { return false; },
    get defaulttoggle_hideTitle() { return false; },
    get defaulttoggle_suppressErrors() { return true; },
-	   
+
    get defaulttoggle_insertPostLastMarkLink() { return true; },
    get defaulttoggle_disableGradients() { return false; },
    get defaulttoggle_resizeCustomTitleText() { return true; },
@@ -1129,7 +1129,7 @@ salrPersistObject.prototype = {
          }
       }
    },
-  
+
 	/* Is this function safe to delete?
    _OLDSaveTypePrefs: function(prefType,dataType)
    {
@@ -1257,7 +1257,7 @@ salrPersistObject.prototype = {
       this._TimerValueSaveAt = this._TimerValue + 60;
    },
 	*/
-	/* This function has been rewritten for 2.0, remove before release	
+	/* This function has been rewritten for 2.0, remove before release
    IsDevelopmentRelease: function()
    {
       var ver = "1.15.1912";
@@ -1377,7 +1377,7 @@ salrPersistObject.prototype = {
 		}
 		return success;
 	},
-	
+
 	// Updates the OP UID in the database
 	// @param: (int) Thread ID #, (int) User ID # of Original Poster
 	// @return: nothing
@@ -1408,21 +1408,37 @@ salrPersistObject.prototype = {
 		statement.reset();
 		return userid;
 	},
-	
+
 	// Returns the last version ran
 	// @param: nothing
 	// @return: (string) Version number
 	get LastRunVersion()
 	{
+		// Check to see if they have a value stored in the old location
+		var prefType = this.pref.getPrefType("salastread.lastRunVersion");
+		if (prefType != this.pref.PREF_INVALID)
+		{
+			this.LastRunVersion = this.pref.getCharPref("salastread.lastRunVersion");
+			this.pref.deleteBranch("salastread.lastRunVersion");
+		}
+		prefType = this.preferences.getPrefType("lastRunVersion");
+		if (prefType == this.preferences.PREF_INVALID)
+		{
+			this.LastRunVersion = this.getPreference("currentVersion");
+		}
 		return this.getPreference("lastRunVersion");
 	},
-	
+
+	// This function seems to no longer work?
 	// Sets the last version ran
 	// @param: (string) Version number
 	// @return: nothing
 	set LastRunVersion(ver)
 	{
-		this.setPreference("lastRunVersion", ver);
+		if (!this.setPreference("lastRunVersion", ver))
+		{
+			this.preferences.setCharPref("lastRunVersion", this.getPreference("currentVersion"));
+		}
 	},
 
 	// Saves the time spent on the forums so far and flags to save in another 60 seconds
