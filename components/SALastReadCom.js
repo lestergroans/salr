@@ -1286,7 +1286,7 @@ salrPersistObject.prototype = {
 	//
 	// Here begins functions that do not need to be rewriten for 2.0
 	//
-	
+
 	// Applies the given XPath and returns the first resultant node
 	// @param:
 	// @return:
@@ -1542,7 +1542,7 @@ salrPersistObject.prototype = {
 		}
 		return prefValue;
 	},
-	
+
 	// Adds/updates a user as a mod
 	// @param: (int) User ID, (string) Username
 	// @return: nothing
@@ -1554,14 +1554,15 @@ salrPersistObject.prototype = {
 		if (!statement.executeStep())
 		{
 			statement.reset();
-			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, '#bb4400', null)");
+			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, ?3, null)");
 			statement.bindInt32Parameter(0,userid);
 			statement.bindStringParameter(1,username);
+			statement.bindStringParameter(2, this.getPreference("adminColor"));
 			statement.executeStep();
 		}
 		statement.reset();
 	},
-	
+
 	// Checks if a user id is flagged as a mod
 	// @param: (int) User ID
 	// @return: (boolean) Mod or not
@@ -1573,7 +1574,7 @@ salrPersistObject.prototype = {
 		statement.reset();
 		return isMod;
 	},
-	
+
 	// Try to figure out the current forum we're in
 	// @param: (document) The current page being viewed
 	// @return: (int) Forum ID, or (bool) false if unable to determine
@@ -1600,7 +1601,7 @@ salrPersistObject.prototype = {
 		}
 		return fid;
 	},
-	
+
 	// Fetches the total post count as of the last time the thread was read
 	// @param: (int) Thread ID
 	// @returns: (int) Post count, or (bool) false if thread not in the db
@@ -1612,27 +1613,19 @@ salrPersistObject.prototype = {
 		if (statement.executeStep())
 		{
 			lrcount = statement.getInt32(0);
+			if (lrcount <= 0) // Incase it's null
+			{
+				lrcount = 1;
+			}
 		}
 		else
 		{
-			statement.reset();
-			statement = this.database.createStatement("SELECT * FROM `threaddata` WHERE `id` = ?1");
-			statement.bindInt32Parameter(0,threadid);
-			if (statement.executeStep())
-			{
-				// reply count not recorded but thread data in db
-				lrcount = 0;
-			}
-			else
-			{
-				// thread not in db
-				lrcount = false;
-			}
+			lrcount = false;
 		}
 		statement.reset();
 		return lrcount;
 	},
-	
+
 	// Fetches the user's status code from the database
 	// @param: (int) User ID
 	// @returns: (string) Hex Colorcode to color user, or (bool) false if not found
@@ -1643,7 +1636,7 @@ salrPersistObject.prototype = {
 		statement.bindInt32Parameter(0,userid);
 		if (statement.executeStep())
 		{
-			userstatus = statement.getInt32(0);
+			userstatus = statement.getString(0);
 		}
 		else
 		{
@@ -1651,6 +1644,72 @@ salrPersistObject.prototype = {
 		}
 		statement.reset();
 		return userstatus;
+	},
+
+	// Get the Post ID of the last read post
+	// @param:
+	// @return:
+	getLastPostID: function(threadid)
+	{
+		var lastread;
+		var statement = this.database.createStatement("SELECT `lastpostid` FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			lastread = statement.getString(0);
+			if (lastread == null)
+			{
+				lastread = false;
+			}
+		}
+		else
+		{
+			lastread = false;
+		}
+		statement.reset();
+		return lastread;
+	},
+
+	// Check the database to see if thread was posted in
+	// @param: (int) Thread ID
+	// @return: (bool) If user posted in thread or not
+	didIPostHere: function(threadid)
+	{
+		var posted;
+		var statement = this.database.createStatement("SELECT `posted` FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			posted = statement.getInt32(0);
+			posted = (posted == true);
+		}
+		else
+		{
+			posted = false;
+		}
+		statement.reset();
+		return posted;
+	},
+
+	// Check to see if the thread is starred
+	// @param:
+	// @return:
+	isThreadStarred: function(threadid)
+	{
+		var starred;
+		var statement = this.database.createStatement("SELECT `star` FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			starred = statement.getInt32(0);
+			starred = (starred == true);
+		}
+		else
+		{
+			starred = false;
+		}
+		statement.reset();
+		return starred;
 	}
 
 	// Don't forget the trailing comma when adding a new function/property
