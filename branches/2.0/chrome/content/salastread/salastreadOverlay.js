@@ -1281,29 +1281,30 @@ function handleForumDisplay(doc)
 		{
 			userid = modarray[i].href.split(/userid=/i)[1];
 			username = modarray[i].innerHTML;
-			if (!persistObject.isMod(userid)) {
+			if (!persistObject.isMod(userid))
+			{
 				persistObject.addMod(userid, username);
 			}
 		}
 	}
 
-	/*
-	// Here be where we work on the thread rows
+	// We'll need lots of variables for this
 	var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox, threadViewsBox;
-	var threadRatingBox, threadLastpostBox, threadTitle, threadId, threadOpId, threadRe;
-	var threadLRCount, theadOPStatus;
+	var threadRatingBox, threadLastpostBox, threadTitle, threadId, threadOPId, threadRe;
+	var threadLRCount, theadOPStatus, unvistIcon, lpIcon, lastPostID, moveLP = false, moveUnvisit = false, moveStar = false;
+	// Here be where we work on the thread rows
 	var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
 	for (i in threadlist)
 	{
-		if (!inDump)
-		{
-			threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
-			threadRatingBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='rating']");
-		}
-		else
+		if (inDump)
 		{
 			threadRatingBox = threadlist[i].getElementsByTagName('td')[0];
 			threadVoteBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='votes']");
+		}
+		else
+		{
+			threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
+			threadRatingBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='rating']");
 		}
 		if (inAskTell)
 		{
@@ -1318,90 +1319,168 @@ function handleForumDisplay(doc)
 		threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
 		threadLRCount = persistObject.getLastReadPostCount(threadId);
 		threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
-		threadOpId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
-		threadOPStatus = persistObject.getPosterStatus(threadOpId);
-		
-		
-		if (threadLRCount && ((threadRe++) > threadLRCount)) {
-			threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + '(' + (threadRethreadLRCount) + ')';
+		threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
+		threadOPStatus = persistObject.getPosterStatus(threadOPId);
+
+		threadlist[i].className = "salastread_thread_" + threadId;
+
+		// If thread is ignored
+		// Do this stuff...
+
+		if (threadOPStatus && persistObject.getPreference("highlightUsernames"))
+		{
+			threadAuthorBox.getElementsByTagName('a')[0].style.color = threadOPStatus;
+			threadAuthorBox.getElementsByTagName('a')[0].style.fontWeight = 'bold';
 		}
-		
+
+		// Replace the thread icon with a linked thread icon
+		iconGo = doc.createElement("a");
+		iconGo.setAttribute("href", "#");
+		iconGo.appendChild(threadIconBox.firstChild.cloneNode(true));
+		iconGo.firstChild.style.border = "none";
+		threadIconBox.removeChild(threadIconBox.firstChild);
+		threadIconBox.appendChild(iconGo);
+
+		if (threadLRCount) // If this thread is in the DB as being read
+		{
+			if ((threadRe++) > threadLRCount)
+			{
+				threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + ' (' + (threadRe - threadLRCount) + ')';
+				threadTitleBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+				threadAuthorBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+				threadRepliesBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+				threadViewsBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+				threadRatingBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+				threadLastpostBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+				if (inDump)
+				{
+					threadVoteBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+				}
+				else
+				{
+					threadIconBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+				}
+				if (inAskTell)
+				{
+					threadIconBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+					threadIcon2Box.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+				}
+			}
+			else
+			{
+				threadTitleBox.style.backgroundColor = persistObject.getPreference("readLight");
+				threadAuthorBox.style.backgroundColor = persistObject.getPreference("readDark");
+				threadRepliesBox.style.backgroundColor = persistObject.getPreference("readLight");
+				threadViewsBox.style.backgroundColor = persistObject.getPreference("readDark");
+				threadRatingBox.style.backgroundColor = persistObject.getPreference("readLight");
+				threadLastpostBox.style.backgroundColor = persistObject.getPreference("readDark");
+				if (inDump)
+				{
+					threadVoteBox.style.backgroundColor = persistObject.getPreference("readLight");
+				}
+				else
+				{
+					threadIconBox.style.backgroundColor = persistObject.getPreference("readDark");
+				}
+				if (inAskTell)
+				{
+					threadIconBox.style.backgroundColor = persistObject.getPreference("readLight");
+					threadIcon2Box.style.backgroundColor = persistObject.getPreference("readDark");
+				}
+			}
+			if (!persistObject.getPreference("disableGradients"))
+			{
+				threadTitleBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+				threadTitleBox.style.backgroundRepeat = "repeat-x";
+				threadAuthorBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+				threadAuthorBox.style.backgroundRepeat = "repeat-x";
+				threadRepliesBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+				threadRepliesBox.style.backgroundRepeat = "repeat-x";
+				threadViewsBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+				threadViewsBox.style.backgroundRepeat = "repeat-x";
+				threadRatingBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+				threadRatingBox.style.backgroundRepeat = "repeat-x";
+				threadLastpostBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+				threadLastpostBox.style.backgroundRepeat = "repeat-x";
+				if (inDump)
+				{
+					threadVoteBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadVoteBox.style.backgroundRepeat = "repeat-x";
+				}
+				else
+				{
+					threadIconBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadIconBox.style.backgroundRepeat = "repeat-x";
+				}
+				if (inAskTell)
+				{
+					threadIcon2Box.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadIcon2Box.style.backgroundRepeat = "repeat-x";
+				}
+			}
+			if (persistObject.didIPostHere(threadId))
+			{
+				threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
+			}
+			if ((persistObject.getPreference("showGoToLastIcon") && (threadRe > threadLRCount)) ||
+				persistObject.getPreference("alwaysShowGoToLastIcon"))
+			{
+				lpGo = doc.createElement("a");
+				lastPostID = persistObject.getLastPostID(threadId);
+				lpGo.setAttribute("href", "http://forums.somethingawful.com/showthread.php?s=&postid=" + lastPostID + "#post" + lastPostID);
+				lpIcon = doc.createElement("img");
+				lpIcon.setAttribute("src", "chrome://salastread/skin/lastpost.png");
+				lpIcon.style.cssFloat = "right";
+				lpIcon.style.marginRight = "3px";
+				lpIcon.style.marginLeft = "3px";
+				lpIcon.style.border = "none";
+				lpGo.appendChild(lpIcon);
+				threadTitleBox.insertBefore(lpGo, threadTitleBox.getElementsByTagName('a')[0]);
+				moveLP = true;
+			}
+			if (persistObject.getPreference("showUnvisitIcon"))
+			{
+				rmGo = doc.createElement("a");
+				rmGo.setAttribute("href", "#");
+				unvisitIcon = doc.createElement("img");
+				unvisitIcon.setAttribute("src", "chrome://salastread/skin/unvisit.png");
+				unvisitIcon.style.cssFloat = "right";
+				unvisitIcon.style.marginRight = "3px";
+				unvisitIcon.style.border = "none";
+				rmGo.appendChild(unvisitIcon);
+				threadTitleBox.insertBefore(rmGo, threadTitleBox.getElementsByTagName('a')[0]);
+				moveUnvisit = true;
+			}
+		}
+
+		if (persistObject.isThreadStarred(threadId))
+		{
+			starIcon = doc.createElement("img");
+			starIcon.setAttribute("src", "chrome://salastread/skin/star.png");
+			starIcon.style.cssFloat = "left";
+			starIcon.style.marginRight = "3px";
+			starIcon.style.marginLeft = "3px";
+			starIcon.style.border = "none";
+			threadTitleBox.insertBefore(starIcon, threadTitleBox.getElementsByTagName('a')[0]);
+			moveStar = true;
+		}
+		if (moveLP)
+		{
+			lpIcon.style.marginTop = ((lpIcon.parentNode.parentNode.clientHeight - 30) / 2) + "px";
+			moveLP = false;
+		}
+		if (moveUnvisit)
+		{
+			unvisitIcon.style.marginTop = ((unvisitIcon.parentNode.parentNode.clientHeight - 30) / 2) + "px";
+			moveUnvisit = false;
+		}
+		if (moveStar)
+		{
+			starIcon.style.marginTop = ((starIcon.parentNode.parentNode.clientHeight - 22) / 2) + "px";
+			moveStar = false;
+		}
+
 	}
-*/	
-   var gotOne = false;
-   var resarray = selectNodes(doc, doc, "//TR[@class='thread']");
-   for (var x=0; x<resarray.length; x++) {
-      var thisel = resarray[x];
-      if ( thisel.nodeName == "TR" ) {
-         var isunread = false;
-         var titleNode = selectSingleNode(doc, thisel, "TD[@class='title']");
-         var threadLink = selectSingleNode(doc, titleNode, "A[1]");
-         if (threadLink==null)
-            continue;
-         var timatch = threadLink.href.match(/threadid=(\d+)/);
-         var threadid = timatch[1];
-         gotOne = true;
-         var lpdtnode = selectSingleNode(doc, thisel, "TD[@class='lastpost']/DIV[@class='date']");
-         var lpdttext = lpdtnode.innerHTML;
-         lpdttext = StripSpaces(lpdttext);
-         var lpdtm = lpdttext.match(/^(\d\d\:\d\d) (...) (\d\d), (\d\d\d\d)$/);
-         if (!lpdtm) {
-            return;
-         }
-         var lptime = lpdtm[1];
-         var lpdate = lpdtm[2] + " " + lpdtm[3] + ", " + lpdtm[4];
-
-         if (inFYAD) {
-            SALR_SilenceLoadErrors = true;
-         }
-         var setClasses = 1;
-         var topictitletd = selectSingleNode(doc, thisel, "TD[@class='title']");
-         var topicretd = selectSingleNode(doc, thisel, "TD[@class='replies']");
-
-				// Here be where last read icons and new posts counts gets inserted
-         setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,inFYAD,setClasses,topictitletd,topicretd,forumid);
-
-				// Here be where to grab OP
-         var ulinknode = selectSingleNode(doc, thisel, "TD[@class='author']/A[contains(@href,'action=getinfo')]");
-         if (ulinknode) {
-            var userid = 0;
-            var uidmatch = ulinknode.href.match(/userid=(\d+)/i);
-            if ( uidmatch ) {
-               userid = uidmatch[1];
-            }
-            var uname = ulinknode.firstChild.nodeValue;
-            uname = uname.replace(/[^A-Z0-9]/gi, "_");
-            ulinknode.className += " somethingawfulforum_userlink_"+uname;
-            if ( SALR_IsModerator(userid, forumid) ) {
-               ulinknode.className += " somethingawfulforum_userlinkMODERATOR";
-            }
-            persistObject.StoreOPData(threadid, userid);
-         }
-
-				// Here be insertion of class name in the killed by column
-         var ulinknodeb = selectSingleNode(doc, thisel, "TD[@class='lastpost']/A[@class='author'][contains(@href,'goto=lastpost')]");
-         if (ulinknodeb) {
-            var uname = ulinknodeb.firstChild.nodeValue;
-            uname = uname.replace(/[^A-Z0-9]/gi, "_");
-            ulinknodeb.className += " somethingawfulforum_userlink_"+uname;
-            if ( SALR_IsModerator(uname, forumid) ) {
-               ulinknodeb.className += " somethingawfulforum_userlinkMODERATOR";
-            }
-         }
-
-      }
-   }
-
-
-   if (gotOne) {
-      var csstxt = SALR_MakeForumDisplayCSS();
-      //alert("csstxt =\n"+csstxt);
-      var cssObj = doc.createElement("style");
-      cssObj.type = "text/css";
-      cssObj.innerHTML = csstxt;
-      doc.getElementsByTagName('head')[0].appendChild(cssObj);
-   }
-	
 }
 
 /*
@@ -2043,7 +2122,7 @@ function handleShowThread(e) {
 			persistObject.setPreference("postsPerPage", perpage.href.match(/perpage=(\d+)/i)[1]);
 		}
 	}
-	
+
 
    // Grab the go to dropdown
    if ( !persistObject.gotForumList ) {
