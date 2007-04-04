@@ -1246,56 +1246,88 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
    }
 }
 
-//
-//
-//
-function handleForumDisplay(e) {
-   //alert("forumdisplay");
-   var doc = e.originalTarget;
-   SALR_SearchForThreadPages(doc, "forum");
+// Do anything needed to the post list in a forum
+function handleForumDisplay(doc)
+{
+	var failed, i, e;	// Little variables that'll get reused
+	var forumid = persistObject.getForumID(doc);
+	// The following forums have special needs that must be dealt with
+	var inFYAD = (forumid == 26 || forumid == 154);
+	var inBYOB = (forumid == 174 || forumid == 176);
+	var inDump = (forumid == 133 || forumid == 163);
+	var inAskTell = (forumid == 158);
 
-   //Replace post button
-   if (persistObject.toggle_useQuickQuote) {
-    var postbutton = selectSingleNode(doc, doc, "//UL[@class='postbuttons']//LI//A/IMG[contains(@src,'forum-post')]");
-    if (postbutton) {
-      makeQuickPostButton(undefined, doc, postbutton);
-    }
-   }
+	// Insert the forums paginator & mouse gestures
+	if (persistObject.getPreference("enableForumNavigator"))
+	{
+		SALR_SearchForThreadPages(doc, "forum");
+	}
 
+	// Replace post button
+	if (persistObject.getPreference("useQuickQuote"))
+	{
+		var postbutton = persistObject.selectSingleNode(doc, doc, "//UL[@class='postbuttons']//A[contains(@href,'action=newthread')]//IMG");
+		if (postbutton) {
+			makeQuickPostButton(undefined, doc, postbutton);
+		}
+	}
 
-   // Snag Forum Moderators
-   if ( persistObject.forumListXml ) {
-      var saveXml = false;
-      var fxml = persistObject.forumListXml;
-      var mNodeContainer = selectSingleNode(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[2]/TD[1]/DIV[contains(text(),'(Mods:')]");
-      if (mNodeContainer) {
-         var fidmatch = doc.location.href.match(/forumid=(\d+)/i);
-         if (fidmatch) {
-            var forumid = fidmatch[1];
-            var mods = new Array();
-            var modnames = new Array();
-            var mNodes = selectNodes(doc, mNodeContainer, ".//A");
-            for (var i=0; i<mNodes.length; i++) {
-               var xhrefuid = mNodes[i].href.match(/userid=(\d+)/i);
-               if (xhrefuid) {
-                  mods.push( xhrefuid[1] );
-                  modnames.push( SALR_MakeClassSafe( mNodes[i].innerHTML ) );
-               }
-            }
-            var flForumEl = selectSingleNode( fxml, fxml, "//forum[@id='"+forumid+"']" );
-            if ( flForumEl ) {
-               flForumEl.setAttribute("mods", mods.join(","));
-               flForumEl.setAttribute("modnames", modnames.join(","));
-               saveXml = true;
-            }
-         }
-      }
-      if (saveXml) {
-         persistObject.forumListXml = fxml;  // forces a save
-      }
-   }
+	// Snag Forum Moderators
+	if (!inFYAD && !inBYOB)
+	{
+		var modarray = doc.getElementById('mods').getElementsByTagName('a');
+		var modcount = modarray.length;
+		for (i=0; i<modcount; i++)
+		{
+			userid = modarray[i].href.split(/userid=/i)[1];
+			username = modarray[i].innerHTML;
+			if (!persistObject.isMod(userid)) {
+				persistObject.addMod(userid, username);
+			}
+		}
+	}
 
-   // Highlight Threads
+	/*
+	// Here be where we work on the thread rows
+	var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox, threadViewsBox;
+	var threadRatingBox, threadLastpostBox, threadTitle, threadId, threadOpId, threadRe;
+	var threadLRCount, theadOPStatus;
+	var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
+	for (i in threadlist)
+	{
+		if (!inDump)
+		{
+			threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
+			threadRatingBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='rating']");
+		}
+		else
+		{
+			threadRatingBox = threadlist[i].getElementsByTagName('td')[0];
+			threadVoteBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='votes']");
+		}
+		if (inAskTell)
+		{
+			threadIcon2Box = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon2']");
+		}
+		threadTitleBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='title']");
+		threadAuthorBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='author']");
+		threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='replies']");
+		threadViewsBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='views']");
+		threadLastpostBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='lastpost']");
+		threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
+		threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
+		threadLRCount = persistObject.getLastReadPostCount(threadId);
+		threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
+		threadOpId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
+		threadOPStatus = persistObject.getPosterStatus(threadOpId);
+		
+		
+		if (threadLRCount && ((threadRe++) > threadLRCount)) {
+			threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + '(' + (threadRethreadLRCount) + ')';
+		}
+		
+	}
+*/	
    var gotOne = false;
    var resarray = selectNodes(doc, doc, "//TR[@class='thread']");
    for (var x=0; x<resarray.length; x++) {
@@ -1319,14 +1351,7 @@ function handleForumDisplay(e) {
          var lptime = lpdtm[1];
          var lpdate = lpdtm[2] + " " + lpdtm[3] + ", " + lpdtm[4];
 
-         var forumid = 0;
-         var fidmatch = doc.location.href.match(/forumid=(\d+)/i);
-         if (fidmatch) {
-            forumid = fidmatch[1];
-         }
-         var isFYAD = (forumid == 26);
-         var isAskTell = (forumid == 158);
-         if (isFYAD) {
+         if (inFYAD) {
             SALR_SilenceLoadErrors = true;
          }
          var setClasses = 1;
@@ -1334,7 +1359,7 @@ function handleForumDisplay(e) {
          var topicretd = selectSingleNode(doc, thisel, "TD[@class='replies']");
 
 				// Here be where last read icons and new posts counts gets inserted
-         setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,topictitletd,topicretd,forumid);
+         setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,inFYAD,setClasses,topictitletd,topicretd,forumid);
 
 				// Here be where to grab OP
          var ulinknode = selectSingleNode(doc, thisel, "TD[@class='author']/A[contains(@href,'action=getinfo')]");
@@ -1376,8 +1401,7 @@ function handleForumDisplay(e) {
       cssObj.innerHTML = csstxt;
       doc.getElementsByTagName('head')[0].appendChild(cssObj);
    }
-
-   return resarray.length;
+	
 }
 
 /*
@@ -2009,6 +2033,17 @@ function handleShowThread(e) {
    if ( doc.getElementById("notregistered") ) {
       isloggedin = false;
    }
+
+	// Grab threads/posts per page
+	var perpage = persistObject.selectSingleNode(doc, doc, "//DIV[@class='pages']//A[@class='pagenumber']");
+	if (perpage)
+	{
+		if (perpage.href.match(/perpage=(\d+)/i) != null)
+		{
+			persistObject.setPreference("postsPerPage", perpage.href.match(/perpage=(\d+)/i)[1]);
+		}
+	}
+	
 
    // Grab the go to dropdown
    if ( !persistObject.gotForumList ) {
@@ -3493,6 +3528,7 @@ function SALR_windowOnLoadMini(e) {
       if (doc.__salastread_processed) {
          if ( persistObject.toggle_reanchorThreadOnLoad ) {
             var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
+            samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
             if (samatch) {
                if ( location.href.indexOf("showthread.php?") != -1 ) {
                   reanchorThreadToLink(doc);
@@ -3533,6 +3569,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
    try {
       if ( location && location.href && !doc.__salastread_processed ) {
          var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
+         samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
          if (samatch) {
             salastread_addUpdateIcon(doc);
             // Moved below, where it should be
@@ -3576,6 +3613,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
       if (doc.__salastread_processed) {
          if ( persistObject.toggle_reanchorThreadOnLoad ) {
             var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
+            samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
             if (samatch) {
                if ( location.href.indexOf("showthread.php?") != -1 ) {
                   reanchorThreadToLink(doc);
@@ -3586,6 +3624,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
       }
       if ( location && location.href && !doc.__salastread_processed ) {
          var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
+         samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
          if (samatch && doc.defaultView.getComputedStyle(doc.body,'').getPropertyValue('background-color')!="rgb(255, 153, 153)") {
 //            var newPageTimer = persistObject.TimeManager.GetStart();
 //            doc.__SALASTREAD_PAGETIMER = newPageTimer;
@@ -3596,9 +3635,8 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
             if ( location.href.indexOf("forumdisplay.php?") != -1 ) {
             	if (doc.getElementById('forum') != null) {
 	            	// Only do if there is a list of posts
-               hresult = handleForumDisplay(e);
-               addInternalDebugLog("forumdisplay.php handler");
-            }
+              	handleForumDisplay(doc);
+            	}
             }
             else if ( location.href.indexOf("showthread.php?") != -1 ) {
                handleShowThread(e);
@@ -3958,7 +3996,7 @@ try {
 //         persistObject.TimeManager = tm;
 //      }
       if ( persistObject && persistObject.LastRunVersion != SALR_CURRENT_VERSION ) {
-         needToShowChangeLog = true;
+         needToShowChangeLog = !persistObject.IsDevelopmentRelease;
          upgradeFromVersion = persistObject.LastRunVersion;
          persistObject.LastRunVersion = SALR_CURRENT_VERSION;
       }

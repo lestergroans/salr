@@ -692,11 +692,6 @@ salrPersistObject.prototype = {
 
    },
 
-   selectSingleNode: function(doc, context, xpath)
-   {
-      var nodeList = doc.evaluate(xpath, context, null, 9 /* XPathResult.FIRST_ORDERED_NODE_TYPE */, null);
-      return nodeList.singleNodeValue;
-   },
 
    SaveThreadDataV2: function()
    {
@@ -1289,7 +1284,34 @@ salrPersistObject.prototype = {
    get wrappedJSObject() { return this; },
 
 	//
-	// Here begins new functions for the 2.0 rewrite ~ 0330 ~ duz
+	// Here begins functions that do not need to be rewriten for 2.0
+	//
+	
+	// Applies the given XPath and returns the first resultant node
+	// @param:
+	// @return:
+	selectSingleNode: function(doc, context, xpath)
+	{
+		var nodeList = doc.evaluate(xpath, context, null, 9 /* XPathResult.FIRST_ORDERED_NODE_TYPE */, null);
+		return nodeList.singleNodeValue;
+	},
+
+	// Applies the given XPath and returns all the nodes in it
+	// @param:
+	// @return:
+	selectNodes: function(doc, context, xpath)
+	{
+		var nodes = doc.evaluate(xpath, context, null, 7 /* XPathResult.ORDERED_NODE_SNAPSHOT_TYPE */, null);
+		var result = new Array(nodes.snapshotLength);
+		for (var i=0; i<result.length; i++)
+		{
+			result[i] = nodes.snapshotItem(i);
+		}
+	return result;
+	},
+
+	//
+	// Here begins new functions for the 2.0 rewrite
 	//
 
 	// Return a resource pointing to the proper preferences branch
@@ -1325,7 +1347,11 @@ salrPersistObject.prototype = {
 		var mDBConn = storageService.openDatabase(file);
 		if (!mDBConn.tableExists('threaddata'))
 		{
-			mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
+			mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER)");
+		}
+		if (!mDBConn.tableExists('userdata'))
+		{
+			mDBConn.executeSimpleSQL("CREATE TABLE `userdata` (userid INTEGER PRIMARY KEY, username VARCHAR(50), mod BOOLEAN, admin BOOLEAN, status VARCHAR(8), notes TEXT)");
 		}
 		return mDBConn;
 	},
@@ -1471,7 +1497,7 @@ salrPersistObject.prototype = {
 		if (vm)
 		{
 			var build = vm[3];
-			isDev = build.length == 6;
+			isDev = (build.length == 6);
 		}
 		return isDev;
 	},
@@ -1515,6 +1541,116 @@ salrPersistObject.prototype = {
 			this.setPreference(prefName, defaultValue);
 		}
 		return prefValue;
+	},
+	
+	// Adds/updates a user as a mod
+	// @param: (int) User ID, (string) Username
+	// @return: nothing
+	addMod: function(userid, username)
+	{
+		var statement = this.database.createStatement("UPDATE `userdata` SET `username` = ?1, `mod` = 1 WHERE `userid` = ?2");
+		statement.bindStringParameter(0,username);
+		statement.bindInt32Parameter(1,userid);
+		if (!statement.executeStep())
+		{
+			statement.reset();
+			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, '#bb4400', null)");
+			statement.bindInt32Parameter(0,userid);
+			statement.bindStringParameter(1,username);
+			statement.executeStep();
+		}
+		statement.reset();
+	},
+	
+	// Checks if a user id is flagged as a mod
+	// @param: (int) User ID
+	// @return: (boolean) Mod or not
+	isMod: function(userid)
+	{
+		var statement = this.database.createStatement("SELECT `username` FROM `userdata` WHERE `mod` = 1 AND `userid` = ?1");
+		statement.bindInt32Parameter(0,userid);
+		isMod = statement.executeStep();
+		statement.reset();
+		return isMod;
+	},
+	
+	// Try to figure out the current forum we're in
+	// @param: (document) The current page being viewed
+	// @return: (int) Forum ID, or (bool) false if unable to determine
+	getForumID: function(doc)
+	{
+		var fid = 0;
+		var intitle = doc.location.href.match(/forumid=(\d+)/i);
+		if (intitle != null)
+		{
+			fid = intitle[1];
+		}
+		else
+		{
+			postbutton = this.selectSingleNode(doc, doc, "//UL[@class='postbuttons']//A[contains(@href,'forumid=')]");
+			inpostbutton = postbutton.href.match(/forumid=(\d+)/i);
+			if (inpostbutton != null)
+			{
+				fid = inpostbutton[1];
+			}
+		}
+		if (fid == 0)
+		{
+			fid = false;
+		}
+		return fid;
+	},
+	
+	// Fetches the total post count as of the last time the thread was read
+	// @param: (int) Thread ID
+	// @returns: (int) Post count, or (bool) false if thread not in the db
+	getLastReadPostCount: function(threadid)
+	{
+		var lrcount;
+		var statement = this.database.createStatement("SELECT `lastreplyct` FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			lrcount = statement.getInt32(0);
+		}
+		else
+		{
+			statement.reset();
+			statement = this.database.createStatement("SELECT * FROM `threaddata` WHERE `id` = ?1");
+			statement.bindInt32Parameter(0,threadid);
+			if (statement.executeStep())
+			{
+				// reply count not recorded but thread data in db
+				lrcount = 0;
+			}
+			else
+			{
+				// thread not in db
+				lrcount = false;
+			}
+		}
+		statement.reset();
+		return lrcount;
+	},
+	
+	// Fetches the user's status code from the database
+	// @param: (int) User ID
+	// @returns: (string) Hex Colorcode to color user, or (bool) false if not found
+	getPosterStatus: function(userid)
+	{
+		var userstatus;
+		var statement = this.database.createStatement("SELECT `status` FROM `userdata` WHERE `userid` = ?1");
+		statement.bindInt32Parameter(0,userid);
+		if (statement.executeStep())
+		{
+			userstatus = statement.getInt32(0);
+		}
+		else
+		{
+			userstatus = false;
+		}
+		statement.reset();
+		return userstatus;
 	}
 
 	// Don't forget the trailing comma when adding a new function/property
