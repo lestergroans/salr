@@ -27,7 +27,8 @@ pref('extensions.salastread.unseenPostDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unseenPostLight', '#f1f1f1');
 pref('extensions.salastread.unseenPostLightFYAD', '#ffccff');
 
-pref('extensions.salastread.adminColor', '#bb4400');
+pref('extensions.salastread.modColor', '#bb4400');
+pref('extensions.salastread.adminColor', '#44bb00');
 
 pref('extensions.salastread.expireMinAge', 7);
 pref('extensions.salastread.gestureButton', 2);
@@ -71,7 +72,8 @@ pref('extensions.salastread.dontTextToImageIfMayBeNws', true);
 pref('extensions.salastread.dontTextToImageInSpoilers', true);
 pref('extensions.salastread.dontCheckKillSwitch', false);
 pref('extensions.salastread.highlightUsernames', true);
-pref('extensions.salastread.highlightBackgroundsInstead', false);
+pref('extensions.salastread.highlightPostBackgroundsInstead', false);
+pref('extensions.salastread.highlightThreadBackgroundsInstead', false);
 pref('extensions.salastread.removeHeaderAndFooter', false);
 pref('extensions.salastread.contextMenuOnBottom', true);
 pref('extensions.salastread.hideSignature', false);

@@ -1291,7 +1291,7 @@ function handleForumDisplay(doc)
 	// We'll need lots of variables for this
 	var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox, threadViewsBox;
 	var threadRatingBox, threadLastpostBox, threadTitle, threadId, threadOPId, threadRe;
-	var threadLRCount, theadOPStatus, unvistIcon, lpIcon, lastPostID, moveLP = false, moveUnvisit = false, moveStar = false;
+	var threadLRCount, theadOPStatus, unvistIcon, lpIcon, lastPostID;
 	// Here be where we work on the thread rows
 	var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
 	for (i in threadlist)
@@ -1321,17 +1321,12 @@ function handleForumDisplay(doc)
 		threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
 		threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
 		threadOPStatus = persistObject.getPosterStatus(threadOPId);
+		persistObject.StoreOPData(threadId, threadOPId);
 
 		threadlist[i].className = "salastread_thread_" + threadId;
 
 		// If thread is ignored
 		// Do this stuff...
-
-		if (threadOPStatus && persistObject.getPreference("highlightUsernames"))
-		{
-			threadAuthorBox.getElementsByTagName('a')[0].style.color = threadOPStatus;
-			threadAuthorBox.getElementsByTagName('a')[0].style.fontWeight = 'bold';
-		}
 
 		// Replace the thread icon with a linked thread icon
 		iconGo = doc.createElement("a");
@@ -1343,7 +1338,7 @@ function handleForumDisplay(doc)
 
 		if (threadLRCount) // If this thread is in the DB as being read
 		{
-			if ((threadRe++) > threadLRCount)
+			if (threadRe > threadLRCount)
 			{
 				threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + ' (' + (threadRe - threadLRCount) + ')';
 				threadTitleBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
@@ -1436,7 +1431,6 @@ function handleForumDisplay(doc)
 				lpIcon.style.border = "none";
 				lpGo.appendChild(lpIcon);
 				threadTitleBox.insertBefore(lpGo, threadTitleBox.getElementsByTagName('a')[0]);
-				moveLP = true;
 			}
 			if (persistObject.getPreference("showUnvisitIcon"))
 			{
@@ -1449,10 +1443,8 @@ function handleForumDisplay(doc)
 				unvisitIcon.style.border = "none";
 				rmGo.appendChild(unvisitIcon);
 				threadTitleBox.insertBefore(rmGo, threadTitleBox.getElementsByTagName('a')[0]);
-				moveUnvisit = true;
 			}
 		}
-
 		if (persistObject.isThreadStarred(threadId))
 		{
 			starIcon = doc.createElement("img");
@@ -1462,23 +1454,22 @@ function handleForumDisplay(doc)
 			starIcon.style.marginLeft = "3px";
 			starIcon.style.border = "none";
 			threadTitleBox.insertBefore(starIcon, threadTitleBox.getElementsByTagName('a')[0]);
-			moveStar = true;
+			starIcon.style.marginTop = ((threadlist[i].clientHeight - 21) / 2) + "px";
 		}
-		if (moveLP)
+		if (threadOPStatus && persistObject.getPreference("highlightUsernames"))
 		{
-			lpIcon.style.marginTop = ((lpIcon.parentNode.parentNode.clientHeight - 30) / 2) + "px";
-			moveLP = false;
+			if (persistObject.getPreference("highlightThreadBackgroundsInstead"))
+			{
+				threadAuthorBox.style.backgroundColor = threadOPStatus;
+				threadAuthorBox.getElementsByTagName("a")[0].style.color = "#000000";
+			}
+			else
+			{
+				threadAuthorBox.getElementsByTagName("a")[0].style.color = threadOPStatus;
+			}
+			threadAuthorBox.getElementsByTagName("a")[0].style.fontWeight = "bold";
 		}
-		if (moveUnvisit)
-		{
-			unvisitIcon.style.marginTop = ((unvisitIcon.parentNode.parentNode.clientHeight - 30) / 2) + "px";
-			moveUnvisit = false;
-		}
-		if (moveStar)
-		{
-			starIcon.style.marginTop = ((starIcon.parentNode.parentNode.clientHeight - 22) / 2) + "px";
-			moveStar = false;
-		}
+
 
 	}
 }
@@ -2568,6 +2559,7 @@ function handleShowThread(e) {
       }
    } // End of main post loop
 
+
    if (needCssInsert) {
       var csstxt = SALR_MakeShowThreadCSS(doc);
       var sel = doc.createElement("style");
@@ -2627,12 +2619,13 @@ function handleShowThread(e) {
    try {
       var isLastPage = SALR_SearchForThreadPages(doc, "thread");
       if (typeof(isLastPage)=="object" && isLastPage.res == true) {
-         var pcount = ((isLastPage.num-1) * 40) + resarray.length - 1;
+         var pcount = ((isLastPage.num-1) * persistObject.getPreference("postsPerPage")) + resarray.length - 1;
+         persistObject.setLastReadPostCount(threadid, pcount);
          //alert("looks like "+pcount+" posts up in this bitch");
-         slurpIntoThreadCache(threadid);
-         if ( cachedThreadEntry ) {
-            cachedThreadEntry.setAttribute("lastreplyct", pcount);
-         }
+         //slurpIntoThreadCache(threadid);
+         //if ( cachedThreadEntry ) {
+            //cachedThreadEntry.setAttribute("lastreplyct", pcount);
+         //}
       }
    } catch (e) { }
    try { SALR_InsertThreadKeyboardNavigation(doc); } catch (e) { }
