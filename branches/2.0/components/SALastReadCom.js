@@ -1557,6 +1557,26 @@ salrPersistObject.prototype = {
 			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, ?3, null)");
 			statement.bindInt32Parameter(0,userid);
 			statement.bindStringParameter(1,username);
+			statement.bindStringParameter(2, this.getPreference("modColor"));
+			statement.executeStep();
+		}
+		statement.reset();
+	},
+
+	// Adds/updates a user as an admin
+	// @param: (int) User ID, (string) Username
+	// @return: nothing
+	addAdmin: function(userid, username)
+	{
+		var statement = this.database.createStatement("UPDATE `userdata` SET `username` = ?1, `admin` = 1 WHERE `userid` = ?2");
+		statement.bindStringParameter(0,username);
+		statement.bindInt32Parameter(1,userid);
+		if (!statement.executeStep())
+		{
+			statement.reset();
+			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 0, 1, ?3, null)");
+			statement.bindInt32Parameter(0,userid);
+			statement.bindStringParameter(1,username);
 			statement.bindStringParameter(2, this.getPreference("adminColor"));
 			statement.executeStep();
 		}
@@ -1624,6 +1644,26 @@ salrPersistObject.prototype = {
 		}
 		statement.reset();
 		return lrcount;
+	},
+
+	// Puts the count of posts in a thread read into the database
+	// @param:
+	// @return:
+	setLastReadPostCount: function(threadid, lrcount)
+	{
+		var statement = this.database.createStatement("UPDATE `threaddata` SET `lastreplyct` = ?1 WHERE `id` = ?2");
+		statement.bindInt32Parameter(0,lrcount);
+		statement.bindInt32Parameter(1,threadid);
+		if (statement.executeStep())
+		{
+			var result = true;
+		}
+		else
+		{
+			var result = false;
+		}
+		statement.reset();
+		return result;
 	},
 
 	// Fetches the user's status code from the database
