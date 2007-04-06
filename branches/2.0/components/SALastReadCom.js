@@ -1353,6 +1353,10 @@ salrPersistObject.prototype = {
 		{
 			mDBConn.executeSimpleSQL("CREATE TABLE `userdata` (userid INTEGER PRIMARY KEY, username VARCHAR(50), mod BOOLEAN, admin BOOLEAN, status VARCHAR(8), notes TEXT)");
 		}
+		if (!mDBConn.tableExists('posticons'))
+		{
+			//mDBConn.executeSimpleSQL("CREATE TABLE `posticons` (iconnum INTEGER PRIMARY KEY, filename VARCHAR(50))");
+		}
 		return mDBConn;
 	},
 
@@ -1624,7 +1628,7 @@ salrPersistObject.prototype = {
 
 	// Fetches the total post count as of the last time the thread was read
 	// @param: (int) Thread ID
-	// @returns: (int) Post count, or (bool) false if thread not in the db
+	// @returns: (int) Post count
 	getLastReadPostCount: function(threadid)
 	{
 		var lrcount;
@@ -1633,21 +1637,21 @@ salrPersistObject.prototype = {
 		if (statement.executeStep())
 		{
 			lrcount = statement.getInt32(0);
-			if (lrcount <= 0) // Incase it's null
+			if (lrcount < 0) // Incase it's null
 			{
-				lrcount = 1;
+				lrcount = -1;
 			}
 		}
 		else
 		{
-			lrcount = false;
+			lrcount = -1;
 		}
 		statement.reset();
 		return lrcount;
 	},
 
 	// Puts the count of posts in a thread read into the database
-	// @param:
+	// @param: (int) Thread ID, (int) Total number of posts read
 	// @return:
 	setLastReadPostCount: function(threadid, lrcount)
 	{
@@ -1736,20 +1740,95 @@ salrPersistObject.prototype = {
 	// @return:
 	isThreadStarred: function(threadid)
 	{
-		var starred;
 		var statement = this.database.createStatement("SELECT `star` FROM `threaddata` WHERE `id` = ?1");
 		statement.bindInt32Parameter(0,threadid);
 		if (statement.executeStep())
 		{
-			starred = statement.getInt32(0);
+			var starred = statement.getInt32(0);
 			starred = (starred == true);
 		}
 		else
 		{
-			starred = false;
+			var starred = false;
 		}
 		statement.reset();
 		return starred;
+	},
+
+	// Check to see if the thread is ignored
+	// @param:
+	// @return:
+	isThreadIgnored: function(threadid)
+	{
+		var statement = this.database.createStatement("SELECT `ignore` FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			var ignored = statement.getInt32(0);
+			ignored = (ignored == true);
+		}
+		else
+		{
+			var ignored = false;
+		}
+		statement.reset();
+		return ignored;
+	},
+
+	// Removes a thread from the database
+	// @param: (int) Thread ID
+	// @return: (booler) true on success, false on failure
+	removeThread: function(threadid)
+	{
+		var statement = this.database.createStatement("DELETE FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			var result = true;
+		}
+		else
+		{
+			var result = false;
+		}
+		statement.reset();
+		return result;
+	},
+
+	// Adds a post icon # and filename to the database
+	// @param: (int) Number used in URL, (string) Filename of icon
+	// @return: nothing
+	addIcon: function(iconNum, iconFilename)
+	{
+		var statement = this.database.createStatement("UPDATE `posticons` SET `filename` = ?1 WHERE `iconnum` = ?2");
+		statement.bindStringParameter(0,iconFilename);
+		statement.bindInt32Parameter(1,iconNum);
+		if (!statement.executeStep())
+		{
+			statement.reset();
+			statement = this.database.createStatement("INSERT INTO `posticons` (`filename`, `iconnum`) VALUES (?1, ?2)");
+			statement.bindStringParameter(0,iconFilename);
+			statement.bindInt32Parameter(1,iconNum);
+			statement.executeStep();
+		}
+		statement.reset();
+	},
+
+	// Gets the icon number out of the database
+	// @param:
+	// @return:
+	getIconNumber: function(iconFilename)
+	{
+		var statement = this.database.createStatement("SELECT `iconnum` FROM `posticons` WHERE `filename` = ?1");
+		statement.bindStringParameter(0,iconFilename);
+		if (statement.executeStep())
+		{
+			var result = statement.getInt32(0);
+		}
+		else
+		{
+			var result = false;
+		}
+		return result;
 	}
 
 	// Don't forget the trailing comma when adding a new function/property
