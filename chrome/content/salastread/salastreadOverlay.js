@@ -1259,16 +1259,16 @@ function handleForumDisplay(doc)
 	var inAskTell = (forumid == 158);
 
 	// Insert the forums paginator & mouse gestures
-	if (persistObject.getPreference("enableForumNavigator") && !inFYAD)
+	if (persistObject.getPreference("enableForumNavigator"))
 	{
 		// TODO: Audit this function
 		SALR_SearchForThreadPages(doc, "forum");
 	}
 
 	// Replace post button
-	if (persistObject.getPreference("useQuickQuote") && !inFYAD)
+	if (persistObject.getPreference("useQuickQuote"))
 	{
-		var postbutton = persistObject.selectSingleNode(doc, doc, "//UL[@class='postbuttons']//A[contains(@href,'action=newthread')]//IMG");
+		var postbutton = persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newthread')]//IMG");
 		if (postbutton) {
 			// TODO: Audit this function
 			makeQuickPostButton(undefined, doc, postbutton);
@@ -1276,7 +1276,7 @@ function handleForumDisplay(doc)
 	}
 
 	// Snag Forum Moderators
-	// Ignore FYAD and BYOB since puppet kinds and deuputies just clog things up
+	// Ignore FYAD and BYOB since idiot kings and deuputies just clog things up
 	if (!inFYAD && !inBYOB)
 	{
 		var modarray = doc.getElementById('mods').getElementsByTagName('a');
@@ -3728,7 +3728,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
       if ( location && location.href && !doc.__salastread_processed ) {
          var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
          samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
-         if (samatch && persistObject.getPreference("enableFYAD")) {
+         if (samatch) {
 //            var newPageTimer = persistObject.TimeManager.GetStart();
 //            doc.__SALASTREAD_PAGETIMER = newPageTimer;
 //            thisWindowPageTimers.push(newPageTimer);
