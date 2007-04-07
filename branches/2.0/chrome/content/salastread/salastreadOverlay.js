@@ -1249,29 +1249,35 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
 // Do anything needed to the post list in a forum
 function handleForumDisplay(doc)
 {
-	try {
+try {
 	var failed, i, e;	// Little variables that'll get reused
 	var forumid = persistObject.getForumID(doc);
 	// The following forums have special needs that must be dealt with
-	var inFYAD = (forumid == 26 || forumid == 154);
-	var inBYOB = (forumid == 174 || forumid == 176);
-	var inDump = (forumid == 133 || forumid == 163);
-	var inAskTell = (forumid == 158);
+	var inFYAD = persistObject.inFYAD(forumid);
+	var inBYOB = persistObject.inBYOB(forumid);
+	var inDump = persistObject.inDump(forumid);
+	var inAskTell = persistObject.inAskTell(forumid);
+
+	if (!inFYAD || persistObject.getPreference("enableFYAD")) {
 
 	// Insert the forums paginator & mouse gestures
 	if (persistObject.getPreference("enableForumNavigator"))
 	{
-		// TODO: Audit this function
-		SALR_SearchForThreadPages(doc, "forum");
+		persistObject.addPagination(doc);
 	}
-
+	if (persistObject.getPreference("gestureEnable"))
+	{
+		doc.body.addEventListener('mousedown', SALR_PageMouseDown, false);
+		doc.body.addEventListener('mouseup', SALR_PageMouseUp, false);
+	}
 	// Replace post button
 	if (persistObject.getPreference("useQuickQuote"))
 	{
-		var postbutton = persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newthread')]//IMG");
+		var postbutton = persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newthread')]");
 		if (postbutton) {
-			// TODO: Audit this function
-			makeQuickPostButton(undefined, doc, postbutton);
+			i = persistObject.turnIntoQuickButton(doc, postbutton, forumid);
+			attachQuickQuoteHandler(undefined,doc,i,"",0);
+			//makeQuickPostButton(undefined, doc, postbutton);
 		}
 	}
 
@@ -1283,7 +1289,7 @@ function handleForumDisplay(doc)
 		var modcount = modarray.length;
 		for (i=0; i<modcount; i++)
 		{
-			userid = modarray[i].href.split(/userid=/i)[1];
+			userid = modarray[i].href.match(/userid=(\d+)/i)[1];
 			username = modarray[i].innerHTML;
 			if (!persistObject.isMod(userid))
 			{
@@ -1291,7 +1297,7 @@ function handleForumDisplay(doc)
 			}
 		}
 	}
-/*
+
 	if (!inFYAD)
 	{
 		// Capture and store the post icon # -> post icon filename relationship
@@ -1304,14 +1310,11 @@ function handleForumDisplay(doc)
 			{
 				iconNumber = parseInt(postIcons[i].href.match(/posticon=(\d+)/i)[1]);
 				iconFilename = postIcons[i].firstChild.src.match(/posticons\/(.*)/i)[1];
-				if (!persistObject.getIconNumber(iconFilename))
-				{
-					persistObject.addIcon(iconNumber, iconFilename);
-				}
+				persistObject.addIcon(iconNumber, iconFilename);
 			}
 		}
 	}
-*/
+
 	// We'll need lots of variables for this
 	var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox, threadViewsBox;
 	var threadRatingBox, threadLastpostBox, threadTitle, threadId, threadOPId, threadRe;
@@ -1348,7 +1351,7 @@ function handleForumDisplay(doc)
 		persistObject.StoreOPData(threadId, threadOPId);
 
 		threadlist[i].className = "salastread_thread_" + threadId;
-/*
+
 		// Replace the thread icon with a linked thread icon
 		if (threadIconBox.firstChild.src.search(/posticons\/(.*)/i) > -1)
 		{
@@ -1363,12 +1366,14 @@ function handleForumDisplay(doc)
 			threadIconBox.removeChild(threadIconBox.firstChild);
 			threadIconBox.appendChild(iconGo);
 		}
-*/
+
 		if (threadLRCount > -1) // If this thread is in the DB as being read
 		{
 			if (threadRe > threadLRCount)
 			{
-				threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + ' (' + (threadRe - threadLRCount) + ')';
+				if (!persistObject.getPreference("disableNewReCount")) {
+					threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + ' (' + (threadRe - threadLRCount) + ')';
+				}
 				threadTitleBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
 				threadAuthorBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
 				threadRepliesBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
@@ -1503,9 +1508,10 @@ function handleForumDisplay(doc)
 			threadlist[i].parentNode.deleteRow(i);
 		}
 	}
-	} catch(e) {
-		alert(e);
 	}
+} catch(e) {
+	alert(e);
+}
 }
 function removeThread() {
 	persistObject.removeThread(this.id.match(/unread_(\d+)/)[1]);
@@ -1816,7 +1822,6 @@ function cleanupLostPageTimers() {
    thisWindowPageTimers = newPageTimers;
 }
 
-//function quickQuoteButtonClick(evt,threadid,/*doc,quotebutton,*/postername,isDoubleClick,hasQuote) {
 function quickQuoteButtonClick(evt/*,threadid,postername,isDoubleClick,hasQuote*/) {
    var doc = evt.originalTarget.ownerDocument;
    var quotebutton = evt.originalTarget;
@@ -1902,8 +1907,6 @@ function attachQuickQuoteHandler(threadid,doc,quotebutton,postername,hasQuote,po
    quotebutton.__salastread_postername = postername;
    quotebutton.__salastread_hasQuote = hasQuote;
    quotebutton.addEventListener("click", quickQuoteButtonClick, true);
-   //quotebutton.onclick = function(evt) { return quickQuoteButtonClick(evt,threadid,/*doc,quotebutton,*/postername,0,hasQuote); };
-   //quotebutton.ondblclick = function(evt) { return quickQuoteButtonClick(evt,threadid,/*doc,quotebutton,*/postername,1,hasQuote); };
 }
 
 var SALR_debugLog = new Array();
@@ -2122,21 +2125,33 @@ function SALR_TextToImage(thisel) {
 }
 
 function handleShowThread(e) {
-   var doc = e.originalTarget;
+var doc = e.originalTarget
 
-   if (doc.body.id != "something_awful" && doc.body.id != "all")
-      return;
-   var inFYAD = false;
-   var inBYOB = false;
+	var failed, i, zzzz;	// Little variables that'll get reused
+	var forumid = persistObject.getForumID(doc);
+	// The following forums have special needs that must be dealt with
+	var inFYAD = persistObject.inFYAD(forumid);
+	var inBYOB = persistObject.inBYOB(forumid);
+	var inDump = persistObject.inDump(forumid);
+	var inAskTell = persistObject.inAskTell(forumid);
 
-   var isloggedin = true;
-   //if ( selectSingleNode(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]//A[contains(@href,'action=loginform')]") ) {
-   if ( doc.getElementById("notregistered") ) {
-      isloggedin = false;
-   }
+	//if (!inFYAD || persistObject.getPreference("enableFYAD")) {
+	// Insert the forums paginator & mouse gestures
+	if (persistObject.getPreference("enableForumNavigator"))
+	{
+		persistObject.addPagination(doc);
+	}
+
+try {
+	if (persistObject.getPreference("gestureEnable"))
+	{
+		doc.body.addEventListener('mousedown', SALR_PageMouseDown, false);
+		doc.body.addEventListener('mouseup', SALR_PageMouseUp, false);
+	}
+} catch(zzzz) { alert(zzzz); }
 
 	// Grab threads/posts per page
-	var perpage = persistObject.selectSingleNode(doc, doc, "//DIV[@class='pages']//A[@class='pagenumber']");
+	var perpage = persistObject.selectSingleNode(doc, doc, "//DIV[contains(@class,'pages')]//A[contains(@href,'perpage=')]");
 	if (perpage)
 	{
 		if (perpage.href.match(/perpage=(\d+)/i) != null)
@@ -2144,6 +2159,15 @@ function handleShowThread(e) {
 			persistObject.setPreference("postsPerPage", perpage.href.match(/perpage=(\d+)/i)[1]);
 		}
 	}
+
+try {
+
+   var isloggedin = true;
+   //if ( selectSingleNode(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]//A[contains(@href,'action=loginform')]") ) {
+   if ( doc.getElementById("notregistered") ) {
+      isloggedin = false;
+   }
+
 
 
    // Grab the go to dropdown
@@ -2482,7 +2506,6 @@ function handleShowThread(e) {
 					newquote.style.cursor = "pointer";
 					attachQuickQuoteHandler(threadid,doc,newquote,rawpostername,1,postid);
 					quotebutton.parentNode.parentNode.insertBefore(newquote, quotebutton.parentNode);
-					//quotebutton.onclick = function(evt) { return quickQuoteButtonClick(evt,threadid,doc,quotebutton,postername); };
 				 }
 				 var quotebutton = selectSingleNode(doc, postbarnode, "TD[@class='postlinks']/UL[@class='postbuttons']/LI//A/IMG[contains(@src,'edit')]");
 				 if (quotebutton) {
@@ -2507,7 +2530,6 @@ function handleShowThread(e) {
 					newquote.is_edit = true;
 					attachQuickQuoteHandler(threadid,doc,newquote,rawpostername,1,postid);
 					quotebutton.parentNode.parentNode.insertBefore(newquote, quotebutton.parentNode);
-					//quotebutton.onclick = function(evt) { return quickQuoteButtonClick(evt,threadid,doc,quotebutton,postername); };
 				 }
 			  }
 			  //alert("qq set");
@@ -2613,13 +2635,14 @@ function handleShowThread(e) {
          makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
 
+/* ~ ben
       var postbuttons = selectNodes(doc, doc.body, "//IMG[@alt='Post']");
       if (postbuttons.length) {
         for (var uiego = 0; uiego < postbuttons.length; uiego++) {
           makeQuickPostButton(threadid, doc, postbuttons[uiego]);
         }
       }
-
+*/
       //replybutton = selectSingleNode(doc, doc.body,
       //    "TABLE/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[4]/A[1][contains(@href,'newreply.php')]/IMG[@alt='Post A Reply'][contains(@src,'forum-reply')]"
       //);
@@ -2646,7 +2669,7 @@ function handleShowThread(e) {
       }
    }
 */
-
+/* ~ ben
    try {
       var isLastPage = SALR_SearchForThreadPages(doc, "thread");
       if (typeof(isLastPage)=="object" && isLastPage.res == true) {
@@ -2659,6 +2682,7 @@ function handleShowThread(e) {
          //}
       }
    } catch (e) { }
+   */
    try { SALR_InsertThreadKeyboardNavigation(doc); } catch (e) { }
 
    reanchorThreadToLink(doc);
@@ -2669,6 +2693,12 @@ function handleShowThread(e) {
      setTimeout(function () { SALR_CheckScrollPostPosition(doc); }, 1000);
 
    addInternalDebugLog("showthread.php handler, thread #"+threadid+", lpbefore="+lpbefore+", lpafter="+lpafter);
+
+	}
+	catch(zzzz)
+	{
+		alert(zzzz);
+	}
 }
 
 var specialDoc;
