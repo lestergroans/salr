@@ -1355,7 +1355,7 @@ salrPersistObject.prototype = {
 		}
 		if (!mDBConn.tableExists('posticons'))
 		{
-			//mDBConn.executeSimpleSQL("CREATE TABLE `posticons` (iconnum INTEGER PRIMARY KEY, filename VARCHAR(50))");
+			mDBConn.executeSimpleSQL("CREATE TABLE `posticons` (iconnumber INTEGER PRIMARY KEY, filename VARCHAR(50))");
 		}
 		return mDBConn;
 	},
@@ -1797,20 +1797,16 @@ salrPersistObject.prototype = {
 	// Adds a post icon # and filename to the database
 	// @param: (int) Number used in URL, (string) Filename of icon
 	// @return: nothing
-	addIcon: function(iconNum, iconFilename)
+	addIcon: function(iconNumber, iconFilename)
 	{
-		var statement = this.database.createStatement("UPDATE `posticons` SET `filename` = ?1 WHERE `iconnum` = ?2");
-		statement.bindStringParameter(0,iconFilename);
-		statement.bindInt32Parameter(1,iconNum);
-		if (!statement.executeStep())
+		if (!this.getIconNumber(iconFilename))
 		{
-			statement.reset();
-			statement = this.database.createStatement("INSERT INTO `posticons` (`filename`, `iconnum`) VALUES (?1, ?2)");
-			statement.bindStringParameter(0,iconFilename);
-			statement.bindInt32Parameter(1,iconNum);
+			var statement = this.database.createStatement("INSERT INTO `posticons` (`iconnumber`, `filename`) VALUES (?1, ?2)");
+			statement.bindInt32Parameter(0,iconNumber);
+			statement.bindStringParameter(1,iconFilename);
 			statement.executeStep();
+			statement.reset();
 		}
-		statement.reset();
 	},
 
 	// Gets the icon number out of the database
@@ -1818,7 +1814,7 @@ salrPersistObject.prototype = {
 	// @return:
 	getIconNumber: function(iconFilename)
 	{
-		var statement = this.database.createStatement("SELECT `iconnum` FROM `posticons` WHERE `filename` = ?1");
+		var statement = this.database.createStatement("SELECT `iconnumber` FROM `posticons` WHERE `filename` = ?1");
 		statement.bindStringParameter(0,iconFilename);
 		if (statement.executeStep())
 		{
@@ -1828,7 +1824,196 @@ salrPersistObject.prototype = {
 		{
 			var result = false;
 		}
+		statement.reset();
 		return result;
+	},
+
+	// Several little functions to test if we're in a special needs forum
+	inFYAD: function(forumid)
+	{
+		return (forumid == 26 || forumid == 154);
+	},
+	inBYOB: function(forumid)
+	{
+		return (forumid == 174 || forumid == 176);
+	},
+	inDump: function(forumid)
+	{
+		return (forumid == 133 || forumid == 163);
+	},
+	inAskTell: function(forumid)
+	{
+		return (forumid == 158);
+	},
+
+	// Add the quick page jump paginator
+	// TODO: This function needs to be audited
+	// @param:
+	// @return:
+	addPagination: function(doc)
+	{
+		var pageList = this.selectSingleNode(doc, doc, "//DIV[contains(@class,'pages')]");
+		var numPages = pageList.innerHTML.match(/\((\d+)\)/);
+		var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
+		if (pageList.childNodes.length > 1) // Are there pages
+		{
+			numPages = parseInt(numPages[1]);
+			curPage = parseInt(curPage[1]);
+			var navDiv = doc.createElement("div");
+			navDiv.className = "salastread_pagenavigator";
+			var firstButtonImg = doc.createElement("img");
+			firstButtonImg.title = "Go to First Page";
+			firstButtonImg.src = "chrome://salastread/skin/nav-firstpage.png";
+			var prevButtonImg = doc.createElement("img");
+			prevButtonImg.title = "Go to Previous Page";
+			prevButtonImg.src = "chrome://salastread/skin/nav-prevpage.png";
+			if (curPage == 1)
+			{
+				firstButtonImg.className = "disab";
+				navDiv.appendChild(firstButtonImg);
+				prevButtonImg.className = "disab";
+				navDiv.appendChild(prevButtonImg);
+			}
+			else
+			{
+				var firstButton = doc.createElement("a");
+				firstButton.href = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber=1");
+				firstButton.appendChild(firstButtonImg);
+				navDiv.appendChild(firstButton);
+				var prevButton = doc.createElement("a");
+				prevButton.href = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber=" + (curPage-1));
+				prevButton.appendChild(prevButtonImg);
+				navDiv.appendChild(prevButton);
+			}
+			var pageSel = doc.createElement("select");
+			pageSel.size = 1;
+			for (var pp=1; pp<=numPages; pp++)
+			{
+				var topt = doc.createElement("option");
+				topt.appendChild(doc.createTextNode(pp));
+				topt.value = pp;
+				if (pp==curPage) topt.selected = true;
+				pageSel.appendChild(topt);
+			}
+			if (curPage == 1)
+			{
+				pageSel.onchange = function() { doc.location = doc.baseURI + "&pagenumber="+this.value; };
+			}
+			else
+			{
+				pageSel.onchange = function() { doc.location = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber="+this.value); };
+			}
+			navDiv.appendChild(pageSel);
+			var nextButtonImg = doc.createElement("img");
+			nextButtonImg.title = "Go to Next Page";
+			nextButtonImg.src = "chrome://salastread/skin/nav-nextpage.png";
+			var lastButtonImg = doc.createElement("img");
+			lastButtonImg.title = "Go to Last Page";
+			lastButtonImg.src = "chrome://salastread/skin/nav-lastpage.png";
+			if (curPage == numPages)
+			{
+				nextButtonImg.className = "disab";
+				navDiv.appendChild(nextButtonImg);
+				lastButtonImg.className = "disab";
+				navDiv.appendChild(lastButtonImg);
+			}
+			else
+			{
+				var nextButton = doc.createElement("a");
+				if (curPage == 1)
+				{
+					nextButton.href = doc.baseURI + "&pagenumber=" + (curPage+1);
+				}
+				else
+				{
+					nextButton.href = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber=" + (curPage+1));
+				}
+				nextButton.appendChild(nextButtonImg);
+				navDiv.appendChild(nextButton);
+				var lastButton = doc.createElement("a");
+				if (curPage == 1)
+				{
+					lastButton.href = doc.baseURI + "&pagenumber=" + numPages;
+				}
+				else
+				{
+					lastButton.href = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber=" + numPages);
+				}
+				lastButton.appendChild(lastButtonImg);
+				navDiv.appendChild(lastButton);
+			}
+			doc.body.appendChild(navDiv);
+			var ss = doc.createElement("link");
+			ss.rel = "stylesheet";
+			ss.href = "chrome://salastread/content/pagenavigator-content.css";
+			doc.getElementsByTagName('head')[0].appendChild(ss);
+			// Do these do anything?
+			doc.__SALR_curPage = curPage;
+			doc.__SALR_maxPage = numPages;
+			doc._SALR_curPage = curPage;
+			doc._SALR_maxPages = numPages;
+		}
+		else
+		{
+			numPages = 1;
+		}
+	},
+
+	// Takes a button and turns it into a quick button
+	// @param:
+	// @return:
+	turnIntoQuickButton: function(doc, button, forumid)
+	{
+		var threadid = undefined, postid = undefined, hasQuote = 0;
+		var action = button.href.match(/action=(\w+)/i)[1];
+		switch (action)
+		{
+			case 'newreply':
+				if (button.href.match(/threadid=(\d+)/i) != null)
+				{
+					action = 'reply';
+					threadid = button.href.match(/threadid=(\d+)/i)[1];
+					break;
+				}
+				else
+				{
+					action = 'quote';
+				}
+			case 'editpost':
+				var postid = button.href.match(/postid=(\d+)/i)[1];
+				hasQuote = 1;
+				break;
+			case 'newthread':
+				break;
+		}
+		var oldsrc = button.firstChild.src;
+		var oldalt = button.firstChild.alt;
+		button.firstChild.style.width = "12px !important";
+		button.firstChild.style.height = "20px !important";
+		if (this.inBYOB(forumid))
+		{
+			button.firstChild.src = "chrome://salastread/skin/quickbutton-byob.gif";
+		}
+		else
+		{
+			button.firstChild.src = "chrome://salastread/skin/quickbutton.gif";
+		}
+		button.firstChild.alt = "Normal " + oldalt;
+		button.firstChild.title = "Normal " + oldalt;
+		var quickbutton = doc.createElement("img");
+		quickbutton.src = oldsrc;
+		quickbutton.alt = "Quick " + oldalt;
+		quickbutton.title = "Quick " + oldalt;
+		quickbutton.border = "0"
+		quickbutton.style.cursor = "pointer";
+		quickbutton.SALR_threadid = threadid;
+		quickbutton.SALR_forumid = forumid;
+		quickbutton.__salastread_threadid = threadid;
+		quickbutton.__salastread_postid = postid; // set if quote or edit
+		//quickbutton.__salastread_postername = postername; // set if quote or edit
+		quickbutton.__salastread_hasQuote = hasQuote; // 1 if quote or edit
+		button.parentNode.insertBefore(quickbutton, button);
+		return quickbutton;
 	}
 
 	// Don't forget the trailing comma when adding a new function/property

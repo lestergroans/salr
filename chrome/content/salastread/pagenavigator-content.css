@@ -1,14 +1,14 @@
 .salastread_pagenavigator {
- position: fixed;
- right: 0px;
- bottom: 0px;
- background-color: rgb(0, 102, 153);
- padding: 4px 4px 4px 4px;
+	position:fixed;
+	right:0;
+	bottom:0;
+	background-color:#069;
+	padding:4px;
 }
 
 .salastread_pagenavigator img {
- cursor: pointer;
- vertical-align: bottom;
+	border:0;
+	vertical-align:bottom;
 }
 
 .salastread_pagenavigator img.disab {

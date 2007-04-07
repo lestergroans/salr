@@ -1,28 +1,22 @@
-pref('extensions.salastread.currentVersion', '1.99.070405');
+pref('extensions.salastread.currentVersion', '1.99.070406');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', false);
+pref('extensions.salastread.disableNewReCount', false);
 
 pref('extensions.salastread.postedInThreadRe', '#fcfd99');
-pref('extensions.salastread.postedInThreadReHighlight', '#ffffcc');
 pref('extensions.salastread.readDark', '#bbccdd');
-pref('extensions.salastread.readDarkHighlight', '#dbe9f8');
 pref('extensions.salastread.readLight', '#ddeeff');
-pref('extensions.salastread.readLightHighlight', '#f5faff');
 pref('extensions.salastread.readWithNewDark', '#cfdfcf');
-pref('extensions.salastread.readWithNewDarkHighlight', '#e1efe1');
 pref('extensions.salastread.readWithNewLight', '#e1f1e1');
-pref('extensions.salastread.readWithNewLightHighlight', '#f9fff9');
 pref('extensions.salastread.seenPostDark', '#bbccdd');
 pref('extensions.salastread.seenPostDarkFYAD', '#bbccdd');
 pref('extensions.salastread.seenPostLight', '#ddeeff');
 pref('extensions.salastread.seenPostLightFYAD', '#ddeeff');
 pref('extensions.salastread.unreadDark', '#dfdfdf');
 pref('extensions.salastread.unreadDarkFYAD', '#ffcccc');
-pref('extensions.salastread.unreadDarkHighlight', '#dfdfdf');
 pref('extensions.salastread.unreadLight', '#f1f1f1');
 pref('extensions.salastread.unreadLightFYAD', '#ffccff');
-pref('extensions.salastread.unreadLightHighlight', '#f1f1f1');
 pref('extensions.salastread.unseenPostDark', '#dfdfdf');
 pref('extensions.salastread.unseenPostDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unseenPostLight', '#f1f1f1');
@@ -96,3 +90,11 @@ pref('extensions.salastread.useRemoteSyncStorage', false);
 
 pref('extensions.salastread.gestureEnable', true);
 pref('extensions.salastread.scrollPostEnable', false);
+
+pref('extensions.salastread.postedInThreadReHighlight', '#ffffcc');
+pref('extensions.salastread.readDarkHighlight', '#dbe9f8');
+pref('extensions.salastread.readLightHighlight', '#f5faff');
+pref('extensions.salastread.readWithNewDarkHighlight', '#e1efe1');
+pref('extensions.salastread.readWithNewLightHighlight', '#f9fff9');
+pref('extensions.salastread.unreadDarkHighlight', '#dfdfdf');
+pref('extensions.salastread.unreadLightHighlight', '#f1f1f1');
