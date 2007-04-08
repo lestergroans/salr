@@ -1257,6 +1257,7 @@ try {
 	var inBYOB = persistObject.inBYOB(forumid);
 	var inDump = persistObject.inDump(forumid);
 	var inAskTell = persistObject.inAskTell(forumid);
+	var inGasChamber = persistObject.inGasChamber(forumid);
 
 	if (!inFYAD || persistObject.getPreference("enableFYAD")) {
 
@@ -1271,7 +1272,7 @@ try {
 		doc.body.addEventListener('mouseup', SALR_PageMouseUp, false);
 	}
 	// Replace post button
-	if (persistObject.getPreference("useQuickQuote"))
+	if (persistObject.getPreference("useQuickQuote") && !inGasChamber)
 	{
 		var postbutton = persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newthread')]");
 		if (postbutton) {
@@ -1283,7 +1284,7 @@ try {
 
 	// Snag Forum Moderators
 	// Ignore FYAD and BYOB since idiot kings and deuputies just clog things up
-	if (!inFYAD && !inBYOB)
+	if (!inFYAD && !inBYOB && !inGasChamber)
 	{
 		var modarray = doc.getElementById('mods').getElementsByTagName('a');
 		var modcount = modarray.length;
@@ -1298,7 +1299,7 @@ try {
 		}
 	}
 
-	if (!inFYAD)
+	if (!inFYAD && !inGasChamber && !inDump)
 	{
 		// Capture and store the post icon # -> post icon filename relationship
 		var iconNumber, iconFilename;
@@ -1353,7 +1354,7 @@ try {
 		threadlist[i].className = "salastread_thread_" + threadId;
 
 		// Replace the thread icon with a linked thread icon
-		if (threadIconBox.firstChild.src.search(/posticons\/(.*)/i) > -1)
+		if (!inDump && threadIconBox.firstChild.src.search(/posticons\/(.*)/i) > -1)
 		{
 			iconGo = doc.createElement("a");
 			iconNumber = persistObject.getIconNumber(threadIconBox.firstChild.src.match(/posticons\/(.*)/i)[1]);
@@ -1369,88 +1370,91 @@ try {
 
 		if (threadLRCount > -1) // If this thread is in the DB as being read
 		{
-			if (threadRe > threadLRCount)
+			if (!persistObject.getPreference("dontHighlightThreads"))
 			{
-				if (!persistObject.getPreference("disableNewReCount")) {
-					threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + ' (' + (threadRe - threadLRCount) + ')';
-				}
-				threadTitleBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
-				threadAuthorBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
-				threadRepliesBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
-				threadViewsBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
-				threadRatingBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
-				threadLastpostBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
-				if (inDump)
+				if ((threadRe+1) > threadLRCount)
 				{
-					threadVoteBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+					if (!persistObject.getPreference("disableNewReCount")) {
+						threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + ' (' + ((threadRe+1) - threadLRCount) + ')';
+					}
+					threadTitleBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+					threadAuthorBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+					threadRepliesBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+					threadViewsBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+					threadRatingBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+					threadLastpostBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+					if (inDump)
+					{
+						threadVoteBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+					}
+					else
+					{
+						threadIconBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+					}
+					if (inAskTell)
+					{
+						threadIconBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+						threadIcon2Box.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+					}
 				}
 				else
 				{
-					threadIconBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+					threadTitleBox.style.backgroundColor = persistObject.getPreference("readLight");
+					threadAuthorBox.style.backgroundColor = persistObject.getPreference("readDark");
+					threadRepliesBox.style.backgroundColor = persistObject.getPreference("readLight");
+					threadViewsBox.style.backgroundColor = persistObject.getPreference("readDark");
+					threadRatingBox.style.backgroundColor = persistObject.getPreference("readLight");
+					threadLastpostBox.style.backgroundColor = persistObject.getPreference("readDark");
+					if (inDump)
+					{
+						threadVoteBox.style.backgroundColor = persistObject.getPreference("readLight");
+					}
+					else
+					{
+						threadIconBox.style.backgroundColor = persistObject.getPreference("readDark");
+					}
+					if (inAskTell)
+					{
+						threadIconBox.style.backgroundColor = persistObject.getPreference("readLight");
+						threadIcon2Box.style.backgroundColor = persistObject.getPreference("readDark");
+					}
 				}
-				if (inAskTell)
+				if (!persistObject.getPreference("disableGradients"))
 				{
-					threadIconBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
-					threadIcon2Box.style.backgroundColor = persistObject.getPreference("readWithNewDark");
+					threadTitleBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadTitleBox.style.backgroundRepeat = "repeat-x";
+					threadAuthorBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadAuthorBox.style.backgroundRepeat = "repeat-x";
+					threadRepliesBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadRepliesBox.style.backgroundRepeat = "repeat-x";
+					threadViewsBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadViewsBox.style.backgroundRepeat = "repeat-x";
+					threadRatingBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadRatingBox.style.backgroundRepeat = "repeat-x";
+					threadLastpostBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+					threadLastpostBox.style.backgroundRepeat = "repeat-x";
+					if (inDump)
+					{
+						threadVoteBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+						threadVoteBox.style.backgroundRepeat = "repeat-x";
+					}
+					else
+					{
+						threadIconBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+						threadIconBox.style.backgroundRepeat = "repeat-x";
+					}
+					if (inAskTell)
+					{
+						threadIcon2Box.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+						threadIcon2Box.style.backgroundRepeat = "repeat-x";
+					}
+				}
+				if (persistObject.didIPostHere(threadId))
+				{
+					threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
 				}
 			}
-			else
-			{
-				threadTitleBox.style.backgroundColor = persistObject.getPreference("readLight");
-				threadAuthorBox.style.backgroundColor = persistObject.getPreference("readDark");
-				threadRepliesBox.style.backgroundColor = persistObject.getPreference("readLight");
-				threadViewsBox.style.backgroundColor = persistObject.getPreference("readDark");
-				threadRatingBox.style.backgroundColor = persistObject.getPreference("readLight");
-				threadLastpostBox.style.backgroundColor = persistObject.getPreference("readDark");
-				if (inDump)
-				{
-					threadVoteBox.style.backgroundColor = persistObject.getPreference("readLight");
-				}
-				else
-				{
-					threadIconBox.style.backgroundColor = persistObject.getPreference("readDark");
-				}
-				if (inAskTell)
-				{
-					threadIconBox.style.backgroundColor = persistObject.getPreference("readLight");
-					threadIcon2Box.style.backgroundColor = persistObject.getPreference("readDark");
-				}
-			}
-			if (!persistObject.getPreference("disableGradients"))
-			{
-				threadTitleBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-				threadTitleBox.style.backgroundRepeat = "repeat-x";
-				threadAuthorBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-				threadAuthorBox.style.backgroundRepeat = "repeat-x";
-				threadRepliesBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-				threadRepliesBox.style.backgroundRepeat = "repeat-x";
-				threadViewsBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-				threadViewsBox.style.backgroundRepeat = "repeat-x";
-				threadRatingBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-				threadRatingBox.style.backgroundRepeat = "repeat-x";
-				threadLastpostBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-				threadLastpostBox.style.backgroundRepeat = "repeat-x";
-				if (inDump)
-				{
-					threadVoteBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadVoteBox.style.backgroundRepeat = "repeat-x";
-				}
-				else
-				{
-					threadIconBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadIconBox.style.backgroundRepeat = "repeat-x";
-				}
-				if (inAskTell)
-				{
-					threadIcon2Box.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadIcon2Box.style.backgroundRepeat = "repeat-x";
-				}
-			}
-			if (persistObject.didIPostHere(threadId))
-			{
-				threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
-			}
-			if ((persistObject.getPreference("showGoToLastIcon") && (threadRe > threadLRCount)) ||
+			if ((persistObject.getPreference("showGoToLastIcon") && ((threadRe+1) > threadLRCount)) ||
 				persistObject.getPreference("alwaysShowGoToLastIcon"))
 			{
 				lpGo = doc.createElement("a");
@@ -1510,7 +1514,10 @@ try {
 	}
 	}
 } catch(e) {
-	alert(e);
+	if (!persistObject.getPreference("suppressErrors"))
+	{
+		alert(e);
+	}
 }
 }
 function removeThread() {
@@ -2125,8 +2132,16 @@ function SALR_TextToImage(thisel) {
 }
 
 function handleShowThread(e) {
-var doc = e.originalTarget
+var doc = e.originalTarget;
 
+	var archivedThreadCheck = persistObject.selectSingleNode(doc, doc, "//TABLE//B");
+	if (archivedThreadCheck)
+	{
+		if (archivedThreadCheck.innerHTML.search(/Special/i) > -1)
+		{
+			return;
+		}
+	}
 	var failed, i, zzzz;	// Little variables that'll get reused
 	var forumid = persistObject.getForumID(doc);
 	// The following forums have special needs that must be dealt with
@@ -2134,164 +2149,183 @@ var doc = e.originalTarget
 	var inBYOB = persistObject.inBYOB(forumid);
 	var inDump = persistObject.inDump(forumid);
 	var inAskTell = persistObject.inAskTell(forumid);
+	var inGasChamber = persistObject.inGasChamber(forumid);
 
-	//if (!inFYAD || persistObject.getPreference("enableFYAD")) {
+if (!inFYAD || persistObject.getPreference("enableFYAD"))
+{
 	// Insert the forums paginator & mouse gestures
-	if (persistObject.getPreference("enableForumNavigator"))
+	if (persistObject.getPreference("enablePageNavigator"))
 	{
 		persistObject.addPagination(doc);
 	}
 
-try {
 	if (persistObject.getPreference("gestureEnable"))
 	{
 		doc.body.addEventListener('mousedown', SALR_PageMouseDown, false);
 		doc.body.addEventListener('mouseup', SALR_PageMouseUp, false);
 	}
-} catch(zzzz) { alert(zzzz); }
 
 	// Grab threads/posts per page
 	var perpage = persistObject.selectSingleNode(doc, doc, "//DIV[contains(@class,'pages')]//A[contains(@href,'perpage=')]");
 	if (perpage)
 	{
-		if (perpage.href.match(/perpage=(\d+)/i) != null)
+		perpage = perpage.href.match(/perpage=(\d+)/i)[1];
+		persistObject.setPreference("postsPerPage", perpage);
+	}
+	else
+	{
+		perpage = 0;
+	}
+
+	var isloggedin = (doc.getElementById("notregistered") == null);
+
+	var pageList = this.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
+	pageList = pageList[1];
+	var numPages = pageList.innerHTML.match(/\((\d+)\)/);
+	var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
+	if (pageList.childNodes.length > 1) // Are there pages
+	{
+		numPages = parseInt(numPages[1]);
+		curPage = parseInt(curPage[1]);
+	}
+	else
+	{
+		numPages = 1;
+		curPage = 1;
+	}
+
+	// Grab the go to dropdown
+	if (!persistObject.gotForumList)
+	{
+		var selectnode = persistObject.selectSingleNode(doc, doc.body, "//SELECT[@name='forumid']");
+		if (selectnode) {
+			// TODO: Audit this function
+			grabForumList(e, selectnode);
+			persistObject.gotForumList = true;
+		}
+	}
+	doc.__SALR_forumid = forumid;
+	doc.body.className += " salastread_forum"+forumid;
+
+	// Figure out the current threadid
+	var replybutton = persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newreply&threadid=')]");
+	if (replybutton)
+	{
+		var threadid = replybutton.href.match(/threadid=(\d+)/)[1];
+	}
+	else
+	{
+		return;
+	}
+	doc.__SALR_threadid = threadid;
+	persistObject.iAmReadingThis(threadid);
+	var lastReadPostId = persistObject.getLastPostID(threadid);
+
+	// used by the context menu to allow options for this thread
+	doc.body.className += " salastread_thread_"+threadid;
+
+	// Get the original poster and update the database if we don't know it yet
+	var sop = persistObject.GetOPFromData(threadid);
+	if (!sop && curPage == 1)
+	{
+		var opInfo = persistObject.selectSingleNode(doc, doc, "//TABLE[contains(@class,'post')]//A[contains(@href,'action=getinfo&userid=')]");
+		if (opInfo)
 		{
-			persistObject.setPreference("postsPerPage", perpage.href.match(/perpage=(\d+)/i)[1]);
+			persistObject.StoreOPData(threadid, opInfo.href.match(/userid=(\d+)/)[1]);
 		}
 	}
 
+	// Grab the thread title
+	var threadtitle = '';
+	var titlematch = doc.title.match(/(.*) \- (.*)/);
+	if (titlematch) {
+		if (titlematch[1].search(/Something/i) > -1)
+		{
+			threadtitle = titlematch[2];
+		}
+		else
+		{
+			threadtitle = titlematch[1];
+		}
+		persistObject.setThreadTitle(threadid, threadtitle);
+	}
+
+	// Check if the thread is closed
+	if (persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newreply&threadid')]//IMG[contains(@src,'closed')]") == null)
+	{
+		var threadClosed = false;
+	}
+	else
+	{
+		var threadClosed = true;
+	}
+
+	// Replace post button
+	if (persistObject.getPreference("useQuickQuote") && !inGasChamber)
+	{
+		var postbuttons = persistObject.selectNodes(doc, doc, "//A[contains(@href,'action=newthread')]");
+		if (postbuttons.length > 0)
+		{
+			for (i in postbuttons)
+			{
+				attachQuickQuoteHandler(undefined,doc,persistObject.turnIntoQuickButton(doc, postbuttons[i], forumid),"",0);
+			}
+		}
+		if (!threadClosed)
+		{
+			var replybuttons = persistObject.selectNodes(doc, doc, "//A[contains(@href,'action=newreply&threadid')]");
+			if (replybuttons.length > 0)
+			{
+				for (i in replybuttons)
+				{
+					//attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, replybuttons[i], forumid),"",0);
+				}
+			}
+		}
+	}
+
+	// Update the last read total
+	var editbuttons = persistObject.selectNodes(doc, doc, "//A[contains(@href,'action=editpost')]");
+	var postcount = (perpage * (curPage-1)) + editbuttons.length;
+	persistObject.setLastReadPostCount(threadid, postcount);
+
+	var curPostId, colorDark = true;
+	// Loop through each post
+	var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
+	for (i in postlist)
+	{
+		curPostId = postlist[i].id.match(/post(\d+)/)[1];
+		if (!persistObject.getPreference("dontHighlightPosts"))
+		{
+			if (curPostId <= lastReadPostId)
+			{
+				persistObject.colorReadPost(doc, postlist[i], colorDark, forumid);
+			}
+		}
+
+		colorDark = !colorDark;
+	}
+
+	// Get the last post #
+	var postIdLink = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'postbar')]//A[contains(@href,'#post')]");
+	var lastPostId = postIdLink[postIdLink.length-1];
+	lastPostId = lastPostId.href.match(/#post(\d+)/i)[1];
+	persistObject.setLastPostID(threadid, lastPostId);
+
+}
+
+	// below hasn't been rewritten
 try {
-
-   var isloggedin = true;
-   //if ( selectSingleNode(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]//A[contains(@href,'action=loginform')]") ) {
-   if ( doc.getElementById("notregistered") ) {
-      isloggedin = false;
-   }
-
-
-
-   // Grab the go to dropdown
-   if ( !persistObject.gotForumList ) {
-      // Don't update from the dropdown in the gas chamber, because it contains Who's Online for some reason.
-      var gasnode = selectSingleNode(doc, doc.body, "//TABLE[@align='center']/TBODY/TR[1]/TD[1]//B[1]/A[3][contains(@href,'forumdisplay.php')][contains(@href,'forumid=25')]");
-      if (!gasnode) {
-         var selectnode = selectSingleNode(doc, doc.body, "//SELECT[@name='forumid']");
-         if (selectnode) {
-            grabForumList(e, selectnode);
-            persistObject.gotForumList = true;
-         }
-      }
-   }
-
-   var forumid = 0;
-   //var forumidnodes = selectNodes(doc, doc.body, "TABLE/TBODY/TR[1]/TD[1]/TABLE[@align='center']/TBODY/TR[1]/TD[1]/SPAN[@class='mainbodytextlarge']/B[1]/A[contains(@href,'forumdisplay.php')][contains(@href,'forumid=')]");
-   var forumidnodes = selectNodes(doc, doc.getElementById("container"), "DIV[@class='breadcrumbs']/SPAN/B/A[contains(@href,'forumdisplay.php')][contains(@href,'forumid=')]");
-   if (forumidnodes && forumidnodes.length>0) {
-      forumid = forumidnodes[forumidnodes.length-1].href.match(/forumid=(\d+)/i)[1];
-   }
-   doc.__SALR_forumid = forumid;
-   doc.body.className += " salastread_forum"+forumid
-   //alert("forumid = "+forumid);
-   if (forumid == 174)
-   	{
-   	 inBYOB = true;
-   	}
-   // Figure out the current threadid
-   var threadid;
-   var timatch = doc.location.href.match( /threadid=(\d+)/ );
-   if ( timatch ) {
-      threadid = timatch[1];
-   } else {
-      //var sublinknode = selectSingleNode(doc, doc.body, "//A[contains(@href,'member2.php')][contains(@href,'threadid=')]");
-      var sublinknode = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='subscribe']/A[contains(@href,'member2.php')][contains(@href,'threadid=')]");
-      if (sublinknode) {
-         var hrefmatch = sublinknode.href.match( /threadid=(\d+)/ );
-         if (hrefmatch) {
-            //alert("here here [1] - " + hrefmatch[1]);
-            threadid = hrefmatch[1];
-         }
-      }
-   }
-   if ( !threadid ) {
-      return;
-   }
-   doc.__SALR_threadid = threadid;
-
-   // used by the context menu to allow options for this thread
-   doc.body.className += " salastread_thread_"+threadid;
 
    // DEBUG:
    slurpIntoThreadCache(threadid);
-   if (cachedThreadEntry) {
 
-      var needSave = false;
-/*
-      if ( persistObject._cachedOP && persistObject._cachedOP.t == threadid ) {
-         if ( cachedThreadEntry.getAttribute("op") != persistObject._cachedOP.op ) {
-            cachedThreadEntry.setAttribute("op", persistObject._cachedOP.op);
-            needSave = true;
-         }
-      }
-*/
-      var sop = persistObject.GetOPFromData(threadid);
-      if ( sop && sop != cachedThreadEntry.getAttribute("op") ) {
-         cachedThreadEntry.setAttribute("op", sop);
-         needSave = true;
-      }
-
-      var threadtitle = "";
-      var titlematch = doc.title.match( /^The Something Awful Forums \- (.*)$/ );
-      if (titlematch) {
-         threadtitle = titlematch[1];
-      } else {
-         var titlematchb = doc.title.match( /^(.*) \- The Something Awful Forums$/ );
-         if (titlematchb) {
-            threadtitle = titlematchb[1];
-         }
-      }
-      if (threadtitle != "") {
-         //alert("thread title = "+titlematch[1]);
-         if ( !cachedThreadEntry.getAttribute("title") || cachedThreadEntry.getAttribute("title") != threadtitle ) {
-            cachedThreadEntry.setAttribute("title", threadtitle);
-            needSave = true;
-            //persistObject.SaveXML();
-         }
-      } else {
-         //alert("XX thread title = "+doc.title);
-      }
-
-      if (needSave) {
-         //persistObject.SaveXML();
-         var threaddetails = new Array();
-         threaddetails['id'] = threadid;
-         threaddetails['title'] = cachedThreadEntry.getAttribute("title");
-         threaddetails['lastviewdt'] = cachedThreadEntry.getAttribute("lastviewdt");
-         threaddetails['op'] = cachedThreadEntry.getAttribute("op");
-         persistObject.SavePostDataSQL(threaddetails);
-      }
-   }
    var lpbefore = 0;
    if (cachedThreadEntry) {
       lpbefore = cachedThreadEntry.getAttribute("lastpostid");
    }
    var lpafter = 0;
-   //addInternalDebugLog("showthread.php handler, thread #"+threadid+", lpbefore="+lpbefore+", lpafter="+lpafter);
 
-   // See if this thread is closed
-   var threadClosed = false;
-   //if ( selectSingleNode(doc, doc.body, "//IMG[@alt='Post A Reply'][contains(@src,'sa-closed.jpg')]") ) {
-   if ( selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='threadbar bottom']/UL[@class='postbuttons']/LI/A/IMG[@alt='Reply'][contains(@src,'closed')]") ) {
-      threadClosed = true;
-   }
-   //alert("threadClosed = "+threadClosed);
-
-   //var resarray = new Array();
-   //if (inFYAD) {
-   //   resarray = selectNodes(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[2]/TD[1]/DIV[1]/FONT[1]");
-   //} else {
-   //   resarray = selectNodes(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[2]/TD[1]/DIV[@class='mainbodytextsmall']");
-   //}
-   // XXX: remove // when font tags are closed
    var resarray = selectNodes(doc, doc.getElementById("thread"), "TABLE[contains(@id,'post')]");
    var needUpdate = false;
    var needCssInsert = false;
@@ -2354,6 +2388,7 @@ try {
 				 lpafter = postid;
 
 			  //var ilpdt = IsLPDateTimeNew(false, postdtvalue, threadid, postid);
+			  /* ~ duz
 			  var ilpdt = (postid > lpbefore);
 			  if ( ilpdt ) {
 				 needUpdate = true;
@@ -2373,7 +2408,7 @@ try {
 				 //} else {
 					setSeenPostColors(doc, thisel);
 				 //}
-			  }
+			  }*/
 			  needCssInsert = true;
 			  //alert("post colors set");
 
@@ -2624,6 +2659,7 @@ try {
       UpdateLPDateTime(updateTo, threadid, updateLastPostID);
    }
 
+/* ~ duz
    if (persistObject.toggle_useQuickQuote) {
       //var replybuttons = selectNodes(doc, doc.body, "//A[contains(@href,'newreply.php')]/IMG[@alt='Post A Reply'][contains(@src,'forum-reply')]");
       //var replybutton = selectSingleNode(doc, doc.body,
@@ -2634,8 +2670,8 @@ try {
       if (replybutton) {
          makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
-
-/* ~ ben
+*/
+/* ~ duz
       var postbuttons = selectNodes(doc, doc.body, "//IMG[@alt='Post']");
       if (postbuttons.length) {
         for (var uiego = 0; uiego < postbuttons.length; uiego++) {
@@ -2643,6 +2679,7 @@ try {
         }
       }
 */
+/* ~ duz
       //replybutton = selectSingleNode(doc, doc.body,
       //    "TABLE/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[4]/A[1][contains(@href,'newreply.php')]/IMG[@alt='Post A Reply'][contains(@src,'forum-reply')]"
       //);
@@ -2653,7 +2690,7 @@ try {
          makeQuickReplyButton(threadid, doc, replybutton, inBYOB);
       }
    }
-
+*/
 /*
    if (persistObject.toggle_thumbnailQuotedImagesInThreads) {
       var qimages = selectNodes(doc, doc.body, "//BLOCKQUOTE//IMG");
@@ -2669,20 +2706,7 @@ try {
       }
    }
 */
-/* ~ ben
-   try {
-      var isLastPage = SALR_SearchForThreadPages(doc, "thread");
-      if (typeof(isLastPage)=="object" && isLastPage.res == true) {
-         var pcount = ((isLastPage.num-1) * persistObject.getPreference("postsPerPage")) + resarray.length - 1;
-         persistObject.setLastReadPostCount(threadid, pcount);
-         //alert("looks like "+pcount+" posts up in this bitch");
-         //slurpIntoThreadCache(threadid);
-         //if ( cachedThreadEntry ) {
-            //cachedThreadEntry.setAttribute("lastreplyct", pcount);
-         //}
-      }
-   } catch (e) { }
-   */
+
    try { SALR_InsertThreadKeyboardNavigation(doc); } catch (e) { }
 
    reanchorThreadToLink(doc);
@@ -2697,7 +2721,10 @@ try {
 	}
 	catch(zzzz)
 	{
-		alert(zzzz);
+		if (!persistObject.getPreference("suppressErrors"))
+		{
+			alert(zzzz);
+		}
 	}
 }
 
@@ -3806,12 +3833,24 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
                dbg.innerHTML = SALR_debugLog.join("<br>");
                doc.body.appendChild(dbg);
             }
-            if ( persistObject.toggle_removePageTitlePrefix ) {
-               var titlematch = doc.title.match( /^The Something Awful Forums \- (.*)$/ );
-               if (titlematch) {
-                  doc.title = titlematch[1] + " - The Something Awful Forums";
-               }
-            }
+            // This if block has been rewritte ~ duz
+						if (persistObject.getPreference("removePageTitlePrefix"))
+						{
+							var threadtitle = doc.title;
+							var titlematch = doc.title.match(/(.*) \- (.*)/);
+							if (titlematch)
+							{
+								if (titlematch[1].search(/Something/i) > -1)
+								{
+									threadtitle = titlematch[2];
+								}
+								else
+								{
+									threadtitle = titlematch[1];
+								}
+								doc.title = threadtitle;
+							}
+						}
             if (persistObject.toggle_removeHeaderAndFooter) {
                salastread_hidePageHeader(doc);
             }
@@ -4123,11 +4162,6 @@ try {
    if (persistObject._killChecked == false) {
       saLastReadKillCheck();
    }
-   //if (persistObject._killed!=true) {
-//      if ( persistObject && persistObject.TimeManager == null ) {
-//         var tm = new SALastRead_TimeManager();
-//         persistObject.TimeManager = tm;
-//      }
       if ( persistObject && persistObject.LastRunVersion != SALR_CURRENT_VERSION ) {
          needToShowChangeLog = !persistObject.IsDevelopmentRelease;
          upgradeFromVersion = persistObject.LastRunVersion;
@@ -4140,7 +4174,6 @@ try {
       } else {
          alert("persistObject._starterr =\n" + persistObject._starterr);
       }
-   //}
 }
 catch (e)
 {
@@ -4149,10 +4182,3 @@ catch (e)
       alert("persistObject._starterr =\n" + persistObject._starterr);
 }
 
-/*
-setTimeout(attachUpdater, 1);
-
-function attachUpdater() {
-   document.getElementById("content").addEventListener("select", SALR_ContentUpdateCurrentBrowser, true);
-}
-*/

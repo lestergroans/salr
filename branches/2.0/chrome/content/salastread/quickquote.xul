@@ -5,7 +5,7 @@
       xmlns:html="http://www.w3.org/1999/xhtml"
       xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       title="Quick Reply"
-      onload="importData()"
+      onload="importData();sizeToContent();"
       onclose="releaseVars()"
       id="thewindow">
 
@@ -61,7 +61,7 @@
         <xul:hbox>
 
          <xul:button class="qqbutton" id="vbcodebutton" label="vB code" tabindex="8" type="menu">
-          <xul:menupopup id="vbcodemenu"> 
+          <xul:menupopup id="vbcodemenu">
 		   <xul:menuitem id="vbcode_bold" style="font-weight: bold;" label="Bold" oncommand="getvBcode('bold');"/>
 		   <xul:menuitem id="vbcode_italic" style="font-style: italic;" label="Italic" oncommand="getvBcode('italic');"/>
 		   <xul:menuitem id="vbcode_strike" style="text-decoration: line-through;" label="Strikethrough" oncommand="getvBcode('strike');"/>
