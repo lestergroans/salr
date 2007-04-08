@@ -1,7 +1,7 @@
-pref('extensions.salastread.currentVersion', '1.99.070406');
+pref('extensions.salastread.currentVersion', '1.99.070407');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
-pref('extensions.salastread.enableFYAD', false);
+pref('extensions.salastread.enableFYAD', true);
 pref('extensions.salastread.disableNewReCount', false);
 
 pref('extensions.salastread.postedInThreadRe', '#fcfd99');
@@ -9,14 +9,18 @@ pref('extensions.salastread.readDark', '#bbccdd');
 pref('extensions.salastread.readLight', '#ddeeff');
 pref('extensions.salastread.readWithNewDark', '#cfdfcf');
 pref('extensions.salastread.readWithNewLight', '#e1f1e1');
+
 pref('extensions.salastread.seenPostDark', '#bbccdd');
-pref('extensions.salastread.seenPostDarkFYAD', '#bbccdd');
 pref('extensions.salastread.seenPostLight', '#ddeeff');
+
+pref('extensions.salastread.seenPostDarkFYAD', '#bbccdd');
 pref('extensions.salastread.seenPostLightFYAD', '#ddeeff');
+
 pref('extensions.salastread.unreadDark', '#dfdfdf');
 pref('extensions.salastread.unreadDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unreadLight', '#f1f1f1');
 pref('extensions.salastread.unreadLightFYAD', '#ffccff');
+
 pref('extensions.salastread.unseenPostDark', '#dfdfdf');
 pref('extensions.salastread.unseenPostDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unseenPostLight', '#f1f1f1');
@@ -88,7 +92,7 @@ pref('extensions.salastread.enableDebugMarkup', false);
 
 pref('extensions.salastread.useRemoteSyncStorage', false);
 
-pref('extensions.salastread.gestureEnable', true);
+pref('extensions.salastread.gestureEnable', false);
 pref('extensions.salastread.scrollPostEnable', false);
 
 pref('extensions.salastread.postedInThreadReHighlight', '#ffffcc');

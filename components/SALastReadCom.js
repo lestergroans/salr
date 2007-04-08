@@ -940,8 +940,6 @@ salrPersistObject.prototype = {
       var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` <= ?1");
       statement.bindStringParameter(0,expiredt);
       statement.execute();
-      var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` IS NULL");
-      statement.execute();
 
    },
 
@@ -1599,6 +1597,18 @@ salrPersistObject.prototype = {
 		return isMod;
 	},
 
+	// Checks if a user id is flagged as an admin
+	// @param: (int) User ID
+	// @return: (boolean) Mod or not
+	isAdmin: function(userid)
+	{
+		var statement = this.database.createStatement("SELECT `username` FROM `userdata` WHERE `admin` = 1 AND `userid` = ?1");
+		statement.bindInt32Parameter(0,userid);
+		isMod = statement.executeStep();
+		statement.reset();
+		return isAdmin;
+	},
+
 	// Try to figure out the current forum we're in
 	// @param: (document) The current page being viewed
 	// @return: (int) Forum ID, or (bool) false if unable to determine
@@ -1612,8 +1622,8 @@ salrPersistObject.prototype = {
 		}
 		else
 		{
-			postbutton = this.selectSingleNode(doc, doc, "//UL[@class='postbuttons']//A[contains(@href,'forumid=')]");
-			inpostbutton = postbutton.href.match(/forumid=(\d+)/i);
+			var postbutton = this.selectSingleNode(doc, doc, "//UL[@class='postbuttons']//A[contains(@href,'forumid=')]");
+			var inpostbutton = postbutton.href.match(/forumid=(\d+)/i);
 			if (inpostbutton != null)
 			{
 				fid = inpostbutton[1];
@@ -1655,18 +1665,18 @@ salrPersistObject.prototype = {
 	// @return:
 	setLastReadPostCount: function(threadid, lrcount)
 	{
-		var statement = this.database.createStatement("UPDATE `threaddata` SET `lastreplyct` = ?1 WHERE `id` = ?2");
-		statement.bindInt32Parameter(0,lrcount);
-		statement.bindInt32Parameter(1,threadid);
-		if (statement.executeStep())
+		var result = false;
+		if (lrcount > this.getLastReadPostCount(threadid))
 		{
-			var result = true;
+			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastreplyct` = ?1 WHERE `id` = ?2");
+			statement.bindInt32Parameter(0,lrcount);
+			statement.bindInt32Parameter(1,threadid);
+			if (statement.executeStep())
+			{
+				var result = true;
+			}
+			statement.reset();
 		}
-		else
-		{
-			var result = false;
-		}
-		statement.reset();
 		return result;
 	},
 
@@ -1712,6 +1722,70 @@ salrPersistObject.prototype = {
 		}
 		statement.reset();
 		return lastread;
+	},
+
+	// Sets the Post ID of the last read post
+	// @param:
+	// @return:
+	setLastPostID: function(threadid, lastpostid)
+	{
+		var result = false;
+		if (lastpostid > this.getLastPostID(threadid))
+		{
+			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastpostid` = ?1 WHERE `id` = ?2");
+			statement.bindStringParameter(0,lastpostid);
+			statement.bindInt32Parameter(1,threadid);
+			if (statement.executeStep())
+			{
+				var result = true;
+			}
+			statement.reset();
+		}
+		return result;
+	},
+
+	// Get the title of the selected thread
+	// @param:
+	// @return:
+	getThreadTitle: function(threadid)
+	{
+		var title;
+		var statement = this.database.createStatement("SELECT `title` FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			title = statement.getString(0);
+			if (title == null)
+			{
+				title = false;
+			}
+		}
+		else
+		{
+			title = false;
+		}
+		statement.reset();
+		return title;
+	},
+
+	// Stores the thread title in the database
+	// @param:
+	// @return:
+	setThreadTitle: function(threadid, title)
+	{
+		var statement = this.database.createStatement("UPDATE `threaddata` SET `title` = ?1 WHERE `id` = ?2");
+		statement.bindStringParameter(0,title);
+		statement.bindInt32Parameter(1,threadid);
+		if (statement.executeStep())
+		{
+			var result = true;
+		}
+		else
+		{
+			var result = false;
+		}
+		statement.reset();
+		return result;
 	},
 
 	// Check the database to see if thread was posted in
@@ -1794,6 +1868,39 @@ salrPersistObject.prototype = {
 		return result;
 	},
 
+	// Adds a thread id # to the database
+	// @param:
+	// @return:
+	iAmReadingThis: function(threadid)
+	{
+		if (!this.threadIsInDB(threadid))
+		{
+			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`) VALUES (?1)");
+			statement.bindInt32Parameter(0,threadid);
+			statement.execute();
+			statement.reset();
+		}
+	},
+
+	// Checks if a thread id # is in the database
+	// @param:
+	// @return:
+	threadIsInDB: function(threadid)
+	{
+		var statement = this.database.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			var result = true;
+		}
+		else
+		{
+			var result = false;
+		}
+		statement.reset();
+		return result;
+	},
+
 	// Adds a post icon # and filename to the database
 	// @param: (int) Number used in URL, (string) Filename of icon
 	// @return: nothing
@@ -1804,7 +1911,7 @@ salrPersistObject.prototype = {
 			var statement = this.database.createStatement("INSERT INTO `posticons` (`iconnumber`, `filename`) VALUES (?1, ?2)");
 			statement.bindInt32Parameter(0,iconNumber);
 			statement.bindStringParameter(1,iconFilename);
-			statement.executeStep();
+			statement.execute();
 			statement.reset();
 		}
 	},
@@ -1831,7 +1938,7 @@ salrPersistObject.prototype = {
 	// Several little functions to test if we're in a special needs forum
 	inFYAD: function(forumid)
 	{
-		return (forumid == 26 || forumid == 154);
+		return (forumid == 26 || forumid == 154 || forumid == 115);
 	},
 	inBYOB: function(forumid)
 	{
@@ -1845,6 +1952,40 @@ salrPersistObject.prototype = {
 	{
 		return (forumid == 158);
 	},
+	inGasChamber: function(forumid)
+	{
+		return (forumid == 25);
+	},
+
+	// Colors the post passed to it
+	// @param:
+	// @return:
+	colorReadPost: function(doc, post, colorDark, forumid)
+	{
+		/*
+		td userinfo
+		td postbody
+		td postdate
+		td postlinks
+		*/
+		// This line is what we'll have to change to support per-forum colors
+		if (colorDark)
+		{
+			var colorToUse = this.getPreference("seenPostDark");
+		}
+		else
+		{
+			var colorToUse = this.getPreference("seenPostLight");
+		}
+		var userInfoBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='userinfo']");
+		var postBodyBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postbody']");
+		var postDateBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postdate']");
+		var postLinksBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postlinks']");
+		userInfoBox.style.backgroundColor = colorToUse;
+		postBodyBox.style.backgroundColor = colorToUse;
+		postDateBox.style.backgroundColor = colorToUse;
+		postLinksBox.style.backgroundColor = colorToUse;
+	},
 
 	// Add the quick page jump paginator
 	// TODO: This function needs to be audited
@@ -1852,7 +1993,8 @@ salrPersistObject.prototype = {
 	// @return:
 	addPagination: function(doc)
 	{
-		var pageList = this.selectSingleNode(doc, doc, "//DIV[contains(@class,'pages')]");
+		var pageList = this.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
+		pageList = pageList[1];
 		var numPages = pageList.innerHTML.match(/\((\d+)\)/);
 		var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
 		if (pageList.childNodes.length > 1) // Are there pages
@@ -1877,11 +2019,11 @@ salrPersistObject.prototype = {
 			else
 			{
 				var firstButton = doc.createElement("a");
-				firstButton.href = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber=1");
+				firstButton.href = this.editPageNumIntoURI(doc, "pagenumber=1");
 				firstButton.appendChild(firstButtonImg);
 				navDiv.appendChild(firstButton);
 				var prevButton = doc.createElement("a");
-				prevButton.href = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber=" + (curPage-1));
+				prevButton.href = this.editPageNumIntoURI(doc, "pagenumber=" + (curPage-1));
 				prevButton.appendChild(prevButtonImg);
 				navDiv.appendChild(prevButton);
 			}
@@ -1901,7 +2043,17 @@ salrPersistObject.prototype = {
 			}
 			else
 			{
-				pageSel.onchange = function() { doc.location = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber="+this.value); };
+				pageSel.onchange = function() {
+					if (doc.location.pathname == "/showthread.php")
+					{
+						var threadid = doc.evaluate("//DIV[contains(@class,'pages')]//A[contains(@href,'threadid=')]", doc, null, 9, null).singleNodeValue.href.match(/threadid=(\d+)/i)[1];
+						doc.location = doc.location.pathname+"?threadid="+threadid+"&pagenumber="+this.value;
+					}
+					else
+					{
+						doc.location = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber="+this.value);
+					}
+				};
 			}
 			navDiv.appendChild(pageSel);
 			var nextButtonImg = doc.createElement("img");
@@ -1920,25 +2072,11 @@ salrPersistObject.prototype = {
 			else
 			{
 				var nextButton = doc.createElement("a");
-				if (curPage == 1)
-				{
-					nextButton.href = doc.baseURI + "&pagenumber=" + (curPage+1);
-				}
-				else
-				{
-					nextButton.href = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber=" + (curPage+1));
-				}
+				nextButton.href = this.editPageNumIntoURI(doc, "pagenumber=" + (curPage+1));
 				nextButton.appendChild(nextButtonImg);
 				navDiv.appendChild(nextButton);
 				var lastButton = doc.createElement("a");
-				if (curPage == 1)
-				{
-					lastButton.href = doc.baseURI + "&pagenumber=" + numPages;
-				}
-				else
-				{
-					lastButton.href = doc.baseURI.replace(/pagenumber=(\d+)/, "pagenumber=" + numPages);
-				}
+				lastButton.href = this.editPageNumIntoURI(doc, "pagenumber=" + numPages);
 				lastButton.appendChild(lastButtonImg);
 				navDiv.appendChild(lastButton);
 			}
@@ -1957,6 +2095,36 @@ salrPersistObject.prototype = {
 		{
 			numPages = 1;
 		}
+	},
+
+	// Helper function for addPagination()
+	// @param:
+	// @return:
+	editPageNumIntoURI: function(doc, replacement)
+	{
+		var result;
+		if (doc.baseURI.search(/pagenumber=(\d+)/) > -1) // Is the pagenumber already in the uri?
+		{
+			result = doc.baseURI.replace(/pagenumber=(\d+)/, replacement);
+		}
+		else
+		{
+			if (doc.location.hash == "") // If no anchor, just add it to the end
+			{
+				result = doc.baseURI + "&" + replacement;
+			}
+			else
+			{
+				result = doc.location.pathname + doc.location.search + "&" + replacement + doc.location.hash;
+				if (doc.location.pathname == "/showthread.php")
+				{
+					var perpage = this.selectSingleNode(doc, doc, "//DIV[contains(@class,'pages')]//A[contains(@href,'threadid=')]");
+					var threadid = perpage.href.match(/threadid=(\d+)/i)[1];
+					result = doc.location.pathname + "?threadid=" + threadid + "&" + replacement;
+				}
+			}
+		}
+		return result;
 	},
 
 	// Takes a button and turns it into a quick button
@@ -2009,9 +2177,10 @@ salrPersistObject.prototype = {
 		quickbutton.SALR_threadid = threadid;
 		quickbutton.SALR_forumid = forumid;
 		quickbutton.__salastread_threadid = threadid;
-		quickbutton.__salastread_postid = postid; // set if quote or edit
-		//quickbutton.__salastread_postername = postername; // set if quote or edit
+/*		quickbutton.__salastread_postid = postid; // set if quote or edit
+		//quickbutton.__salastread_postername = postername; // set if quote or edit?
 		quickbutton.__salastread_hasQuote = hasQuote; // 1 if quote or edit
+*/
 		button.parentNode.insertBefore(quickbutton, button);
 		return quickbutton;
 	}
