@@ -1258,6 +1258,7 @@ try {
 	var inDump = persistObject.inDump(forumid);
 	var inAskTell = persistObject.inAskTell(forumid);
 	var inGasChamber = persistObject.inGasChamber(forumid);
+	var inSAMart = persistObject.inSAMart(forumid);
 
 	if (!inFYAD || persistObject.getPreference("enableFYAD")) {
 
@@ -1332,6 +1333,9 @@ try {
 		else
 		{
 			threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
+		}
+		if (!inSAMart && !inDump)
+		{
 			threadRatingBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='rating']");
 		}
 		if (inAskTell)
@@ -1374,53 +1378,27 @@ try {
 			{
 				if ((threadRe+1) > threadLRCount)
 				{
-					if (!persistObject.getPreference("disableNewReCount")) {
-						threadRepliesBox.innerHTML = threadRepliesBox.innerHTML + ' (' + ((threadRe+1) - threadLRCount) + ')';
-					}
-					threadTitleBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
-					threadAuthorBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
-					threadRepliesBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
-					threadViewsBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
-					threadRatingBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
-					threadLastpostBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
-					if (inDump)
+					if (!persistObject.getPreference("disableNewReCount"))
 					{
-						threadVoteBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
+						if (persistObject.getPreference("newPostCountUseOneLine"))
+						{
+							threadRepliesBox.innerHTML += '&nbsp;(' + ((threadRe+1) - threadLRCount) + ')';
+						}
+						else
+						{
+							threadRepliesBox.innerHTML += ' (' + ((threadRe+1) - threadLRCount) + ')';
+						}
 					}
-					else
-					{
-						threadIconBox.style.backgroundColor = persistObject.getPreference("readWithNewDark");
-					}
-					if (inAskTell)
-					{
-						threadIconBox.style.backgroundColor = persistObject.getPreference("readWithNewLight");
-						threadIcon2Box.style.backgroundColor = persistObject.getPreference("readWithNewDark");
-					}
+					persistObject.colorThread(doc, threadlist[i], forumid, persistObject.getPreference("readWithNewLight"), persistObject.getPreference("readWithNewDark"));
 				}
 				else
 				{
-					threadTitleBox.style.backgroundColor = persistObject.getPreference("readLight");
-					threadAuthorBox.style.backgroundColor = persistObject.getPreference("readDark");
-					threadRepliesBox.style.backgroundColor = persistObject.getPreference("readLight");
-					threadViewsBox.style.backgroundColor = persistObject.getPreference("readDark");
-					threadRatingBox.style.backgroundColor = persistObject.getPreference("readLight");
-					threadLastpostBox.style.backgroundColor = persistObject.getPreference("readDark");
-					if (inDump)
-					{
-						threadVoteBox.style.backgroundColor = persistObject.getPreference("readLight");
-					}
-					else
-					{
-						threadIconBox.style.backgroundColor = persistObject.getPreference("readDark");
-					}
-					if (inAskTell)
-					{
-						threadIconBox.style.backgroundColor = persistObject.getPreference("readLight");
-						threadIcon2Box.style.backgroundColor = persistObject.getPreference("readDark");
-					}
+					persistObject.colorThread(doc, threadlist[i], forumid, persistObject.getPreference("readLight"), persistObject.getPreference("readDark"));
 				}
 				if (!persistObject.getPreference("disableGradients"))
 				{
+					persistObject.addGradient(threadlist[i]);
+					/*
 					threadTitleBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
 					threadTitleBox.style.backgroundRepeat = "repeat-x";
 					threadAuthorBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
@@ -1429,8 +1407,11 @@ try {
 					threadRepliesBox.style.backgroundRepeat = "repeat-x";
 					threadViewsBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
 					threadViewsBox.style.backgroundRepeat = "repeat-x";
-					threadRatingBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadRatingBox.style.backgroundRepeat = "repeat-x";
+					if (!inSAMart)
+					{
+						threadRatingBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+						threadRatingBox.style.backgroundRepeat = "repeat-x";
+					}
 					threadLastpostBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
 					threadLastpostBox.style.backgroundRepeat = "repeat-x";
 					if (inDump)
@@ -1448,6 +1429,7 @@ try {
 						threadIcon2Box.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
 						threadIcon2Box.style.backgroundRepeat = "repeat-x";
 					}
+					*/
 				}
 				if (persistObject.didIPostHere(threadId))
 				{
@@ -2134,14 +2116,12 @@ function SALR_TextToImage(thisel) {
 function handleShowThread(e) {
 var doc = e.originalTarget;
 
-	var archivedThreadCheck = persistObject.selectSingleNode(doc, doc, "//TABLE//B");
-	if (archivedThreadCheck)
+	if (doc.getElementById('thread') == null)
 	{
-		if (archivedThreadCheck.innerHTML.search(/Special/i) > -1)
-		{
-			return;
-		}
+		// If there is no thread div then abort since something's not right
+		return;
 	}
+
 	var failed, i, zzzz;	// Little variables that'll get reused
 	var forumid = persistObject.getForumID(doc);
 	// The following forums have special needs that must be dealt with
@@ -2150,6 +2130,7 @@ var doc = e.originalTarget;
 	var inDump = persistObject.inDump(forumid);
 	var inAskTell = persistObject.inAskTell(forumid);
 	var inGasChamber = persistObject.inGasChamber(forumid);
+	var inSAMart = persistObject.inSAMart(forumid);
 
 if (!inFYAD || persistObject.getPreference("enableFYAD"))
 {
@@ -2278,7 +2259,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 			{
 				for (i in replybuttons)
 				{
-					//attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, replybuttons[i], forumid),"",0);
+					attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, replybuttons[i], forumid),"",0);
 				}
 			}
 		}
@@ -2289,7 +2270,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	var postcount = (perpage * (curPage-1)) + editbuttons.length;
 	persistObject.setLastReadPostCount(threadid, postcount);
 
-	var curPostId, colorDark = true;
+	var curPostId, colorDark = true, colorOfPost;
 	// Loop through each post
 	var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
 	for (i in postlist)
@@ -2299,10 +2280,17 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 		{
 			if (curPostId <= lastReadPostId)
 			{
-				persistObject.colorReadPost(doc, postlist[i], colorDark, forumid);
+				if (colorDark)
+				{
+					colorOfPost = persistObject.getPreference("seenPostDark");
+				}
+				else
+				{
+					colorOfPost = persistObject.getPreference("seenPostLight");
+				}
+				persistObject.colorPost(doc, postlist[i], colorOfPost, forumid);
 			}
 		}
-
 		colorDark = !colorDark;
 	}
 

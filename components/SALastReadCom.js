@@ -1556,10 +1556,9 @@ salrPersistObject.prototype = {
 		if (!statement.executeStep())
 		{
 			statement.reset();
-			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, ?3, null)");
+			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, 0, null)");
 			statement.bindInt32Parameter(0,userid);
 			statement.bindStringParameter(1,username);
-			statement.bindStringParameter(2, this.getPreference("modColor"));
 			statement.executeStep();
 		}
 		statement.reset();
@@ -1956,39 +1955,102 @@ salrPersistObject.prototype = {
 	{
 		return (forumid == 25);
 	},
+	inSAMart: function(forumid)
+	{
+		return (forumid == 61 || forumid == 77 || forumid == 78 || forumid == 79);
+	},
 
 	// Colors the post passed to it
 	// @param:
 	// @return:
-	colorReadPost: function(doc, post, colorDark, forumid)
+	colorPost: function(doc, post, colorToUse)
 	{
-		/*
-		td userinfo
-		td postbody
-		td postdate
-		td postlinks
-		*/
-		// This line is what we'll have to change to support per-forum colors
-		if (colorDark)
-		{
-			var colorToUse = this.getPreference("seenPostDark");
-		}
-		else
-		{
-			var colorToUse = this.getPreference("seenPostLight");
-		}
 		var userInfoBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='userinfo']");
 		var postBodyBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postbody']");
 		var postDateBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postdate']");
 		var postLinksBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postlinks']");
-		userInfoBox.style.backgroundColor = colorToUse;
-		postBodyBox.style.backgroundColor = colorToUse;
-		postDateBox.style.backgroundColor = colorToUse;
-		postLinksBox.style.backgroundColor = colorToUse;
+		if (userInfoBox)
+		{
+			userInfoBox.style.backgroundColor = colorToUse;
+		}
+		if (postBodyBox)
+		{
+			postBodyBox.style.backgroundColor = colorToUse;
+		}
+		if (postDateBox)
+		{
+			postDateBox.style.backgroundColor = colorToUse;
+		}
+		if (postLinksBox)
+		{
+			postLinksBox.style.backgroundColor = colorToUse;
+		}
+	},
+
+	// Color a thread entry passed to it
+	// @param: doc, TR, (int), color code, color code
+	// @return: nothing
+	colorThread: function (doc, thread, forumID, lightColorToUse, darkColorToUse)
+	{
+		if (this.inDump(forumID))
+		{
+			threadRatingBox = thread.getElementsByTagName('td')[0];
+			threadVoteBox = this.selectSingleNode(doc, thread, "TD[@class='votes']");
+		}
+		else
+		{
+			threadIconBox = this.selectSingleNode(doc, thread, "TD[@class='icon']");
+		}
+		if (!this.inSAMart(forumID) && !this.inDump(forumID))
+		{
+			threadRatingBox = this.selectSingleNode(doc, thread, "TD[@class='rating']");
+		}
+		if (this.inAskTell(forumID))
+		{
+			threadIcon2Box = this.selectSingleNode(doc, thread, "TD[@class='icon2']");
+		}
+		threadTitleBox = this.selectSingleNode(doc, thread, "TD[@class='title']");
+		threadAuthorBox = this.selectSingleNode(doc, thread, "TD[@class='author']");
+		threadRepliesBox = this.selectSingleNode(doc, thread, "TD[@class='replies']");
+		threadViewsBox = this.selectSingleNode(doc, thread, "TD[@class='views']");
+		threadLastpostBox = this.selectSingleNode(doc, thread, "TD[@class='lastpost']");
+		threadTitleBox.style.backgroundColor = lightColorToUse;
+		threadAuthorBox.style.backgroundColor = darkColorToUse;
+		threadRepliesBox.style.backgroundColor = lightColorToUse;
+		threadViewsBox.style.backgroundColor = darkColorToUse;
+		if (!this.inSAMart(forumID))
+		{
+			threadRatingBox.style.backgroundColor = lightColorToUse;
+		}
+		threadLastpostBox.style.backgroundColor = darkColorToUse;
+		if (this.inDump(forumID))
+		{
+			threadVoteBox.style.backgroundColor = lightColorToUse;
+		}
+		else
+		{
+			threadIconBox.style.backgroundColor = darkColorToUse;
+		}
+		if (this.inAskTell(forumID))
+		{
+			threadIconBox.style.backgroundColor = lightColorToUse;
+			threadIcon2Box.style.backgroundColor = darkColorToUse;
+		}
+	},
+
+	// Adds the gradient overlay to a given thread
+	// @param: TR
+	// @return: nothing
+	addGradient: function(thread)
+	{
+		for (var i=0;i<thread.getElementsByTagName('td').length;i++)
+		{
+			thread.getElementsByTagName('td')[i].style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+			thread.getElementsByTagName('td')[i].style.backgroundRepeat = "repeat-x";
+		}
 	},
 
 	// Add the quick page jump paginator
-	// TODO: This function needs to be audited
 	// @param:
 	// @return:
 	addPagination: function(doc)
@@ -2175,8 +2237,15 @@ salrPersistObject.prototype = {
 		quickbutton.border = "0"
 		quickbutton.style.cursor = "pointer";
 		quickbutton.SALR_threadid = threadid;
-		quickbutton.SALR_forumid = forumid;
 		quickbutton.__salastread_threadid = threadid;
+		if (action != 'reply')
+		{
+			quickbutton.SALR_forumid = forumid;
+		}
+		else
+		{
+			quickbutton.SALR_forumid = undefined;
+		}
 /*		quickbutton.__salastread_postid = postid; // set if quote or edit
 		//quickbutton.__salastread_postername = postername; // set if quote or edit?
 		quickbutton.__salastread_hasQuote = hasQuote; // 1 if quote or edit
