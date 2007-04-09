@@ -1,8 +1,9 @@
-pref('extensions.salastread.currentVersion', '1.99.070407');
+pref('extensions.salastread.currentVersion', '1.99.070408');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
 pref('extensions.salastread.disableNewReCount', false);
+pref('extensions.salastread.newPostCountUseOneLine', false);
 
 pref('extensions.salastread.postedInThreadRe', '#fcfd99');
 pref('extensions.salastread.readDark', '#bbccdd');
