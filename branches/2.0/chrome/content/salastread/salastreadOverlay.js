@@ -1345,6 +1345,11 @@ try {
 		threadTitleBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='title']");
 		threadAuthorBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='author']");
 		threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='replies']");
+		if (threadRepliesBox.innerHTML == '-')
+		{
+			// It's an announcement
+			continue;
+		}
 		threadViewsBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='views']");
 		threadLastpostBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='lastpost']");
 		threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
