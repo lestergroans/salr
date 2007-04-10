@@ -1851,10 +1851,10 @@ salrPersistObject.prototype = {
 	// Removes a thread from the database
 	// @param: (int) Thread ID
 	// @return: (booler) true on success, false on failure
-	removeThread: function(threadid)
+	removeThread: function(threadId)
 	{
 		var statement = this.database.createStatement("DELETE FROM `threaddata` WHERE `id` = ?1");
-		statement.bindInt32Parameter(0,threadid);
+		statement.bindInt32Parameter(0,threadId);
 		if (statement.executeStep())
 		{
 			var result = true;
@@ -2048,6 +2048,68 @@ salrPersistObject.prototype = {
 			thread.getElementsByTagName('td')[i].style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
 			thread.getElementsByTagName('td')[i].style.backgroundRepeat = "repeat-x";
 		}
+	},
+
+	// Blidly colors the thread by alternating without regard to content
+	// @param:
+	// @return:
+	blindColorThread: function(doc, thread, lightColorToUse, darkColorToUse)
+	{
+		for (var i=0;i<8;i+=2)
+		{
+			thread.getElementsByTagName('td')[i].style.backgroundColor = lightColorToUse;
+			thread.getElementsByTagName('td')[i+1].style.backgroundColor = darkColorToUse;
+		}
+	},
+
+	// Inserts the jump to last read post icon
+	// @param: doc, TD
+	// @return: nothing
+	insertLastIcon: function(doc, titleBox, threadId)
+	{
+		lpGo = doc.createElement("a");
+		lastPostID = this.getLastPostID(threadId);
+		lpGo.setAttribute("href", "/showthread.php?postid=" + lastPostID + "#post" + lastPostID);
+		lpIcon = doc.createElement("img");
+		lpIcon.setAttribute("src", "chrome://salastread/skin/lastpost.png");
+		lpIcon.style.cssFloat = "right";
+		lpIcon.style.marginRight = "3px";
+		lpIcon.style.marginLeft = "3px";
+		lpIcon.style.border = "none";
+		lpGo.appendChild(lpIcon);
+		titleBox.insertBefore(lpGo, titleBox.firstChild);
+	},
+
+	// Inserts the unread icon
+	// @param: doc, TD, (int)
+	// @return: (img)
+	insertUnreadIcon: function(doc, titleBox, threadId)
+	{
+		unvisitIcon = doc.createElement("img");
+		unvisitIcon.setAttribute("src", "chrome://salastread/skin/unvisit.png");
+		unvisitIcon.setAttribute("id", "unread_"+threadId);
+		unvisitIcon.style.cssFloat = "right";
+		unvisitIcon.style.marginRight = "3px";
+		unvisitIcon.style.border = "none";
+		unvisitIcon.style.cursor = "pointer";
+		//unvisitIcon.addEventListener("click", this.removeThread, false);
+		titleBox.insertBefore(unvisitIcon, titleBox.firstChild);
+		return unvisitIcon;
+	},
+
+	// Inserts the star
+	// @param: doc, TD
+	// @return: nothing
+	insertStar: function(doc, titleBox)
+	{
+		starIcon = doc.createElement("img");
+		starIcon.setAttribute("src", "chrome://salastread/skin/star.png");
+		starIcon.style.cssFloat = "left";
+		starIcon.style.marginRight = "3px";
+		starIcon.style.marginLeft = "3px";
+		starIcon.style.border = "none";
+		titleBox.insertBefore(starIcon, titleBox.getElementsByTagName('a')[0]);
+		starIcon.style.marginTop = ((titleBox.clientHeight - 21) / 2) + "px";
 	},
 
 	// Add the quick page jump paginator

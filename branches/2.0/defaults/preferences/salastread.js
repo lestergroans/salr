@@ -1,4 +1,4 @@
-pref('extensions.salastread.currentVersion', '1.99.070408');
+pref('extensions.salastread.currentVersion', '1.99.070409');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
@@ -37,7 +37,7 @@ pref('extensions.salastread.timeSpentOnForums', 0);
 pref('extensions.salastread.goToLastReadPost', 'chrome://salastread/skin/go_to_first_unread_post.png');
 pref('extensions.salastread.markThreadUnvisited', 'chrome://salastread/skin/mark_thread_unvisited.png');
 
-pref('extensions.salastread.threadIconOrder', '12');
+pref('extensions.salastread.swapIconOrder', false);
 pref('extensions.salastread.databaseStoragePath', '%profile%salastread.sqlite');
 pref('extensions.salastread.persistStoragePath', '%profile%salastread.xml');
 pref('extensions.salastread.forumListStoragePath', '%profile%saforumlist.xml');
