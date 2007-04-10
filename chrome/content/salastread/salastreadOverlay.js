@@ -1086,15 +1086,93 @@ function handleSubscribedThreadTable(e, subTable) {
    }
 }
 
-function handleSubscriptions(e) {
-   //alert("member2");
-   var doc = e.originalTarget;
-   //var subForm = selectNodes(doc, doc.body, "//FORM[@method='get'][contains(@action,'member2.php')]")[0];
-   var subForm = selectSingleNode(doc, doc.body, "//FORM[@method='get'][contains(@action,'member2.php')]");
-   if (subForm) {
-      var subTable = subForm.parentNode;
-      handleSubscribedThreadTable(e, subTable);
-   }
+function handleSubscriptions(doc) {
+	var subForm = persistObject.selectSingleNode(doc, doc, "//FORM[@method='get'][contains(@action,'member2.php')]");
+	if (!subForm) {
+		return;
+	}
+	var subTable = subForm.parentNode;
+	var threadlist = persistObject.selectNodes(doc, subTable, "TBODY/TR");
+	for (i in threadlist)
+	{
+		if (threadlist[i].getElementsByTagName('td')[0].colSpan > "1")
+		{
+			// It's part of the header or footer so drop out
+			continue;
+		}
+		threadTitleBox = persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'threadid=')]");
+		if (threadTitleBox == null)
+		{
+			// No subscribed threads listed, should rewrite this to be nicer
+			continue;
+		}
+		else
+		{
+			threadTitleBox = threadTitleBox.parentNode.parentNode;
+		}
+		threadId = parseInt(persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'threadid=')]").href.match(/threadid=(\d+)/)[1]);
+		threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'javascript:who(')]").parentNode.parentNode;
+		threadRe = parseInt(persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'javascript:who(')]").innerHTML);
+		threadLRCount = persistObject.getLastReadPostCount(threadId);
+		// So right click star/ignore works
+		threadlist[i].className = "salastread_thread_" + threadId;
+		// If this thread is in the DB as being read
+		if (threadLRCount > -1)
+		{
+			if (!persistObject.getPreference("dontHighlightThreads"))
+			{
+				if ((threadRe+1) > threadLRCount) // If there are new posts
+				{
+					if (!persistObject.getPreference("disableNewReCount"))
+					{
+						if (persistObject.getPreference("newPostCountUseOneLine"))
+						{
+							threadRepliesBox.innerHTML += '&nbsp;(' + ((threadRe+1) - threadLRCount) + ')';
+						}
+						else
+						{
+							threadRepliesBox.innerHTML += ' (' + ((threadRe+1) - threadLRCount) + ')';
+						}
+					}
+					persistObject.blindColorThread(doc, threadlist[i], persistObject.getPreference("readWithNewLight"), persistObject.getPreference("readWithNewDark"));
+				}
+				else
+				{
+					persistObject.blindColorThread(doc, threadlist[i], persistObject.getPreference("readLight"), persistObject.getPreference("readDark"));
+				}
+				if (!persistObject.getPreference("disableGradients"))
+				{
+					persistObject.addGradient(threadlist[i]);
+				}
+				if (persistObject.didIPostHere(threadId))
+				{
+					threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
+				}
+			}
+			if (persistObject.getPreference("showUnvisitIcon") && persistObject.getPreference("swapIconOrder"))
+			{
+				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
+			}
+			if ((persistObject.getPreference("showGoToLastIcon") && ((threadRe+1) > threadLRCount)) ||
+				persistObject.getPreference("alwaysShowGoToLastIcon"))
+			{
+				persistObject.insertLastIcon(doc, threadTitleBox, threadId);
+			}
+			if (persistObject.getPreference("showUnvisitIcon") && !persistObject.getPreference("swapIconOrder"))
+			{
+				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
+			}
+		}
+		if (persistObject.isThreadStarred(threadId))
+		{
+			persistObject.insertStar(doc, threadTitleBox);
+		}
+		// If thread is ignored
+		if (persistObject.isThreadIgnored(threadId))
+		{
+			threadlist[i].parentNode.deleteRow(i);
+		}
+	}
 }
 
 function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,topictitletd,topicretd,forumid) {
@@ -1347,7 +1425,7 @@ try {
 		threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='replies']");
 		if (threadRepliesBox.innerHTML == '-')
 		{
-			// It's an announcement
+			// It's an announcement so skip the rest
 			continue;
 		}
 		threadViewsBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='views']");
@@ -1358,10 +1436,8 @@ try {
 		threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
 		threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
 		threadOPStatus = persistObject.getPosterStatus(threadOPId);
-		persistObject.StoreOPData(threadId, threadOPId);
-
+		// So right click star/ignore works
 		threadlist[i].className = "salastread_thread_" + threadId;
-
 		// Replace the thread icon with a linked thread icon
 		if (!inDump && threadIconBox.firstChild.src.search(/posticons\/(.*)/i) > -1)
 		{
@@ -1376,12 +1452,14 @@ try {
 			threadIconBox.removeChild(threadIconBox.firstChild);
 			threadIconBox.appendChild(iconGo);
 		}
-
-		if (threadLRCount > -1) // If this thread is in the DB as being read
+		// If this thread is in the DB as being read
+		if (threadLRCount > -1)
 		{
+			persistObject.setThreadTitle(threadId, threadId);
+			persistObject.StoreOPData(threadId, threadOPId);
 			if (!persistObject.getPreference("dontHighlightThreads"))
 			{
-				if ((threadRe+1) > threadLRCount)
+				if ((threadRe+1) > threadLRCount) // If there are new posts
 				{
 					if (!persistObject.getPreference("disableNewReCount"))
 					{
@@ -1403,82 +1481,29 @@ try {
 				if (!persistObject.getPreference("disableGradients"))
 				{
 					persistObject.addGradient(threadlist[i]);
-					/*
-					threadTitleBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadTitleBox.style.backgroundRepeat = "repeat-x";
-					threadAuthorBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadAuthorBox.style.backgroundRepeat = "repeat-x";
-					threadRepliesBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadRepliesBox.style.backgroundRepeat = "repeat-x";
-					threadViewsBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadViewsBox.style.backgroundRepeat = "repeat-x";
-					if (!inSAMart)
-					{
-						threadRatingBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-						threadRatingBox.style.backgroundRepeat = "repeat-x";
-					}
-					threadLastpostBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-					threadLastpostBox.style.backgroundRepeat = "repeat-x";
-					if (inDump)
-					{
-						threadVoteBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-						threadVoteBox.style.backgroundRepeat = "repeat-x";
-					}
-					else
-					{
-						threadIconBox.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-						threadIconBox.style.backgroundRepeat = "repeat-x";
-					}
-					if (inAskTell)
-					{
-						threadIcon2Box.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-						threadIcon2Box.style.backgroundRepeat = "repeat-x";
-					}
-					*/
 				}
 				if (persistObject.didIPostHere(threadId))
 				{
 					threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
 				}
 			}
+			if (persistObject.getPreference("showUnvisitIcon") && persistObject.getPreference("swapIconOrder"))
+			{
+				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
+			}
 			if ((persistObject.getPreference("showGoToLastIcon") && ((threadRe+1) > threadLRCount)) ||
 				persistObject.getPreference("alwaysShowGoToLastIcon"))
 			{
-				lpGo = doc.createElement("a");
-				lastPostID = persistObject.getLastPostID(threadId);
-				lpGo.setAttribute("href", "/showthread.php?postid=" + lastPostID + "#post" + lastPostID);
-				lpIcon = doc.createElement("img");
-				lpIcon.setAttribute("src", "chrome://salastread/skin/lastpost.png");
-				lpIcon.style.cssFloat = "right";
-				lpIcon.style.marginRight = "3px";
-				lpIcon.style.marginLeft = "3px";
-				lpIcon.style.border = "none";
-				lpGo.appendChild(lpIcon);
-				threadTitleBox.insertBefore(lpGo, threadTitleBox.getElementsByTagName('a')[0]);
+				persistObject.insertLastIcon(doc, threadTitleBox, threadId);
 			}
-			if (persistObject.getPreference("showUnvisitIcon"))
+			if (persistObject.getPreference("showUnvisitIcon") && !persistObject.getPreference("swapIconOrder"))
 			{
-				unvisitIcon = doc.createElement("img");
-				unvisitIcon.setAttribute("src", "chrome://salastread/skin/unvisit.png");
-				unvisitIcon.setAttribute("id", "unread_"+threadId);
-				unvisitIcon.style.cssFloat = "right";
-				unvisitIcon.style.marginRight = "3px";
-				unvisitIcon.style.border = "none";
-				unvisitIcon.style.cursor = "pointer";
-				unvisitIcon.addEventListener("click", removeThread, false);
-				threadTitleBox.insertBefore(unvisitIcon, threadTitleBox.getElementsByTagName('a')[0]);
+				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 			}
 		}
 		if (persistObject.isThreadStarred(threadId))
 		{
-			starIcon = doc.createElement("img");
-			starIcon.setAttribute("src", "chrome://salastread/skin/star.png");
-			starIcon.style.cssFloat = "left";
-			starIcon.style.marginRight = "3px";
-			starIcon.style.marginLeft = "3px";
-			starIcon.style.border = "none";
-			threadTitleBox.insertBefore(starIcon, threadTitleBox.getElementsByTagName('a')[0]);
-			starIcon.style.marginTop = ((threadlist[i].clientHeight - 21) / 2) + "px";
+			persistObject.insertStar(doc, threadTitleBox);
 		}
 		if (threadOPStatus && persistObject.getPreference("highlightUsernames"))
 		{
@@ -1509,6 +1534,14 @@ try {
 }
 function removeThread() {
 	persistObject.removeThread(this.id.match(/unread_(\d+)/)[1]);
+	for (var i=0;i<this.parentNode.parentNode.childNodes.length;i++)
+	{
+		if (this.parentNode.parentNode.childNodes[i].nodeName != "#text")
+		{
+			this.parentNode.parentNode.childNodes[i].style.backgroundColor = '';
+		}
+	}
+	this.parentNode.removeChild(this);
 }
 
 
@@ -1547,8 +1580,8 @@ function createUnvisitButton(doc, threadid, topicrow, unvisitDecolors, forumid) 
 }
 
 function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) {
-   alert("unvisiting "+threadid);
-   /*try {
+   //alert("unvisiting "+threadid);
+   try {
    var xmlDoc = pobj.xmlDoc;
    var threads = selectNodes(xmlDoc, xmlDoc, "/salastread/thread[@id='"+threadid+"']");
    for (var i=0; i<threads.length; i++) {
@@ -1572,7 +1605,7 @@ function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) 
    invalidateThreadCache();
    //pobj.SaveXML();
    persistObject.RemovePostDataSQL(threadid);
-   } catch(e) { alert ("SALastRead unvisit fail: "+e); };*/
+   } catch(e) { alert ("SALastRead unvisit fail: "+e); };
 }
 
 function replaceEmoticons(rawhtml) {
@@ -3802,7 +3835,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
             }
             else if ( location.href.indexOf("member2.php") != -1 ||
                       location.href.indexOf("usercp.php") != -1 ) {
-               handleSubscriptions(e);
+               handleSubscriptions(doc);
             }
             else if ( location.href.indexOf("member.php") != -1 &&
                       location.href.indexOf("salr_") != -1 ) {
@@ -3818,6 +3851,11 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
                var screl = doc.createElement("SCRIPT");
                screl.setAttribute("language","javascript");
                screl.setAttribute("src","chrome://salastread/content/pageunload.js");
+               doc.getElementsByTagName('head')[0].appendChild(screl);
+               // Added by duz for testing events
+               screl = doc.createElement("SCRIPT");
+               screl.setAttribute("language","javascript");
+               screl.setAttribute("src","chrome://salastread/content/salrevents.js");
                doc.getElementsByTagName('head')[0].appendChild(screl);
             }
             SALR_IncTimer();
