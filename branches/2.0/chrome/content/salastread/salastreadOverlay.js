@@ -1455,7 +1455,7 @@ try {
 		// If this thread is in the DB as being read
 		if (threadLRCount > -1)
 		{
-			persistObject.setThreadTitle(threadId, threadId);
+			persistObject.setThreadTitle(threadId, threadTitle);
 			persistObject.StoreOPData(threadId, threadOPId);
 			if (!persistObject.getPreference("dontHighlightThreads"))
 			{
