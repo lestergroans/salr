@@ -160,7 +160,7 @@ function __old__() {
 }
 
 function getQuoteIntroText() {
-   var astr = persistObject.string_quoteIntroText;
+   var astr = persistObject.getPreference('quoteIntroText');
    if ( astr.indexOf("|")!=-1 ) {
       var qits = astr.split("|");
       var qnum = Math.floor( Math.random() * qits.length );
@@ -296,7 +296,7 @@ function finalizeTextGrab(restext) {
          restext = restext.replace("of the closet to say: [/i]", "of the closet to say:[/PL][/i]");
       }
 */
-      if ( persistObject.toggle_quickQuoteImagesAsLinks ) {
+      if ( persistObject.getPreference('quickQuoteImagesAsLinks') ) {
          restext = restext.replace(/\[IMG\](.*?)\[\/IMG\]/ig,"[URL=$1][image][/URL]");
       }
 
@@ -338,7 +338,7 @@ function addQuoteFromPost(postid) {
 
 function importData() {
    try {
-   if ( persistObject.toggle_quickQuoteSwapPostPreview ) {
+   if ( persistObject.getPreference('quickQuoteSwapPostPreview') ) {
       document.getElementById("submit-swap").style.display = "-moz-box";
       document.getElementById("submit-normal").style.display = "none";
    } else {
@@ -367,16 +367,16 @@ function importData() {
       hasSpellCheck = true;
       document.getElementById("spellcheckbutton").style.display = "-moz-box";
    }
-   if ( persistObject.toggle_quickQuoteSubscribeDefault ) {
+   if ( persistObject.getPreference('quickQuoteSubscribeDefault') ) {
       document.getElementById("subscribe").setAttribute("checked",true);
    }
-   if ( persistObject.toggle_quickQuoteDisableSmiliesDefault ) {
+   if ( persistObject.getPreference('quickQuoteDisableSmiliesDefault') ) {
       document.getElementById("disablesmilies").setAttribute("checked",true);
    }
-   if ( persistObject.toggle_quickQuoteSignatureDefault && !window.opener.__salastread_alreadypostedinthread ) {
+   if ( persistObject.getPreference('quickQuoteSignatureDefault') && !window.opener.__salastread_alreadypostedinthread ) {
       document.getElementById("signature").setAttribute("checked",true);
    }
-   if ( persistObject.toggle_quickQuoteLivePreview ) {
+   if ( persistObject.getPreference('quickQuoteLivePreview') ) {
       document.getElementById("preview").setAttribute("checked",true);
       togglePreview();
    }
@@ -708,8 +708,7 @@ function togglePreview() {
    else
       document.getElementById("previewbox").setAttribute('collapsed', 'true');
 
-   persistObject.toggle_quickQuoteLivePreview = document.getElementById("preview").checked;
-   persistObject.SavePrefs();
+   persistObject.setPreference('quickQuoteLivePreview', document.getElementById("preview").checked);
 
    window.sizeToContent();
    doPreview();
