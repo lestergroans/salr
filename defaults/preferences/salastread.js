@@ -1,9 +1,16 @@
-pref('extensions.salastread.currentVersion', '1.99.070409');
+pref('extensions.salastread.currentVersion', '1.99.070410');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
 pref('extensions.salastread.disableNewReCount', false);
 pref('extensions.salastread.newPostCountUseOneLine', false);
+
+pref('extensions.salastread.modColor', '#bb4400');
+pref('extensions.salastread.adminColor', '#44bb00');
+pref('extensions.salastread.opColor', '#0044bb');
+pref('extensions.salastread.modBackground', '0');
+pref('extensions.salastread.adminBackground', '0');
+pref('extensions.salastread.opBackground', '0');
 
 pref('extensions.salastread.postedInThreadRe', '#fcfd99');
 pref('extensions.salastread.readDark', '#bbccdd');
@@ -26,9 +33,6 @@ pref('extensions.salastread.unseenPostDark', '#dfdfdf');
 pref('extensions.salastread.unseenPostDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unseenPostLight', '#f1f1f1');
 pref('extensions.salastread.unseenPostLightFYAD', '#ffccff');
-
-pref('extensions.salastread.modColor', '#bb4400');
-pref('extensions.salastread.adminColor', '#44bb00');
 
 pref('extensions.salastread.expireMinAge', 7);
 pref('extensions.salastread.gestureButton', 2);
@@ -67,13 +71,10 @@ pref('extensions.salastread.convertTextToImage', false);
 pref('extensions.salastread.thumbnailQuotedImagesInThreads', false);
 pref('extensions.salastread.shrinkTextToImages', true);
 pref('extensions.salastread.removeTargetNewFromTorrentLinks', true);
-pref('extensions.salastread.insertPostTargetLink', true);
 pref('extensions.salastread.dontTextToImageIfMayBeNws', true);
 pref('extensions.salastread.dontTextToImageInSpoilers', true);
 pref('extensions.salastread.dontCheckKillSwitch', false);
 pref('extensions.salastread.highlightUsernames', true);
-pref('extensions.salastread.highlightPostBackgroundsInstead', false);
-pref('extensions.salastread.highlightThreadBackgroundsInstead', false);
 pref('extensions.salastread.removeHeaderAndFooter', false);
 pref('extensions.salastread.contextMenuOnBottom', true);
 pref('extensions.salastread.hideSignature', false);
@@ -81,6 +82,7 @@ pref('extensions.salastread.hideTitle', false);
 pref('extensions.salastread.suppressErrors', true);
 
 pref('extensions.salastread.insertPostLastMarkLink', true);
+pref('extensions.salastread.insertPostTargetLink', true);
 pref('extensions.salastread.disableGradients', false);
 pref('extensions.salastread.resizeCustomTitleText', true);
 pref('extensions.salastread.enablePageNavigator', true);
