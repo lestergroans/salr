@@ -284,7 +284,7 @@ salrPersistObject.prototype = {
 
    FirefoxShuttingDown: function(subject, topic, data)
    {
-      if ( this.toggle_useRemoteSyncStorage ) {
+      if ( this.getPreference('useRemoteSyncStorage') ) {
          var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
                      .getService(Components.interfaces.nsIWindowWatcher);
          var res = ww.openWindow(ww.activeWindow,
@@ -320,7 +320,7 @@ salrPersistObject.prototype = {
       }
       try
       {
-         if (this.toggle_useRemoteSyncStorage) {
+         if (this.getPreference('useRemoteSyncStorage')) {
             this._DoAsynchronousSync(syncCallback, trace);
             res = {bad:false, msg:"syncing..."};
          } else {
@@ -332,11 +332,6 @@ salrPersistObject.prototype = {
       }
       this.GenerateNextSyncTime();
       return res;
-   },
-
-   GetSyncUrl: function()
-   {
-      return this.string_remoteSyncStorageUrl;
    },
 
 /*
@@ -371,7 +366,7 @@ salrPersistObject.prototype = {
       var sto = this._syncTransferObject;
       this._syncTrace = trace;
       trace("Getting remote file...");
-      sto.getFile(this.GetSyncUrl(), this._dbfn, function(status) { that._AsyncSync1(status); });
+      sto.getFile(this.getPreference('remoteSyncStorageUrl'), this._dbfn, function(status) { that._AsyncSync1(status); });
    },
 
    _AsyncComplete: function(status)
@@ -400,7 +395,7 @@ salrPersistObject.prototype = {
       this.SaveXML();
       trace("Uploading remote file...");
       var that = this;
-      sto.sendFile(this.GetSyncUrl(), this._fn, function(istatus) { that._AsyncSync2(istatus); });
+      sto.sendFile(this.getPreference('remoteSyncStorageUrl'), this._fn, function(istatus) { that._AsyncSync2(istatus); });
    },
 
    _AsyncSync2: function(istatus)
@@ -873,7 +868,7 @@ salrPersistObject.prototype = {
       var xdoc = this.xmlDoc;
       if (typeof(xdoc)=="undefined" || !xdoc)
          return;
-      var expireDate = new Date( (new Date().getTime()) - (this.int_expireMinAge * (1000*60*60*24)) );
+      var expireDate = new Date( (new Date().getTime()) - (this.getPreference('expireMinAge') * (1000*60*60*24)) );
       var expireyear = new String( expireDate.getYear()+1900 );
       var expiremonth = new String( expireDate.getMonth()+1 );
       var expireday = new String( expireDate.getDate() );
@@ -928,7 +923,7 @@ salrPersistObject.prototype = {
         mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
       }
 
-      var expireDate = new Date( (new Date().getTime()) - (this.int_expireMinAge * (1000*60*60*24)) );
+      var expireDate = new Date( (new Date().getTime()) - (this.getPreference('expireMinAge') * (1000*60*60*24)) );
       var expireyear = new String( expireDate.getYear()+1900 );
       var expiremonth = new String( expireDate.getMonth()+1 );
       var expireday = new String( expireDate.getDate() );
@@ -943,6 +938,7 @@ salrPersistObject.prototype = {
 
    },
 
+/* these are old and retarded ~ tivac
    LoadPrefs: function()
    {
       this._LoadTypePrefs("color","char");
@@ -960,6 +956,7 @@ salrPersistObject.prototype = {
       this._SaveTypePrefs("string","char");
       this._SaveTypePrefs("int","int");
    },
+*/
 
    ProfileInit: function(isWindows)
    {
@@ -969,21 +966,21 @@ salrPersistObject.prototype = {
       this._isWindows = isWindows;
       try {
          this.AttachShutdownObserver();
-         this.LoadPrefs();
-         if ( this.string_databaseStoragePath.indexOf("%profile%")==0 ) {
-            this._dbfn = GetUserProfileDirectory( this.string_databaseStoragePath.substring(9), this._isWindows );
+         //this.LoadPrefs();
+         if ( this.getPreference('databaseStoragePath').indexOf("%profile%")==0 ) {
+            this._dbfn = GetUserProfileDirectory(this.getPreference('databaseStoragePath').substring(9), this._isWindows );
          } else {
-            this._dbfn = this.string_databaseStoragePath;
+            this._dbfn = this.getPreference('databaseStoragePath');
          }
-         if ( this.string_persistStoragePath.indexOf("%profile%")==0 ) {
-            this._fn = GetUserProfileDirectory( this.string_persistStoragePath.substring(9), this._isWindows );
+         if ( this.getPreference('persistStoragePath').indexOf("%profile%")==0 ) {
+            this._fn = GetUserProfileDirectory( this.getPreference('persistStoragePath').substring(9), this._isWindows );
          } else {
-            this._fn = this.string_persistStoragePath;
+            this._fn = this.getPreference('persistStoragePath');
          }
-         if ( this.string_forumListStoragePath.indexOf("%profile%")==0 ) {
-            this._flfn = GetUserProfileDirectory( this.string_forumListStoragePath.substring(9), this._isWindows );
+         if ( this.getPreference('forumListStoragePath').indexOf("%profile%")==0 ) {
+            this._flfn = GetUserProfileDirectory( this.getPreference('forumListStoragePath').substring(9), this._isWindows );
          } else {
-            this._flfn = this.string_forumListStoragePath;
+            this._flfn = this.getPreference('forumListStoragePath');
          }
          this.LoadXML();
          this.CleanupSQL();
@@ -1058,6 +1055,7 @@ salrPersistObject.prototype = {
    _flfn: null,
    _xmlDoc: null,
 
+/* remove before 2.0 release	
    _LoadTypePrefs: function(prefType,dataType)
    {
       var propname;
@@ -1111,18 +1109,18 @@ salrPersistObject.prototype = {
    },
 
    _SaveTypePrefs: function(prefType,dataType) {
-      var propname;
+	  var propname;
       for (propname in this)
       {
-         if ( propname.indexOf(prefType+"_")==0 )
+         if( propname.indexOf(prefType + "_") == 0)
          {
             var prefName = propname.substring( 1 + prefType.length );
-            prefName = "salastread."+prefType+"."+prefName;
+            prefName = "salastread." + prefType + "." + prefName;
             this._SetPref(prefName, this[propname], dataType);
          }
       }
    },
-
+*/
 	/* Is this function safe to delete?
    _OLDSaveTypePrefs: function(prefType,dataType)
    {
@@ -1266,8 +1264,7 @@ salrPersistObject.prototype = {
       }
    },
 	*/
-   IsDebugEnabled: function()
-   {
+   IsDebugEnabled: function() {
       return this.IsDevelopmentRelease();
    },
 
@@ -1357,7 +1354,7 @@ salrPersistObject.prototype = {
 		}
 		return mDBConn;
 	},
-
+	
 	// Returns the value at the given preference from the branch in the preference property
 	// @param: (string) Preference name
 	// @return: (boolean, string or int) Preference value or NULL if not found
