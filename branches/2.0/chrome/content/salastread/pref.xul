@@ -4,7 +4,6 @@
 
 <dialog id="salastreadpref"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        style="width: 52.3em; height: 49em;"
         onload="onLoad();"
         ondialogaccept="saveChanges();"
         title="SALastRead Configuration">

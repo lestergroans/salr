@@ -1,5 +1,5 @@
-
 function generalInit() {
+   initSettings('Quick Reply Settings');
    cbSet();
 }
 

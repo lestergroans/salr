@@ -17,8 +17,7 @@
   -moz-appearance: none;
   border: 1px solid transparent;
   background-color: transparent;
-  margin-left: 1px;
-  margin-right: 1px;
+  margin: 1px 1px;
   list-style-image: url("chrome://salastread/content/pref-icons.png")
 }
 
@@ -63,4 +62,7 @@
 #catExtButton       {-moz-image-region: rect(0px, 192px, 32px, 160px)}
 #catAdvancedButton  {-moz-image-region: rect(0px, 224px, 32px, 192px)}
 
-
+#salastreadpref {
+	width: 52.3em; 
+	height: 51em;
+}
