@@ -1038,7 +1038,7 @@ function buildSAForumMenu() {
    document.getElementById("menu_SAforums").style.display = "-moz-box";
 }
 */
-
+/* Can delete this, I think ~ duz
 function handleSubscribedThreadTable(e, subTable) {
    var doc = e.originalTarget;
    //alert("here " + subTable.nodeName);
@@ -1085,7 +1085,7 @@ function handleSubscribedThreadTable(e, subTable) {
       }
    }
 }
-
+*/
 function handleSubscriptions(doc) {
 	var subForm = persistObject.selectSingleNode(doc, doc, "//FORM[@method='get'][contains(@action,'member2.php')]");
 	if (!subForm) {
@@ -1174,7 +1174,7 @@ function handleSubscriptions(doc) {
 		}
 	}
 }
-
+/* Can delete this, I think ~ duz
 function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,topictitletd,topicretd,forumid) {
    var lpdtvalue = ConvertLPDateTimeToNum(StripSpaces(lpdate), StripSpaces(lptime));
    var isunread = IsLPDateTimeNew(true, lpdtvalue, threadid);
@@ -1323,6 +1323,7 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
       }
    }
 }
+*/
 
 // Do anything needed to the post list in a forum
 function handleForumDisplay(doc)
@@ -1396,25 +1397,20 @@ try {
 	}
 
 	// We'll need lots of variables for this
-	var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox, threadViewsBox;
-	var threadRatingBox, threadLastpostBox, threadTitle, threadId, threadOPId, threadRe;
-	var threadLRCount, theadOPStatus, unvistIcon, lpIcon, lastPostID;
+	var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox;
+	var threadLastpostBox, threadTitle, threadId, threadOPId, threadRe;
+	var threadLRCount, posterColor, posterBG, unvistIcon, lpIcon, lastPostID;
 	// Here be where we work on the thread rows
 	var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
 	for (i in threadlist)
 	{
 		if (inDump)
 		{
-			threadRatingBox = threadlist[i].getElementsByTagName('td')[0];
 			threadVoteBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='votes']");
 		}
 		else
 		{
 			threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
-		}
-		if (!inSAMart && !inDump)
-		{
-			threadRatingBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='rating']");
 		}
 		if (inAskTell)
 		{
@@ -1428,14 +1424,33 @@ try {
 			// It's an announcement so skip the rest
 			continue;
 		}
-		threadViewsBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='views']");
 		threadLastpostBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='lastpost']");
 		threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
 		threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
+		// If thread is ignored might as well stop now
+		if (persistObject.isThreadIgnored(threadId))
+		{
+			threadlist[i].parentNode.deleteRow(i);
+			continue;
+		}
 		threadLRCount = persistObject.getLastReadPostCount(threadId);
 		threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
 		threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
-		threadOPStatus = persistObject.getPosterStatus(threadOPId);
+		posterColor = false;
+		posterBG = false;
+		if (persistObject.isMod(threadOPId))
+		{
+			posterColor = persistObject.getPreference("modColor");
+			posterBG =  persistObject.getPreference("modBackground");
+		}
+		if (persistObject.isAdmin(threadOPId))
+		{
+			posterColor = persistObject.getPreference("adminColor");
+			posterBG =  persistObject.getPreference("adminBackground");
+		}
+		//persistObject.getPosterColor(threadOPId);
+		//persistObject.getPosterBackground(threadOPId);
+
 		// So right click star/ignore works
 		threadlist[i].className = "salastread_thread_" + threadId;
 		// Replace the thread icon with a linked thread icon
@@ -1505,23 +1520,17 @@ try {
 		{
 			persistObject.insertStar(doc, threadTitleBox);
 		}
-		if (threadOPStatus && persistObject.getPreference("highlightUsernames"))
+		if (persistObject.getPreference("highlightUsernames"))
 		{
-			if (persistObject.getPreference("highlightThreadBackgroundsInstead"))
+			if (posterBG != false)
 			{
-				threadAuthorBox.style.backgroundColor = threadOPStatus;
-				threadAuthorBox.getElementsByTagName("a")[0].style.color = "#000000";
+				threadAuthorBox.style.backgroundColor = posterBG;
 			}
-			else
+			if (posterColor != false)
 			{
-				threadAuthorBox.getElementsByTagName("a")[0].style.color = threadOPStatus;
+				threadAuthorBox.getElementsByTagName("a")[0].style.color = posterColor;
+				threadAuthorBox.getElementsByTagName("a")[0].style.fontWeight = "bold";
 			}
-			threadAuthorBox.getElementsByTagName("a")[0].style.fontWeight = "bold";
-		}
-		// If thread is ignored
-		if (persistObject.isThreadIgnored(threadId))
-		{
-			threadlist[i].parentNode.deleteRow(i);
 		}
 	}
 	}
@@ -1532,14 +1541,22 @@ try {
 	}
 }
 }
-function removeThread() {
-	persistObject.removeThread(this.id.match(/unread_(\d+)/)[1]);
+function removeThread(evt) {
+	//var doc = evt.originalTarget.ownerDocument;
+	var threadid = this.id.match(/unread_(\d+)/)[1];
+	persistObject.removeThread(threadid);
 	for (var i=0;i<this.parentNode.parentNode.childNodes.length;i++)
 	{
 		if (this.parentNode.parentNode.childNodes[i].nodeName != "#text")
 		{
-			this.parentNode.parentNode.childNodes[i].style.backgroundColor = '';
+			this.parentNode.parentNode.childNodes[i].style.backgroundColor = "";
+			this.parentNode.parentNode.childNodes[i].style.backgroundImage = "";
+			this.parentNode.parentNode.childNodes[i].style.backgroundRepeat = "";
 		}
+	}
+	if (this.parentNode.getElementsByTagName('a')[0].id == "jumptolast_"+threadid)
+	{
+		this.parentNode.removeChild(this.parentNode.getElementsByTagName('a')[0]);
 	}
 	this.parentNode.removeChild(this);
 }
@@ -1551,6 +1568,7 @@ function SALR_MakeClassSafe(unsafestr) {
    return result;
 }
 
+/* Can delete this I think ~ duz
 function createGoToLastReadPostButton(doc, lkpid) {
    var golink = doc.createElement("A");
    golink.href = "http://forums.somethingawful.com/showthread.php?s=&postid="+lkpid+"#post"+lkpid;
@@ -1563,7 +1581,8 @@ function createGoToLastReadPostButton(doc, lkpid) {
    golink.appendChild(goimg);
    return golink;
 }
-
+*/
+/* Can delete this I think ~ duz
 function createUnvisitButton(doc, threadid, topicrow, unvisitDecolors, forumid) {
    var dellink = doc.createElement("A");
    dellink.href = "javascript:void(0);";
@@ -1578,7 +1597,7 @@ function createUnvisitButton(doc, threadid, topicrow, unvisitDecolors, forumid) 
    dellink.appendChild(delimg);
    return dellink;
 }
-
+*/
 function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) {
    //alert("unvisiting "+threadid);
    try {
@@ -2161,7 +2180,15 @@ var doc = e.originalTarget;
 	}
 
 	var failed, i, zzzz;	// Little variables that'll get reused
-	var forumid = persistObject.getForumID(doc);
+	try
+	{
+		var forumid = persistObject.getForumID(doc);
+	}
+	catch(zzzz)
+	{
+		// Can't get the forum id so abort for now
+		return;
+	}
 	// The following forums have special needs that must be dealt with
 	var inFYAD = persistObject.inFYAD(forumid);
 	var inBYOB = persistObject.inBYOB(forumid);
@@ -2227,7 +2254,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	doc.body.className += " salastread_forum"+forumid;
 
 	// Figure out the current threadid
-	var replybutton = persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newreply&threadid=')]");
+	var replybutton = persistObject.selectSingleNode(doc, doc, "//DIV[@id='content']//A[contains(@href,'action=newreply&threadid=')]");
 	if (replybutton)
 	{
 		var threadid = replybutton.href.match(/threadid=(\d+)/)[1];
@@ -2244,8 +2271,8 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	doc.body.className += " salastread_thread_"+threadid;
 
 	// Get the original poster and update the database if we don't know it yet
-	var sop = persistObject.GetOPFromData(threadid);
-	if (!sop && curPage == 1)
+	var threadOP = persistObject.GetOPFromData(threadid);
+	if (!threadOP && curPage == 1)
 	{
 		var opInfo = persistObject.selectSingleNode(doc, doc, "//TABLE[contains(@class,'post')]//A[contains(@href,'action=getinfo&userid=')]");
 		if (opInfo)
@@ -2282,7 +2309,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	// Replace post button
 	if (persistObject.getPreference("useQuickQuote") && !inGasChamber)
 	{
-		var postbuttons = persistObject.selectNodes(doc, doc, "//A[contains(@href,'action=newthread')]");
+		var postbuttons = persistObject.selectNodes(doc, doc, "//DIV[@id='content']//A[contains(@href,'action=newthread')]");
 		if (postbuttons.length > 0)
 		{
 			for (i in postbuttons)
@@ -2292,7 +2319,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 		}
 		if (!threadClosed)
 		{
-			var replybuttons = persistObject.selectNodes(doc, doc, "//A[contains(@href,'action=newreply&threadid')]");
+			var replybuttons = persistObject.selectNodes(doc, doc, "//DIV[@id='content']//A[contains(@href,'action=newreply&threadid')]");
 			if (replybuttons.length > 0)
 			{
 				for (i in replybuttons)
@@ -2304,39 +2331,102 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	}
 
 	// Update the last read total
-	var editbuttons = persistObject.selectNodes(doc, doc, "//A[contains(@href,'action=editpost')]");
+	var editbuttons = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'postbar')]//A[contains(@href,'action=editpost')]");
 	var postcount = (perpage * (curPage-1)) + editbuttons.length;
 	persistObject.setLastReadPostCount(threadid, postcount);
 
-	var curPostId, colorDark = true, colorOfPost;
+	var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId;
+	var posterColor, posterBG, userNameBox;
+	doc.postlinks = new Array;
 	// Loop through each post
 	var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
 	for (i in postlist)
 	{
 		curPostId = postlist[i].id.match(/post(\d+)/)[1];
+		postcount = (perpage * (curPage-1)) + i + 1;
+		profileLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'userid=')]");
+		posterId = profileLink.href.match(/userid=(\d+)/i)[1];
+		userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR/TD//DL//DT[contains(@class,'author')]");
+		posterColor = false;
+		posterBG = false;
+		if (posterId == threadOP)
+		{
+			posterColor = persistObject.getPreference("opColor");
+			posterBG =  persistObject.getPreference("opBackground");
+		}
+		if (persistObject.isMod(posterId))
+		{
+			posterColor = persistObject.getPreference("modColor");
+			posterBG =  persistObject.getPreference("modBackground");
+		}
+		if (persistObject.isAdmin(posterId))
+		{
+			posterColor = persistObject.getPreference("adminColor");
+			posterBG =  persistObject.getPreference("adminBackground");
+		}
+		//persistObject.getPosterColor(posterId);
+		//persistObject.getPosterBackground(posterId);
+		if (persistObject.getPreference("highlightUsernames") && posterColor != false)
+		{
+			userNameBox.style.color = posterColor;
+		}
 		if (!persistObject.getPreference("dontHighlightPosts"))
 		{
-			if (curPostId <= lastReadPostId)
+			if (posterBG != false)
+			{
+				persistObject.colorPost(doc, postlist[i], posterBG, forumid);
+			}
+			else if (curPostId <= lastReadPostId)
 			{
 				if (colorDark)
 				{
-					colorOfPost = persistObject.getPreference("seenPostDark");
+					posterBG = persistObject.getPreference("seenPostDark");
 				}
 				else
 				{
-					colorOfPost = persistObject.getPreference("seenPostLight");
+					posterBG = persistObject.getPreference("seenPostLight");
 				}
-				persistObject.colorPost(doc, postlist[i], colorOfPost, forumid);
+				persistObject.colorPost(doc, postlist[i], posterBG, forumid);
 			}
 		}
 		colorDark = !colorDark;
+		postIdLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'#post')]");
+		postid = postIdLink.href.match(/#post(\d+)/i)[1];
+		if (persistObject.getPreference("insertPostTargetLink"))
+		{
+			var slink = doc.createElement("a");
+			slink.href = "/showthread.php?action=showpost&postid="+postid;
+			slink.title = "Show Single Post";
+			slink.appendChild(doc.createTextNode("1"));
+			postIdLink.parentNode.insertBefore(slink, postIdLink);
+			postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
+		}
+		if (persistObject.getPreference("insertPostLastMarkLink"))
+		{
+			// If SALR_ChangeLastReadOnThread gets rewritten, then this should work
+			resetLink = doc.createElement("a");
+			resetLink.href = "javascript:void('lr',"+postid+");";
+			resetLink.title = "Set \"Last Read\" post in this thread to this post";
+			resetLink.threadid = threadid;
+			resetLink.postid = postid;
+			resetLink.postcount = postcount;
+			resetLink.parentpost = postlist[i];
+			resetLink.onclick = SALR_ChangeLastReadOnThread;
+			resetLink.appendChild(doc.createTextNode("<"));
+			doc.postlinks[doc.postlinks.length] = resetLink;
+			postIdLink.parentNode.insertBefore(resetLink, postIdLink);
+			postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
+		}
+		// TODO: Audit this function
+		SALR_ProcessPostImages(postlist[i]);
+		// TODO: Put some code here to read the mod/admin star and store that info
 	}
 
 	// Get the last post #
-	var postIdLink = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'postbar')]//A[contains(@href,'#post')]");
-	var lastPostId = postIdLink[postIdLink.length-1];
-	lastPostId = lastPostId.href.match(/#post(\d+)/i)[1];
+	lastPostId = postIdLink.href.match(/#post(\d+)/i)[1];
 	persistObject.setLastPostID(threadid, lastPostId);
+
+	// Insert timestamp of last viewing
 
 }
 
@@ -2358,12 +2448,12 @@ try {
    var updateTo = null;
    var updateLastPostID = null;
    var isEven = false;
-   doc.postlinks = new Array;
    for (var x=0; x<resarray.length; x++) {
       if (!(resarray[x].className.match(/ignored/))) {
 			  //var postdate = resarray[x].firstChild.nodeValue;
 			  var postbarnode = selectSingleNode(doc, resarray[x], "TBODY/TR[@class='postbar']");
 			  var userinfonode = selectSingleNode(doc, resarray[x], "TBODY/TR/TD[@class='userinfo']");
+			  /* duz
 			  if (isEven) {
 				 resarray[x].className += " salastread_even";
 				 //postbarnode.className += " salastread_even";
@@ -2372,40 +2462,26 @@ try {
 				 //postbarnode.className += " salastread_odd";
 			  }
 			  isEven = !isEven;
+			  */
 			  var postdatenode = selectSingleNode(doc, postbarnode, "TD[@class='postdate']");
+			  /* duz
 			  if (postdatenode.firstChild.nodeName=="FONT") {
 				 postdatenode = postdatenode.firstChild;
 			  }
 			  var postdate = postdatenode.lastChild.nodeValue;
 
 			  postdate = StripSpaces(postdate.substring(0, postdate.length));
-			  //alert("postdate = "+postdate);
-			  //try {
 			  var posttime;
-			  //if (inFYAD) {
-			  //   posttime = StripSpaces(resarray[x].firstChild.nextSibling.firstChild.firstChild.nodeValue);
-			  //} else {
-			  //   posttime = StripSpaces(resarray[x].firstChild.nextSibling.firstChild.nodeValue);
-			  //}
 			  var pdmatch = postdate.match(/^(... \d\d, \d\d\d\d)\:? (\d\d\:\d\d)$/);
 			  if (pdmatch) {
 				  postdate = pdmatch[1];
 				  posttime = pdmatch[2];
 			  }
-			  //} catch (e) { resarray[x].style.backgroundColor = "red"; throw e; }
 			  var postdtvalue = ConvertLPDateTimeToNum(postdate, posttime);
+			  */
 			  var thisel = resarray[x];
-			  //while ( thisel.nodeName != "TABLE" ) {
-			  //   thisel = thisel.parentNode;
-			  //}
 
 			  var postid = 0;
-			  //var postidlink = selectSingleNode(doc, thisel, "TBODY/TR[2]/TD[2]/TABLE/TBODY/TR[1]/TD[2]//A[contains(@href,'postid=')]");
-			  //if (postidlink) {
-			  //   var postidmatch = postidlink.href.match(/postid=(\d+)/);
-			  //   postid = postidmatch[1];
-			  //}
-				  // XXX: The // in the next xpath can be changed to / when unclosed font tags stop messing with the forum DOM tree
 			  var postlink = selectSingleNode(doc, postbarnode, "TD[@class='postdate']//A[contains(@href,'#')]").href;
 			  postid = postlink.match(/post(\d+)/)[1];
 			  //alert("postid = "+postid);
@@ -2481,20 +2557,24 @@ try {
 			  }
 			  if (!inFYAD) {
 				 slurpIntoThreadCache(threadid);
+				 /* ~ duz
 				 if ( cachedThreadEntry && cachedThreadEntry.getAttribute("op")==posteruserid ) {
 					thiselClassNameAdd += " somethingawfulforum_postbyOP";
 					posternodeClassNameAdd += " somethingawfulforum_usernameOP";
 					posternodeparentClassNameAdd += " somethingawfulforum_parentusernameOP";
 				 }
+				 */
 				 //if ( SALR_IsModerator( posteruserid, forumid ) ) {
+				/* duz
 				var modcheck = selectSingleNode(doc, userinfonode, "DL[@class='userinfo']/DT[@class='author']/IMG[@title='Moderator']");
 				if (modcheck && isloggedin) {
 					thiselClassNameAdd += " somethingawfulforum_postbyMODERATOR";
 					posternodeClassNameAdd += " somethingawfulforum_usernameMODERATOR";
 					posternodeparentClassNameAdd += " somethingawfulforum_parentusernameMODERATOR";
 				 }
+				 */
 				 //var admincheck = selectNodes(doc, thisel, "TBODY/TR[2]/TD[2]/TABLE/TBODY/TR[1]/TD[2]/DIV/A[contains(@href,'modalert.php')]")[0];
-
+/* ~ duz
 				 //Checking for admins is harder than it used to be :argh:
 				var admincheck = selectSingleNode(doc, postbarnode, "TD[@class='postlinks']/UL[@class='postbuttons']/LI/A/IMG[contains(@src,'report')]");
 				// check for an admin star, make sure it isn't a mod star
@@ -2507,6 +2587,7 @@ try {
 						posternodeparentClassNameAdd += " somethingawfulforum_parentusernameADMIN";
 					}
 				 }
+				 */
 			  }
 
 			  // Apply classes...
@@ -2610,7 +2691,6 @@ try {
 			  }
 		*/
 
-			  SALR_ProcessPostImages(thisel);
 			  //alert("images processed");
 
 			  if ( persistObject.toggle_insertPostTargetLink ||
@@ -2634,6 +2714,7 @@ try {
 					   posttimenode.appendChild(plink);
 					}
 		*/
+		/* duz
 					if (posttimenode) {
 					   var slink = doc.createElement("A");
 					   slink.href = "http://forums.somethingawful.com/showthread.php?action=showpost&postid="+postid;
@@ -2642,6 +2723,8 @@ try {
 					   posttimenode.parentNode.insertBefore(slink, posttimenode);
 					   posttimenode.parentNode.insertBefore(doc.createTextNode(" "), posttimenode);
 					}
+					*/
+					/*
 					if (posttimenode && persistObject.toggle_insertPostLastMarkLink ) {
 					   var plink = doc.createElement("A");
 					   plink.href = "javascript:void('lr',"+postid+");";
@@ -2656,6 +2739,7 @@ try {
 					   posttimenode.parentNode.insertBefore(plink, posttimenode);
 					   posttimenode.parentNode.insertBefore(doc.createTextNode(" "), posttimenode);
 					}
+					*/
 				 }
 			  }
 			  //alert("l inserted");

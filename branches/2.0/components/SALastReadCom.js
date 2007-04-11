@@ -1591,7 +1591,7 @@ salrPersistObject.prototype = {
 	{
 		var statement = this.database.createStatement("SELECT `username` FROM `userdata` WHERE `mod` = 1 AND `userid` = ?1");
 		statement.bindInt32Parameter(0,userid);
-		isMod = statement.executeStep();
+		var isMod = statement.executeStep();
 		statement.reset();
 		return isMod;
 	},
@@ -1603,7 +1603,7 @@ salrPersistObject.prototype = {
 	{
 		var statement = this.database.createStatement("SELECT `username` FROM `userdata` WHERE `admin` = 1 AND `userid` = ?1");
 		statement.bindInt32Parameter(0,userid);
-		isMod = statement.executeStep();
+		var isAdmin = statement.executeStep();
 		statement.reset();
 		return isAdmin;
 	},
@@ -1623,10 +1623,7 @@ salrPersistObject.prototype = {
 		{
 			var postbutton = this.selectSingleNode(doc, doc, "//UL[@class='postbuttons']//A[contains(@href,'forumid=')]");
 			var inpostbutton = postbutton.href.match(/forumid=(\d+)/i);
-			if (inpostbutton != null)
-			{
-				fid = inpostbutton[1];
-			}
+			fid = inpostbutton[1];
 		}
 		if (fid == 0)
 		{
@@ -1679,24 +1676,44 @@ salrPersistObject.prototype = {
 		return result;
 	},
 
-	// Fetches the user's status code from the database
+	// Fetches the user's color code from the database
 	// @param: (int) User ID
 	// @returns: (string) Hex Colorcode to color user, or (bool) false if not found
-	getPosterStatus: function(userid)
+	getPosterColor: function(userid)
 	{
-		var userstatus;
-		var statement = this.database.createStatement("SELECT `status` FROM `userdata` WHERE `userid` = ?1");
+		var usercolor;
+		var statement = this.database.createStatement("SELECT `color` FROM `userdata` WHERE `userid` = ?1");
 		statement.bindInt32Parameter(0,userid);
 		if (statement.executeStep())
 		{
-			userstatus = statement.getString(0);
+			usercolor = statement.getString(0);
 		}
 		else
 		{
-			userstatus = false;
+			usercolor = false;
 		}
 		statement.reset();
-		return userstatus;
+		return usercolor;
+	},
+
+	// Fetches the user's background color code from the database
+	// @param: (int) User ID
+	// @returns: (string) Hex Colorcode to color user, or (bool) false if not found
+	getPosterBackground: function(userid)
+	{
+		var userbgcolor;
+		var statement = this.database.createStatement("SELECT `background` FROM `userdata` WHERE `userid` = ?1");
+		statement.bindInt32Parameter(0,userid);
+		if (statement.executeStep())
+		{
+			userbgcolor = statement.getString(0);
+		}
+		else
+		{
+			userbgcolor = false;
+		}
+		statement.reset();
+		return userbgcolor;
 	},
 
 	// Get the Post ID of the last read post
@@ -1959,6 +1976,10 @@ salrPersistObject.prototype = {
 	{
 		return (forumid == 61 || forumid == 77 || forumid == 78 || forumid == 79);
 	},
+	inQCS: function(forumid)
+	{
+		return (forumid == 188);
+	},
 
 	// Colors the post passed to it
 	// @param:
@@ -2001,7 +2022,7 @@ salrPersistObject.prototype = {
 		{
 			threadIconBox = this.selectSingleNode(doc, thread, "TD[@class='icon']");
 		}
-		if (!this.inSAMart(forumID) && !this.inDump(forumID))
+		if (!this.inSAMart(forumID) && !this.inDump(forumID) && !this.inQCS(forumID))
 		{
 			threadRatingBox = this.selectSingleNode(doc, thread, "TD[@class='rating']");
 		}
@@ -2018,7 +2039,7 @@ salrPersistObject.prototype = {
 		threadAuthorBox.style.backgroundColor = darkColorToUse;
 		threadRepliesBox.style.backgroundColor = lightColorToUse;
 		threadViewsBox.style.backgroundColor = darkColorToUse;
-		if (!this.inSAMart(forumID))
+		if (!this.inSAMart(forumID) && !this.inQCS(forumID))
 		{
 			threadRatingBox.style.backgroundColor = lightColorToUse;
 		}
@@ -2070,6 +2091,7 @@ salrPersistObject.prototype = {
 		lpGo = doc.createElement("a");
 		lastPostID = this.getLastPostID(threadId);
 		lpGo.setAttribute("href", "/showthread.php?postid=" + lastPostID + "#post" + lastPostID);
+		lpGo.setAttribute("id", "jumptolast_"+threadId);
 		lpIcon = doc.createElement("img");
 		lpIcon.setAttribute("src", "chrome://salastread/skin/lastpost.png");
 		lpIcon.style.cssFloat = "right";
