@@ -29,7 +29,7 @@ function SALRClass()
     var SALR_checkKillSwitch = function()
     {
         persistObject._killChecked = true;
-        if (persistObject.toggle_dontCheckKillSwitch)
+        if (persistObject.getPreference('dontCheckKillSwitch'))
             return;
 
         var kc = new XMLHttpRequest();
@@ -197,7 +197,7 @@ function SALRClass()
                     var submenu = document.createElement("menu");
                     submenu.setAttribute("label", thisforum.getAttribute("name"));
                     var submenupopup = document.createElement("menupopup");
-                    if (persistObject.toggle_useSAForumMenuBackground)
+                    if (persistObject.getPreference('useSAForumMenuBackground'))
                         submenupopup.setAttribute("class", "SALR_GrenadeBackground");
                     submenu.appendChild(submenupopup);
                     SALR_populateForumMenuFrom(nested_menus, submenupopup, thisforum, pinnedForumNumbers, pinnedForumElements);
@@ -285,7 +285,7 @@ function SALRClass()
  
     var SALR_buildForumMenu = function()
     {
-        if (!persistObject.toggle_showSAForumMenu || !persistObject.forumListXml || persistObject.forumListXml == null) return;
+        if (!persistObject.getPreference('showSAForumMenu') || !persistObject.forumListXml || persistObject.forumListXml == null) return;
 
         //try
         //{
@@ -308,7 +308,7 @@ function SALRClass()
                 document.getElementById("main-menubar").insertBefore(menuel, iBefore);
                 menupopup.addEventListener('popupshowing', SALR_SAMenuPopup_popupshowing, false);
             }
-            if (persistObject.toggle_useSAForumMenuBackground)
+            if (persistObject.getPreference('useSAForumMenuBackground'))
                 menupopup.className = "SALR_GrenadeBackground";
             else
                 menupopup.className = "";
@@ -334,11 +334,11 @@ function SALRClass()
             };
             
             var forumsDoc = persistObject.forumListXml;
-            var nested_menus = persistObject.toggle_nestSAForumMenu;
+            var nested_menus = persistObject.getPreference('nestSAForumMenu');
             var pinnedForumNumbers = new Array();
             var pinnedForumElements = new Array();
-            if (nested_menus && persistObject.string_menuPinnedForums)
-                pinnedForumNumbers = persistObject.string_menuPinnedForums.split(",");
+            if (nested_menus && persistObject.getPreference('menuPinnedForums'))
+                pinnedForumNumbers = persistObject.getPreference('menuPinnedForums').split(",");
 
             menupopup.appendChild(_makeMenuItem(
                 { "label": "Something Awful",
@@ -368,7 +368,7 @@ function SALRClass()
             {
                 menupopup.appendChild(document.createElement("menuseparator"));
                 SALR_populatePinnedForums(menupopup, pinnedForumElements, pinnedForumNumbers);
-                if (persistObject.toggle_showMenuPinHelper)
+                if (persistObject.getPreference('showMenuPinHelper'))
                 {
                     var ms = document.createElement("menuseparator");
                     ms.id = "SALR_PinHelperSep";
@@ -395,11 +395,11 @@ function SALRClass()
         var href = doc.location.href;
         if (doc.__salastread_processed)
         {
-            if (persistObject.toggle_reanchorThreadOnLoad)
+            if (persistObject.getPreference('reanchorThreadOnLoad'))
             {
                 if (href.match(/^http:\/\/forums?\.somethingawful\.com\//i) && href.indexOf("showthread.php?")!=-1)
                 {
-                    if (persistObject.toggle_reanchorThreadOnLoad)
+                    if (persistObject.getPreference('reanchorThreadOnLoad'))
                     {
                         var hashmatch = href.match(/\#(.*)$/);
                         if (hashmatch)

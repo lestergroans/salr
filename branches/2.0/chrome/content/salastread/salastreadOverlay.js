@@ -367,17 +367,17 @@ function SALRHexToNumber(hex) {
 
 function SALR_MakeShowThreadCSS() {
    var csstxt = "";
-   csstxt += "table.salastread_seenpost.salastread_odd tr { background-color: "+persistObject.color_seenPostDark+" !important; }\n\n";
-   csstxt += "table.salastread_seenpost.salastread_even tr { background-color: "+persistObject.color_seenPostLight+" !important; }\n\n";
-   //csstxt += "table.salastread_unseenpost.salastread_odd tr { background-color: "+persistObject.color_unseenPostDark+" !important; }\n\n";
-   //csstxt += "table.salastread_unseenpost.salastread_even tr { background-color: "+persistObject.color_unseenPostLight+" !important; }\n\n";
-   if ( persistObject.toggle_hideTitle ) {
+   csstxt += "table.salastread_seenpost.salastread_odd tr { background-color: "+persistObject.getPreference('seenPostDark')+" !important; }\n\n";
+   csstxt += "table.salastread_seenpost.salastread_even tr { background-color: "+persistObject.getPreference('seenPostLight')+" !important; }\n\n";
+   //csstxt += "table.salastread_unseenpost.salastread_odd tr { background-color: "+persistObject.getPreference('unseenPostDark')+" !important; }\n\n";
+   //csstxt += "table.salastread_unseenpost.salastread_even tr { background-color: "+persistObject.getPreference('unseenPostLight')+" !important; }\n\n";
+   if ( persistObject.getPreference('hideTitle') ) {
       csstxt += "dd.title * { display: none; }\n\n";
-   } else if ( persistObject.toggle_resizeCustomTitleText ) {
+   } else if ( persistObject.getPreference('resizeCustomTitleText') ) {
       csstxt += "dd.title * { font-size: 8pt; }\n\n";
    }
 
-   if ( persistObject.toggle_hideSignature)
+   if ( persistObject.getPreference('hideSignature'))
    {
 	   //So yeah firefox comes up with a pretty unique way of
 	   //interpretting SA's invalid HTML......
@@ -402,7 +402,7 @@ function SALR_MakeForumDisplayCSS() {
          res += "tr."+cls+" td.rating";
       }
       res += " { background-repeat: repeat-x !important; background-color: "+basecolor + " !important";
-      if (highlightcolor && !persistObject.toggle_disableGradients) {
+      if (highlightcolor && !persistObject.getPreference('disableGradients')) {
          res += "; background-image: url(x-salr-gradientpng:" +
                     SALRHexToNumber(highlightcolor.substring(1,3)) + "," +
                     SALRHexToNumber(highlightcolor.substring(3,5)) + "," +
@@ -412,9 +412,9 @@ function SALR_MakeForumDisplayCSS() {
       res += "; }\n\n";
 
       res += "tr.salastread_postedinthread td.replies { background-repeat: repeat-x !important; background-color: "+
-                    persistObject.color_postedInThreadRe + " !important";
-      if (persistObject.color_postedInThreadReHighlight && !persistObject.toggle_disableGradients) {
-         var highlightcolor = persistObject.color_postedInThreadReHighlight;
+                    persistObject.getPreference('postedInThreadRe') + " !important";
+      if (persistObject.getPreference('postedInThreadReHighlight') && !persistObject.getPreference('disableGradients')) {
+         var highlightcolor = persistObject.getPreference('postedInThreadReHighlight');
          res += "; background-image: url(x-salr-gradientpng:" +
                     SALRHexToNumber(highlightcolor.substring(1,3)) + "," +
                     SALRHexToNumber(highlightcolor.substring(3,5)) + "," +
@@ -427,12 +427,12 @@ function SALR_MakeForumDisplayCSS() {
    };
 
    var csstext = "";
-   csstext += sub("salastread_readthread", true, persistObject.color_readDark, persistObject.color_readDarkHighlight);
-   csstext += sub("salastread_readthread", false, persistObject.color_readLight, persistObject.color_readLightHighlight);
-   csstext += sub("salastread_readwithnewthread", true, persistObject.color_readWithNewDark, persistObject.color_readWithNewDarkHighlight);
-   csstext += sub("salastread_readwithnewthread", false, persistObject.color_readWithNewLight, persistObject.color_readWithNewLightHighlight);
-   //csstext += sub("salastread_unreadthread", true, persistObject.color_unreadDark, persistObject.color_unreadDarkHighlight);
-   //csstext += sub("salastread_unreadthread", false, persistObject.color_unreadLight, persistObject.color_unreadLightHighlight);
+   csstext += sub("salastread_readthread", true, persistObject.getPreference('readDark'), persistObject.getPreference('readDarkHighlight'));
+   csstext += sub("salastread_readthread", false, persistObject.getPreference('readLight'), persistObject.getPreference('readLightHighlight'));
+   csstext += sub("salastread_readwithnewthread", true, persistObject.getPreference('readWithNewDark'), persistObject.getPreference('readWithNewDarkHighlight'));
+   csstext += sub("salastread_readwithnewthread", false, persistObject.getPreference('readWithNewLight'), persistObject.getPreference('readWithNewLightHighlight'));
+   //csstext += sub("salastread_unreadthread", true, persistObject.getPreference('unreadDark'), persistObject.getPreference('unreadDarkHighlight'));
+   //csstext += sub("salastread_unreadthread", false, persistObject.getPreference('unreadLight'), persistObject.getPreference('unreadLightHighlight'));
    csstext += "td.replies { white-space: nowrap; }\n\n";
    csstext += ".salastread_newreplycount { font-weight: normal !important; }\n\n";
 
@@ -443,7 +443,7 @@ function changeBGColorsFromTo(doc, context, xpathbase, bgfrom, bgto, bgtohighlig
    var xarray = selectNodes(doc, context, xpathbase+"[@bgcolor='"+bgfrom+"']");
    for (var x=0; x<xarray.length; x++) {
       xarray[x].style.backgroundColor = bgto;
-      if ( bgtohighlight && !persistObject.toggle_disableGradients ) {
+      if ( bgtohighlight && !persistObject.getPreference('disableGradients') ) {
          xarray[x].style.backgroundRepeat = "repeat-x";
          xarray[x].style.backgroundImage = "url(x-salr-gradientpng:"+
               SALRHexToNumber( bgtohighlight.substring(1,3) ) + "," +
@@ -456,93 +456,93 @@ function changeBGColorsFromTo(doc, context, xpathbase, bgfrom, bgto, bgtohighlig
 }
 
 //function setSeenPostFYADColors(doc, context, xpathbase) {
-//   if ( persistObject.toggle_dontHighlightPosts ) { return; }
-//   changeBGColorsFromTo(doc, context, xpathbase, "#ffccff", persistObject.color_seenPostLightFYAD);
-//   changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc", persistObject.color_seenPostDarkFYAD);
+//   if ( persistObject.getPreference('dontHighlightPosts') ) { return; }
+//   changeBGColorsFromTo(doc, context, xpathbase, "#ffccff", persistObject.getPreference('seenPostLightFYAD'));
+//   changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc", persistObject.getPreference('seenPostDarkFYAD'));
 //}
 
 function setSeenPostColors(doc, context, xpathbase) {
-   if ( persistObject.toggle_dontHighlightPosts ) { return; }
-   //changeBGColorsFromTo(doc, context, xpathbase, "#f1f1f1", persistObject.color_seenPostLight);
-   //changeBGColorsFromTo(doc, context, xpathbase, "#dfdfdf", persistObject.color_seenPostDark);
+   if ( persistObject.getPreference('dontHighlightPosts') ) { return; }
+   //changeBGColorsFromTo(doc, context, xpathbase, "#f1f1f1", persistObject.getPreference('seenPostLight'));
+   //changeBGColorsFromTo(doc, context, xpathbase, "#dfdfdf", persistObject.getPreference('seenPostDark'));
    context.className += " salastread_seenpost";
    context.nextSibling.className += " salastread_seenpostbar";
 }
 
 //function setUnseenPostFYADColors(doc, context, xpathbase) {
-//   if ( persistObject.toggle_dontHighlightPosts ) { return; }
-//   changeBGColorsFromTo(doc, context, xpathbase, "#ffccff", persistObject.color_unseenPostLightFYAD);
-//   changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc", persistObject.color_unseenPostDarkFYAD);
+//   if ( persistObject.getPreference('dontHighlightPosts') ) { return; }
+//   changeBGColorsFromTo(doc, context, xpathbase, "#ffccff", persistObject.getPreference('unseenPostLightFYAD'));
+//   changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc", persistObject.getPreference('unseenPostDarkFYAD'));
 //}
 
 function setUnseenPostColors(doc, context, xpathbase) {
-   if ( persistObject.toggle_dontHighlightPosts ) { return; }
-   //changeBGColorsFromTo(doc, context, xpathbase, "#f1f1f1", persistObject.color_unseenPostLight);
-   //changeBGColorsFromTo(doc, context, xpathbase, "#dfdfdf", persistObject.color_unseenPostDark);
+   if ( persistObject.getPreference('dontHighlightPosts') ) { return; }
+   //changeBGColorsFromTo(doc, context, xpathbase, "#f1f1f1", persistObject.getPreference('unseenPostLight'));
+   //changeBGColorsFromTo(doc, context, xpathbase, "#dfdfdf", persistObject.getPreference('unseenPostDark'));
    context.className += " salastread_unseenpost";
    context.nextSibling.className += " salastread_unseenpostbar";
 }
 
 function setReadColors(doc, context, xpathbase) {
-   if ( persistObject.toggle_dontHighlightThreads ) { return; }
+   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
    var res = new Array(2);
    var r0 = changeBGColorsFromTo(doc, context, xpathbase, "#ffccff",
-      persistObject.color_readLight, persistObject.color_readLightHighlight);
+      persistObject.getPreference('readLight'), persistObject.getPreference('readLightHighlight'));
    var r1 = changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc",
-      persistObject.color_readDark, persistObject.color_readDarkHighlight);
+      persistObject.getPreference('readDark'), persistObject.getPreference('readDarkHighlight'));
    res[0] = changeBGColorsFromTo(doc, context, xpathbase, "#f4f4f4",
-      persistObject.color_readLight, persistObject.color_readLightHighlight);
+      persistObject.getPreference('readLight'), persistObject.getPreference('readLightHighlight'));
    res[1] = changeBGColorsFromTo(doc, context, xpathbase, "#e8e8e8",
-      persistObject.color_readDark, persistObject.color_readDarkHighlight);
+      persistObject.getPreference('readDark'), persistObject.getPreference('readDarkHighlight'));
    for (var x=0; x<r0.length; x++) { res[0].push(r0[x]); }
    for (var y=0; y<r1.length; y++) { res[1].push(r1[y]); }
    return res;
 }
 
 function setReadWithNewColors(doc, context, xpathbase) {
-   if ( persistObject.toggle_dontHighlightThreads ) { return; }
+   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
    var res = new Array(2);
    var r0 = changeBGColorsFromTo(doc, context, xpathbase, "#ffccff",
-      persistObject.color_readWithNewLight, persistObject.color_readWithNewLightHighlight);
+      persistObject.getPreference('readWithNewLight'), persistObject.getPreference('readWithNewLightHighlight'));
    var r1 = changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc",
-      persistObject.color_readWithNewDark, persistObject.color_readWithNewDarkHighlight);
+      persistObject.getPreference('readWithNewDark'), persistObject.getPreference('readWithNewDarkHighlight'));
    res[0] = changeBGColorsFromTo(doc, context, xpathbase, "#f4f4f4",
-      persistObject.color_readWithNewLight, persistObject.color_readWithNewLightHighlight);
+      persistObject.getPreference('readWithNewLight'), persistObject.getPreference('readWithNewLightHighlight'));
    res[1] = changeBGColorsFromTo(doc, context, xpathbase, "#e8e8e8",
-      persistObject.color_readWithNewDark, persistObject.color_readWithNewDarkHighlight);
+      persistObject.getPreference('readWithNewDark'), persistObject.getPreference('readWithNewDarkHighlight'));
    for (var x=0; x<r0.length; x++) { res[0].push(r0[x]); }
    for (var y=0; y<r1.length; y++) { res[1].push(r1[y]); }
    return res;
 }
 
 function setUnreadColors(doc, context, xpathbase) {
-   if ( persistObject.toggle_dontHighlightThreads ) { return; }
+   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
    var res = new Array(2);
    res[0] = changeBGColorsFromTo(doc, context, xpathbase, "#f4f4f4",
-      persistObject.color_unreadLight, persistObject.color_unreadLightHighlight);
+      persistObject.getPreference('unreadLight'), persistObject.getPreference('unreadLightHighlight'));
    res[1] = changeBGColorsFromTo(doc, context, xpathbase, "#e8e8e8",
-      persistObject.color_unreadDark, persistObject.color_unreadDarkHighlight);
+      persistObject.getPreference('unreadDark'), persistObject.getPreference('unreadDarkHighlight'));
    return res;
 }
 
 function setUnreadFYADColors(doc, context, xpathbase) {
-   if ( persistObject.toggle_dontHighlightThreads ) { return; }
+   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
    var res = new Array(2);
    res[0] = changeBGColorsFromTo(doc, context, xpathbase, "#ffccff",
-      persistObject.color_unreadLightFYAD, persistObject.color_unreadLightFYADHighlight);
+      persistObject.getPreference('unreadLightFYAD'), persistObject.getPreference('unreadLightFYADHighlight'));
    res[1] = changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc",
-      persistObject.color_unreadDarkFYAD, persistObject.color_unreadDarkFYADHighlight);
+      persistObject.getPreference('unreadDarkFYAD'), persistObject.getPreference('unreadDarkFYADHighlight'));
    return res;
 }
 
 function resetUnreadColors(unvisitDecolors) {
-   if ( persistObject.toggle_dontHighlightThreads ) { return; }
+   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
    for (var i=0; i<unvisitDecolors[0].length; i++) {
-      unvisitDecolors[0][i].style.backgroundColor = persistObject.color_unreadLight;
+      unvisitDecolors[0][i].style.backgroundColor = persistObject.getPreference('unreadLight');
       unvisitDecolors[0][i].style.backgroundImage = "";
    }
    for (var j=0; j<unvisitDecolors[1].length; j++) {
-      unvisitDecolors[1][j].style.backgroundColor = persistObject.color_unreadDark;
+      unvisitDecolors[1][j].style.backgroundColor = persistObject.getPreference('unreadDark');
       unvisitDecolors[1][j].style.backgroundImage = "";
    }
 }
@@ -669,7 +669,7 @@ function grabForumList(e, selectnode) {
       }
    }
    persistObject.forumListXml = forumsDoc;
-   if ( persistObject.toggle_showSAForumMenu ) {
+   if ( persistObject.getPreference('showSAForumMenu') ) {
       buildSAForumMenu();
    }
 }
@@ -695,7 +695,7 @@ function populateForumMenuFrom(nested_menus,target,src,pinnedForumNumbers,pinned
             var submenu = document.createElement("menu");
             submenu.setAttribute("label", thisforum.getAttribute("name"));
             var submenupopup = document.createElement("menupopup");
-            if ( persistObject.toggle_useSAForumMenuBackground ) {
+            if ( persistObject.getPreference('useSAForumMenuBackground') ) {
                submenupopup.setAttribute("class", "lastread_menu");
             }
             submenu.appendChild(submenupopup);
@@ -813,7 +813,7 @@ function SALR_DEBUG_TestFTPUploadDone(result) {
 
 function buildSAForumMenu() {
    try {
-   if ( persistObject.toggle_hideOtherSAMenus ) {
+   if ( persistObject.getPreference('hideOtherSAMenus') ) {
       var mmb = document.getElementById("main-menubar");
       for (var x=0; x<mmb.childNodes.length; x++) {
          var thischild = mmb.childNodes[x];
@@ -847,7 +847,7 @@ function buildSAForumMenu() {
       document.getElementById("main-menubar").insertBefore(menuel, iBefore);
       menupopup.addEventListener("popupshowing", SALR_SAMenuShowing, false);
    }
-   if ( persistObject.toggle_useSAForumMenuBackground ) {
+   if ( persistObject.getPreference('useSAForumMenuBackground') ) {
       menupopup.className = "lastread_menu";
    } else {
       menupopup.className = "";
@@ -856,12 +856,12 @@ function buildSAForumMenu() {
       menupopup.removeChild(menupopup.firstChild);
    }
    var forumsDoc = persistObject.forumListXml;
-   var nested_menus = persistObject.toggle_nestSAForumMenu;
+   var nested_menus = persistObject.getPreference('nestSAForumMenu');
    var menuel = document.createElement("menuitem");
    var pinnedForumNumbers = new Array();
    var pinnedForumElements = new Array();
-   if (nested_menus && persistObject.string_menuPinnedForums) {
-      pinnedForumNumbers = persistObject.string_menuPinnedForums.split(",");
+   if (nested_menus && persistObject.getPreference('menuPinnedForums')) {
+      pinnedForumNumbers = persistObject.getPreference('menuPinnedForums').split(",");
    }
    menuel.setAttribute("label","Something Awful");
    menuel.setAttribute("image", "chrome://salastread/content/sa.png");
@@ -939,7 +939,7 @@ function buildSAForumMenu() {
             subpopup.setAttribute("onpopupshowing", "SALR_StarredThreadMenuShowing();");
          }
       }
-      if ( persistObject.toggle_showMenuPinHelper ) {
+      if ( persistObject.getPreference('showMenuPinHelper') ) {
          var ms = document.createElement("menuseparator");
          ms.id = "salr_pinhelper_sep";
          menupopup.appendChild(ms);
@@ -977,8 +977,8 @@ function SALR_StarredThreadMenuShowing() {
 }
 
 function SALR_SAMenuShowing() {
-   //alert("here - " + persistObject.toggle_showMenuPinHelper);
-   if ( persistObject.toggle_showMenuPinHelper == false ) {
+   //alert("here - " + persistObject.getPreference('showMenuPinHelper'));
+   if ( persistObject.getPreference('showMenuPinHelper') == false ) {
       var ms = document.getElementById("salr_pinhelper_sep");
       var mi = document.getElementById("salr_pinhelper_item");
       if ( ms != null ) {
@@ -991,8 +991,8 @@ function SALR_SAMenuShowing() {
 }
 
 function SALR_LaunchPinHelper() {
-   persistObject.toggle_showMenuPinHelper = false;
-   persistObject.SavePrefs();
+   persistObject.setPreference('showMenuPinHelper', false);
+   
    SALR_runConfig("catMenuButton");
    alert("You may return to the menu settings at any time by choosing \"Configure SALastRead...\" from the SA menu, or by "+
          "clicking the \"Configure Last Read Extension\" link in the header of any forum page.");
@@ -1015,7 +1015,7 @@ function grabForumList(e, selectnode) {
       }
    }
    persistObject.forumListXml = forumsDoc;
-   if ( persistObject.toggle_showSAForumMenu ) {
+   if ( persistObject.getPreference('showSAForumMenu') ) {
       buildSAForumMenu();
    }
 }
@@ -1209,7 +1209,7 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
          unvisitDecolors = setReadColors(doc, thisel, "TD");
       }
 
-      var threadIconOrder = persistObject.string_threadIconOrder;
+      var threadIconOrder = persistObject.getPreference('threadIconOrder');
       for (var j=0; j<THREAD_ICON_COUNT; j++) {
          if ( threadIconOrder.indexOf(String(j)) == -1 ) {
             threadIconOrder = String(threadIconOrder) + String(j);
@@ -1264,18 +1264,18 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
          var thisicon = threadIconOrder.substring(0,1);
          threadIconOrder = threadIconOrder.substring(1);
          if ( thisicon == 1 ) {
-            if ( !knownLastPostID && persistObject.toggle_alwaysShowGoToLastIcon ) {
+            if ( !knownLastPostID && persistObject.getPreference('alwaysShowGoToLastIcon') ) {
                knownLastPostID = GetLastPostID(threadid);
             }
             if (knownLastPostID) {
-               if ( persistObject.toggle_showGoToLastIcon ) {
+               if ( persistObject.getPreference('showGoToLastIcon') ) {
                   //iconTargetElement.insertBefore(createGoToLastReadPostButton(doc, knownLastPostID), topictitletd.firstChild);
                   iconTargetElement.appendChild(createGoToLastReadPostButton(doc, knownLastPostID));
                }
             }
          }
          else if ( thisicon == 2 ) {
-            if ( persistObject.toggle_showUnvisitIcon ) {
+            if ( persistObject.getPreference('showUnvisitIcon') ) {
                //iconTargetElement.insertBefore( createUnvisitButton(doc, threadid, thisel, unvisitDecolors), topictitletd.firstChild );
                iconTargetElement.appendChild( createUnvisitButton(doc, threadid, thisel, unvisitDecolors, forumid) );
             }
@@ -1298,9 +1298,9 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
          if ( setClasses ) {
             thisel.className += " salastread_postedinthread";
          }
-         topicretd.style.backgroundColor = persistObject.color_postedInThreadRe;
-         if ( !persistObject.toggle_disableGradients ) {
-            var bgtohighlight = persistObject.color_postedInThreadReHighlight;
+         topicretd.style.backgroundColor = persistObject.getPreference('postedInThreadRe');
+         if ( !persistObject.getPreference('disableGradients') ) {
+            var bgtohighlight = persistObject.getPreference('postedInThreadReHighlight');
             topicretd.style.backgroundImage = "url(x-salr-gradientpng:"+
                  SALRHexToNumber( bgtohighlight.substring(1,3) ) + "," +
                  SALRHexToNumber( bgtohighlight.substring(3,5) ) + "," +
@@ -1574,7 +1574,7 @@ function createGoToLastReadPostButton(doc, lkpid) {
    golink.href = "http://forums.somethingawful.com/showthread.php?s=&postid="+lkpid+"#post"+lkpid;
    golink.className = "salastreadicon";
    var goimg = doc.createElement("IMG");
-   goimg.src = persistObject.url_goToLastReadPost;
+   goimg.src = persistObject.getPreference('goToLastReadPost');
    //goimg.style.cssFloat = "right";
    goimg.style.border = "none";
    goimg.style.marginLeft = "3px";
@@ -1590,7 +1590,7 @@ function createUnvisitButton(doc, threadid, topicrow, unvisitDecolors, forumid) 
    dellink.id = "salastread_dellink" + threadid;
    dellink.addEventListener("click", function(ce) { unvisitThread(doc, persistObject, threadid, topicrow, unvisitDecolors, forumid); }, true);
    var delimg = doc.createElement("IMG");
-   delimg.src = persistObject.url_markThreadUnvisited;
+   delimg.src = persistObject.getPreference('markThreadUnvisited');
    //delimg.style.cssFloat = "right";
    delimg.style.border = "none";
    delimg.style.marginLeft = "3px";
@@ -1609,7 +1609,7 @@ function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) 
    if ( forumid == 0 ) {
       resetUnreadColors(unvisitDecolors);
    } else {
-      if ( !persistObject.toggle_dontHighlightThreads ) {
+      if ( !persistObject.getPreference('dontHighlightThreads') ) {
          var threadrows = selectNodes(doc, topicrow, ".");
          for (var x=0; x<threadrows.length; x++) {
             threadrows[x].className = "thread salastread_thread_" + threadid + " salastread_unreadthread";
@@ -1965,9 +1965,9 @@ function addInternalDebugLog(msg) {
 
 function SALR_ProcessPostImages(thisel) {
    var doc = thisel.ownerDocument;
-   if ( persistObject.toggle_convertTextToImage ) {
+   if ( persistObject.getPreference('convertTextToImage') ) {
       var mayBeNws = false;
-      if ( persistObject.toggle_dontTextToImageIfMayBeNws ) {
+      if ( persistObject.getPreference('dontTextToImageIfMayBeNws') ) {
          var ptext = thisel.innerHTML;
          if ( ptext.match(/nsfw/i) || ptext.match(/nws/i) ||
               ptext.match(/work safe/i) || ptext.match(/safe for work/i) ||
@@ -1980,7 +1980,7 @@ function SALR_ProcessPostImages(thisel) {
    }
 
 
-   if (persistObject.toggle_thumbnailAllImages) {
+   if (persistObject.getPreference('thumbnailAllImages')) {
       setTimeout(function() {
 
          var bodyimagenodes = selectNodes(doc, thisel, "TBODY/TR[1]/TD[2]/descendant::IMG");
@@ -2133,7 +2133,7 @@ function SALR_TextToImage(thisel) {
       }
       if (isimage) {
          var abortTTI = false;
-         if ( persistObject.toggle_dontTextToImageInSpoilers ) {
+         if ( persistObject.getPreference('dontTextToImageInSpoilers') ) {
             var cel = thislink;
             while (cel!=null) {
                if (cel.className.indexOf("spoiler")!=-1) {
@@ -2162,7 +2162,7 @@ function SALR_TextToImage(thisel) {
             nimg.style.border = "2px dotted red";
             nimg.src = imgurl;
             nimg.title = "Text link converted to image automatically by SALR";
-            if ( persistObject.toggle_shrinkTextToImages ) {
+            if ( persistObject.getPreference('shrinkTextToImages') ) {
                setupThumbnailImage(nimg,false,true);
             }
          }
@@ -2596,11 +2596,6 @@ try {
 			  }
 			  if (posternode && posternodeClassNameAdd!="") {
 				 posternode.className += posternodeClassNameAdd;
-				 //if (persistObject.toggle_props) {
-				 //   if (postername == "biznatchio") {
-				 //      posternode.style.color = "red";
-				 //   }
-				 //}
 			  }
 			  if (posternode && posternodeparentClassNameAdd!="") {
 				 posternode.parentNode.className += posternodeparentClassNameAdd;
@@ -2612,7 +2607,7 @@ try {
 			  var titlenode = selectSingleNode(doc, thisel, "DL[@class='userinfo']/DD[@class='title']");
 			  if (titlenode) {
 				 titlenode.className += " customtitle";
-				 if ( persistObject.toggle_resizeCustomTitleText ) {
+				 if ( persistObject.getPreference('resizeCustomTitleText') ) {
 					var subnodes = selectNodes(doc, titlenode, ".//*");
 					for (var i=0; i<subnodes.length; i++) {
 					   if ( subnodes[i].style ) {
@@ -2623,7 +2618,7 @@ try {
 			  }
 		*/
 
-			  if (persistObject.toggle_useQuickQuote && !threadClosed) {
+			  if (persistObject.getPreference('useQuickQuote') && !threadClosed) {
 				 //var quotebutton = selectNodes(doc, thisel, "//IMG[@alt='Reply w/Quote']")[0];
 				 //   // to / when font tags are closed
 				 var quotebutton = selectSingleNode(doc, postbarnode, "TD[@class='postlinks']/UL[@class='postbuttons']/LI//A/IMG[contains(@src,'quote')]");
@@ -2676,7 +2671,7 @@ try {
 			  }
 			  //alert("qq set");
 
-			  //if ( persistObject.toggle_fixBrokenQuotedLinks ) {
+			  //if ( persistObject.getPreference('fixBrokenQuotedLinks') ) {
 		/*
 			  if ( 1==1 ) {
 				 var bodylinknodes = selectNodes(doc, thisel, "TBODY/TR[1]/TD[2]/descendant::A");
@@ -2693,8 +2688,8 @@ try {
 
 			  //alert("images processed");
 
-			  if ( persistObject.toggle_insertPostTargetLink ||
-				   persistObject.toggle_insertPostLastMarkLink ) {
+			  if ( persistObject.getPreference('insertPostTargetLink') ||
+				   persistObject.getPreference('insertPostLastMarkLink') ) {
 				 if (postid!=0) {
 					//var posttimenode;
 					//if (inFYAD) {
@@ -2705,7 +2700,7 @@ try {
 					//  // to / when font tags are closed
 					var posttimenode = selectSingleNode(doc, postbarnode, "TD[@class='postdate']//A");
 		/*
-					if (posttimenode && persistObject.toggle_insertPostTargetLink ) {
+					if (posttimenode && persistObject.getPreference('insertPostTargetLink') ) {
 					   var plink = doc.createElement("A");
 					   plink.href = "http://forums.somethingawful.com/showthread.php?s=&postid="+postid+"#post"+postid;
 					   plink.title = "Link directly to this post";
@@ -2723,9 +2718,7 @@ try {
 					   posttimenode.parentNode.insertBefore(slink, posttimenode);
 					   posttimenode.parentNode.insertBefore(doc.createTextNode(" "), posttimenode);
 					}
-					*/
-					/*
-					if (posttimenode && persistObject.toggle_insertPostLastMarkLink ) {
+					if (posttimenode && persistObject.getPreference('insertPostLastMarkLink') ) {
 					   var plink = doc.createElement("A");
 					   plink.href = "javascript:void('lr',"+postid+");";
 					   plink.title = "Set \"Last Read\" post in this thread to this post";
@@ -2747,7 +2740,7 @@ try {
 		/*
 			  var postpane = selectSingleNode(doc, thisel, "TBODY[1]/TR[1]/TD[2]");
 
-			  if (persistObject.toggle_removeTargetNewFromTorrentLinks) {
+			  if (persistObject.getPreference('removeTargetNewFromTorrentLinks')) {
 				 var tlinks = selectNodes(doc, postpane, "//A[contains(@href,'download.php?info_hash=')]");
 				 for (var i=0; i<tlinks.length; i++) {
 					tlinks[i].target = "";
@@ -2765,12 +2758,12 @@ try {
       sel.innerHTML = csstxt;
       doc.getElementsByTagName('head')[0].appendChild(sel);
    }
-   if (needUpdate && !persistObject.toggle_scrollPostEnable) {
+   if (needUpdate && !persistObject.getPreference('scrollPostEnable')) {
       UpdateLPDateTime(updateTo, threadid, updateLastPostID);
    }
 
 /* ~ duz
-   if (persistObject.toggle_useQuickQuote) {
+   if (persistObject.getPreference('useQuickQuote')) {
       //var replybuttons = selectNodes(doc, doc.body, "//A[contains(@href,'newreply.php')]/IMG[@alt='Post A Reply'][contains(@src,'forum-reply')]");
       //var replybutton = selectSingleNode(doc, doc.body,
       //        "TABLE/TBODY[1]/TR[1]/TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[2]/DIV[1]/A[2][contains(@href,'newreply.php')]/IMG[@alt='Post A Reply'][contains(@src,'forum-reply')]"
@@ -2802,14 +2795,14 @@ try {
    }
 */
 /*
-   if (persistObject.toggle_thumbnailQuotedImagesInThreads) {
+   if (persistObject.getPreference('thumbnailQuotedImagesInThreads')) {
       var qimages = selectNodes(doc, doc.body, "//BLOCKQUOTE//IMG");
       for (var i=0; i<qimages.length; i++) {
          setupThumbnailImage(qimages[i],true,false);
       }
    }
 
-   if (persistObject.toggle_removeTargetNewFromTorrentLinks) {
+   if (persistObject.getPreference('removeTargetNewFromTorrentLinks')) {
       var tlinks = selectNodes(doc, doc.body, "//A[contains(@href,'download.php?info_hash=')]");
       for (var i=0; i<tlinks.length; i++) {
          tlinks[i].target = "";
@@ -2823,7 +2816,7 @@ try {
 
    doc.__salastread_loading = true;
    window.addEventListener("load", SALR_PageFinishedLoading, true);
-   if (persistObject.toggle_scrollPostEnable)
+   if (persistObject.getPreference('scrollPostEnable'))
      setTimeout(function () { SALR_CheckScrollPostPosition(doc); }, 1000);
 
    addInternalDebugLog("showthread.php handler, thread #"+threadid+", lpbefore="+lpbefore+", lpafter="+lpafter);
@@ -3005,7 +2998,7 @@ function SALR_PageMouseDown(event) {
    if (gn) {
       return;
    }
-   if (event.button == persistObject.int_gestureButton && persistObject.toggle_gestureEnable) {
+   if (event.button == persistObject.getPreference('gestureButton') && persistObject.getPreference('gestureEnable')) {
       var cx = function(dir, ofsy, ofsx) {
          var el = doc.createElement("IMG");
          el.SALR_dir = ""+dir;
@@ -3039,7 +3032,7 @@ function SALR_PageMouseDown(event) {
 }
 
 function SALR_SearchForThreadPages(doc, type) {
-   if ((!persistObject.toggle_enablePageNavigator && type=="thread") || ((!persistObject.toggle_enableForumNavigator && type=="forum")))
+   if ((!persistObject.getPreference('enablePageNavigator') && type=="thread") || ((!persistObject.getPreference('enableForumNavigator') && type=="forum")))
       return { res: false };
 
    doc.body.addEventListener('mousedown', SALR_PageMouseDown, false);
@@ -3358,7 +3351,7 @@ function setImageThumbnailSize(img,fullsizetoggle) {
 
 function reanchorThreadToLink(doc) {
 
-   if ( persistObject.toggle_reanchorThreadOnLoad ) {
+   if ( persistObject.getPreference('reanchorThreadOnLoad') ) {
 
       var hashmatch = doc.location.href.match(/\#(.*)$/);
       if (hashmatch) {
@@ -3387,7 +3380,7 @@ function handleEditPost(e) {
    var tarea = selectNodes(doc, doc.body, "//TEXTAREA[@name='message']")[0];
    if (submitbtn && tarea) {
       submitbtn.addEventListener("click", function() { parsePLTagsInEdit(tarea); }, true);
-      submitbtn.style.backgroundColor = persistObject.color_postedInThreadRe;
+      submitbtn.style.backgroundColor = persistObject.getPreference('postedInThreadRe');
    }
 }
 
@@ -3414,7 +3407,7 @@ function handleNewReply(e) {
          var postbtn = selectNodes(doc, doc.body, "//FORM[@name='vbform'][contains(@action,'newreply.php')]//INPUT[@type='submit'][@name='submit']")[0];
          if (postbtn) {
             postbtn.addEventListener("click", function() { markThreadReplied(persistObject, threadid); }, true);
-            postbtn.style.backgroundColor = persistObject.color_postedInThreadRe;
+            postbtn.style.backgroundColor = persistObject.getPreference('postedInThreadRe');
          }
       }
    } else {
@@ -3796,7 +3789,7 @@ function SALR_windowOnLoadMini(e) {
    var location = doc.location;
    try {
       if (doc.__salastread_processed) {
-         if ( persistObject.toggle_reanchorThreadOnLoad ) {
+         if ( persistObject.getPreference('reanchorThreadOnLoad') ) {
             var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
             samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
             if (samatch) {
@@ -3843,7 +3836,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
          if (samatch) {
             salastread_addUpdateIcon(doc);
             // Moved below, where it should be
-            //if (persistObject.toggle_removeHeaderAndFooter) {
+            //if (persistObject.getPreference('removeHeaderAndFooter')) {
             //   salastread_hidePageHeader(doc);
             //}
          }
@@ -3862,7 +3855,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
       loadCount++;
       if (firstLoad) {
          firstLoad = false;
-         if ( persistObject.toggle_showSAForumMenu && persistObject.forumListXml && persistObject.forumListXml != null ) {
+         if ( persistObject.getPreference('showSAForumMenu') && persistObject.forumListXml && persistObject.forumListXml != null ) {
             try { buildSAForumMenu(); } catch(xx) { alert("buildsaforummenu err:"+xx); };
          }
          // DOMContentLoaded test...
@@ -3881,7 +3874,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
       //var doc = e.originalTarget;
       //var location = doc.location;
       if (doc.__salastread_processed) {
-         if ( persistObject.toggle_reanchorThreadOnLoad ) {
+         if ( persistObject.getPreference('reanchorThreadOnLoad') ) {
             var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
             samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
             if (samatch) {
@@ -3943,7 +3936,7 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
                doc.getElementsByTagName('head')[0].appendChild(screl);
             }
             SALR_IncTimer();
-            if ( persistObject.toggle_enableDebugMarkup ) {
+            if ( persistObject.getPreference('enableDebugMarkup') ) {
                var dbg = doc.createElement("DIV");
                dbg.innerHTML = SALR_debugLog.join("<br>");
                doc.body.appendChild(dbg);
@@ -3966,10 +3959,10 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
 								doc.title = threadtitle;
 							}
 						}
-            if (persistObject.toggle_removeHeaderAndFooter) {
+            if (persistObject.getPreference('removeHeaderAndFooter')) {
                salastread_hidePageHeader(doc);
             }
-            if (persistObject.toggle_props) {
+            if (persistObject.getPreference('props')) {
                var ssel = doc.createElement("LINK");
                ssel.setAttribute('rel',"STYLESHEET");
                ssel.setAttribute('type',"text/css");
@@ -3993,10 +3986,10 @@ if (Components.classes["@mozilla.org/preferences;1"].getService(Components.inter
             for ( var tn in ex ) {
                errstr += tn+": "+ex[tn]+"\n";
             }
-            if (!persistObject || !persistObject.toggle_suppressErrors)
+            if (!persistObject || !persistObject.getPreference('suppressErrors'))
               alert("SALastRead application err: "+errstr);
          } else {
-            if (!persistObject || !persistObject.toggle_suppressErrors)
+            if (!persistObject || !persistObject.getPreference('suppressErrors'))
               alert("SALastRead application err: "+ex);
          }
       } else {
@@ -4039,7 +4032,7 @@ function SALR_ShowContextMenuItem(id) {
    var moptsep = document.getElementById("salastread-context-menuseparator");
    cacm.removeChild(mopt);
    cacm.removeChild(moptsep);
-   if ( persistObject.toggle_contextMenuOnBottom ) {
+   if ( persistObject.getPreference('contextMenuOnBottom') ) {
       cacm.appendChild(moptsep);
       cacm.appendChild(mopt);
    } else {
@@ -4196,7 +4189,7 @@ var killcheckxmlhttp;
 
 function saLastReadKillCheck() {
    persistObject._killChecked = true;
-   if ( persistObject.toggle_dontCheckKillSwitch ) {
+   if ( persistObject.getPreference('dontCheckKillSwitch') ) {
       return;
    }
    killcheckxmlhttp = new XMLHttpRequest();
