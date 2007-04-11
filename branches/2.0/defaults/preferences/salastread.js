@@ -21,17 +21,25 @@ pref('extensions.salastread.readWithNewLight', '#e1f1e1');
 pref('extensions.salastread.seenPostDark', '#bbccdd');
 pref('extensions.salastread.seenPostLight', '#ddeeff');
 
+pref('extensions.salastread.postedInThreadReFYAD', '#fcfd99');
+pref('extensions.salastread.readDarkFYAD', '#bbccdd');
+pref('extensions.salastread.readLightFYAD', '#ddeeff');
+pref('extensions.salastread.readWithNewDarkFYAD', '#cfdfcf');
+pref('extensions.salastread.readWithNewLightFYAD', '#e1f1e1');
+
 pref('extensions.salastread.seenPostDarkFYAD', '#bbccdd');
 pref('extensions.salastread.seenPostLightFYAD', '#ddeeff');
 
 pref('extensions.salastread.unreadDark', '#dfdfdf');
-pref('extensions.salastread.unreadDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unreadLight', '#f1f1f1');
+
+pref('extensions.salastread.unreadDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unreadLightFYAD', '#ffccff');
 
 pref('extensions.salastread.unseenPostDark', '#dfdfdf');
-pref('extensions.salastread.unseenPostDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unseenPostLight', '#f1f1f1');
+
+pref('extensions.salastread.unseenPostDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unseenPostLightFYAD', '#ffccff');
 
 pref('extensions.salastread.expireMinAge', 7);
@@ -105,3 +113,11 @@ pref('extensions.salastread.readWithNewDarkHighlight', '#e1efe1');
 pref('extensions.salastread.readWithNewLightHighlight', '#f9fff9');
 pref('extensions.salastread.unreadDarkHighlight', '#dfdfdf');
 pref('extensions.salastread.unreadLightHighlight', '#f1f1f1');
+
+pref('extensions.salastread.postedInThreadReFYADHighlight', '#ffffcc');
+pref('extensions.salastread.readDarkFYADHighlight', '#dbe9f8');
+pref('extensions.salastread.readLightFYADHighlight', '#f5faff');
+pref('extensions.salastread.readWithNewDarkFYADHighlight', '#e1efe1');
+pref('extensions.salastread.readWithNewLightFYADHighlight', '#f9fff9');
+pref('extensions.salastread.unreadDarkFYADHighlight', '#dfdfdf');
+pref('extensions.salastread.unreadLightFYADHighlight', '#f1f1f1');
