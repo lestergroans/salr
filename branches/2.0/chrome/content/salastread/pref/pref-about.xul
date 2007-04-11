@@ -19,7 +19,7 @@
    <vbox>
     <spacer flex="1"/>
     <text value="SA Last Read" style="font-weight: bold; font-size: 120%"/>
-    <text value="Version 1.15.1918"/>
+    <text value="Version 1.99.*"/>
     <separator class="thin"/>
     <hbox>
      <text value="Created by: " style="font-weight: bold"/>
@@ -46,7 +46,7 @@
     <iframe src="chrome://salastread/content/changelog.html" flex="1"/>
    </hbox>
    <spacer flex="2"/>
-  </hbox>  
+  </hbox>
 <!--
   <hbox>
    <spacer flex="1"/>
