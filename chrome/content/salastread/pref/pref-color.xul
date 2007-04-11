@@ -7,7 +7,7 @@
 
 <page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       xmlns:html="http://www.w3.org/1999/xhtml"
-      onload="initSettings('Color Settings');initColors();">
+      onload="initColors();">
 
  <script language="JavaScript" src="chrome://salastread/content/pref/pref-common.js" />
  <script language="JavaScript" src="chrome://salastread/content/pref/pref-color.js" />
@@ -20,14 +20,6 @@
    <menuitem label="FYAD"/>
   </menupopup>
  </menulist>
-<!--
- <menulist id="ishighlights" oncommand="loadColors(isDropDownFYAD(),isDropDownHighlights())">
-  <menupopup>
-   <menuitem label="Base Color"/>
-   <menuitem label="Gradient Highlight Color"/>
-  </menupopup>
- </menulist>
--->
  </hbox>
 
  <description>
@@ -77,35 +69,6 @@
   <spacer flex="1"/>
  </hbox>
 
-<!--
- <hbox>
-  <vbox flex="1">
-  <groupbox>
-   <caption label="Thread Colors"/>
-   <sacolorpicker flex="1" label="Unread (light)" id="cp_unreadLight" onchange="colorChanged(this);"/>
-   <sacolorpicker flex="1" label="Unread (dark)" id="cp_unreadDark" onchange="colorChanged(this);"/>
-   <sacolorpicker flex="1" label="Read with new (light)" id="cp_readWithNewLight" onchange="colorChanged(this);"/>
-   <sacolorpicker flex="1" label="Read with new (dark)" id="cp_readWithNewDark" onchange="colorChanged(this);"/>
-   <sacolorpicker flex="1" label="Read (light)" id="cp_readLight" onchange="colorChanged(this);"/>
-   <sacolorpicker flex="1" label="Read (dark)" id="cp_readDark" onchange="colorChanged(this);"/>
-  </groupbox>
-  </vbox>
-  <vbox flex="1">
-  <groupbox>
-   <caption label="Post Colors"/>
-   <sacolorpicker flex="1" label="Unread (light)" id="cp_unseenPostLight" onchange="colorChanged(this);"/>
-   <sacolorpicker flex="1" label="Unread (dark)" id="cp_unseenPostDark" onchange="colorChanged(this);"/>
-   <sacolorpicker flex="1" label="Read (light)" id="cp_seenPostLight" onchange="colorChanged(this);"/>
-   <sacolorpicker flex="1" label="Read (dark)" id="cp_seenPostDark" onchange="colorChanged(this);"/>
-  </groupbox>
-  <groupbox>
-   <caption label="Posted in Thread"/>
-   <sacolorpicker flex="1" label="Posted in Thread" id="cp_postedInThreadRe" onchange="colorChanged(this);"/>
-  </groupbox>
-  </vbox>
- </hbox>
--->
-
  <hbox>
   <button label="Load Default Colors" oncommand="loadDefaultColors()"/>
   <spacer flex="1"/>
@@ -115,7 +78,7 @@
            label="Don't perform color highlighting on thread lists"/>
  <checkbox id="toggle_dontHighlightPosts"
            label="Don't perform color highlighting on posts in a thread"/>
- <checkbox id="toggle_props"
+ <checkbox id="toggle_highlightUsernames"
            label="Highlight interesting and important usernames"/>
  <checkbox id="toggle_disableGradients" onclick="setTimeout(loadColorLauncher,1);"
            label="Disable all color gradients"/>

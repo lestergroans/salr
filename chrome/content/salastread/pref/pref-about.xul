@@ -3,7 +3,7 @@
 <?xml-stylesheet href="chrome://salastread/content/pref/pref-about.css" type="text/css"?>
 
 <page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-      onload="initSettings('About the SALastRead Extension');aboutInit();">
+      onload="aboutInit();">
 
  <script language="JavaScript" src="chrome://salastread/content/utilfunctions.js" />
 
@@ -30,7 +30,7 @@
      <vbox>
       <text value="uncut product, 8ender, LonelyKing,"/>
       <text value="Sebbe, Pahalial, ctz, Defiler, Shii,"/>
-      <text value="cheesypeanut, duz"/>
+      <text value="cheesypeanut, duz, Tivac"/>
      </vbox>
     </hbox>
     <spacer flex="1"/>
@@ -38,7 +38,7 @@
    <spacer flex="1"/>
   </hbox>
 
-  <spacer flex="2"/>
+  <spacer flex="1"/>
 
   <hbox flex="8">
    <spacer flex="2"/>
@@ -47,22 +47,6 @@
    </hbox>
    <spacer flex="2"/>
   </hbox>
-<!--
-  <hbox>
-   <spacer flex="1"/>
-   <vbox align="center">
-    <text value="Contributions By:" style="font-weight: bold;"/>
-    <text value="uncut product"/>
-    <text value="8ender"/>
-    <text value="LonelyKing"/>
-    <text value="Sebbe"/>
-    <text value="Pahalial"/>
-    <text value="ctz"/>
-   </vbox>
-   <spacer flex="1"/>
-  </hbox>
-  <spacer flex="1"/>
--->
 
   <hbox style="margin-bottom: 5px; margin-top: 5px;">
    <spacer flex="1"/>
