@@ -1055,7 +1055,7 @@ salrPersistObject.prototype = {
    _flfn: null,
    _xmlDoc: null,
 
-/* remove before 2.0 release	
+/* remove before 2.0 release
    _LoadTypePrefs: function(prefType,dataType)
    {
       var propname;
@@ -1354,7 +1354,7 @@ salrPersistObject.prototype = {
 		}
 		return mDBConn;
 	},
-	
+
 	// Returns the value at the given preference from the branch in the preference property
 	// @param: (string) Preference name
 	// @return: (boolean, string or int) Preference value or NULL if not found
@@ -1726,12 +1726,12 @@ salrPersistObject.prototype = {
 			lastread = statement.getString(0);
 			if (lastread == null)
 			{
-				lastread = false;
+				lastread = 0;
 			}
 		}
 		else
 		{
-			lastread = false;
+			lastread = 0;
 		}
 		statement.reset();
 		return lastread;

@@ -992,7 +992,7 @@ function SALR_SAMenuShowing() {
 
 function SALR_LaunchPinHelper() {
    persistObject.setPreference('showMenuPinHelper', false);
-   
+
    SALR_runConfig("catMenuButton");
    alert("You may return to the menu settings at any time by choosing \"Configure SALastRead...\" from the SA menu, or by "+
          "clicking the \"Configure Last Read Extension\" link in the header of any forum page.");
@@ -2199,6 +2199,7 @@ var doc = e.originalTarget;
 
 if (!inFYAD || persistObject.getPreference("enableFYAD"))
 {
+	try {
 	// Insert the forums paginator & mouse gestures
 	if (persistObject.getPreference("enablePageNavigator"))
 	{
@@ -2226,18 +2227,28 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	var isloggedin = (doc.getElementById("notregistered") == null);
 
 	var pageList = this.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
-	pageList = pageList[1];
-	var numPages = pageList.innerHTML.match(/\((\d+)\)/);
-	var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
-	if (pageList.childNodes.length > 1) // Are there pages
+	if (pageList)
 	{
-		numPages = parseInt(numPages[1]);
-		curPage = parseInt(curPage[1]);
-	}
-	else
-	{
-		numPages = 1;
-		curPage = 1;
+		if (pageList.length >  1)
+		{
+			pageList = pageList[1];
+		}
+		else
+		{
+			pageList = pageList[0];
+		}
+		var numPages = pageList.innerHTML.match(/\((\d+)\)/);
+		var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
+		if (pageList.childNodes.length > 1) // Are there pages
+		{
+			numPages = parseInt(numPages[1]);
+			curPage = parseInt(curPage[1]);
+		}
+		else
+		{
+			numPages = 1;
+			curPage = 1;
+		}
 	}
 
 	// Grab the go to dropdown
@@ -2254,7 +2265,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	doc.body.className += " salastread_forum"+forumid;
 
 	// Figure out the current threadid
-	var replybutton = persistObject.selectSingleNode(doc, doc, "//DIV[@id='content']//A[contains(@href,'action=newreply&threadid=')]");
+	var replybutton = persistObject.selectSingleNode(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newreply&threadid=')]");
 	if (replybutton)
 	{
 		var threadid = replybutton.href.match(/threadid=(\d+)/)[1];
@@ -2265,7 +2276,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	}
 	doc.__SALR_threadid = threadid;
 	persistObject.iAmReadingThis(threadid);
-	var lastReadPostId = persistObject.getLastPostID(threadid);
+	var lastReadPostCount = persistObject.getLastReadPostCount(threadid);
 
 	// used by the context menu to allow options for this thread
 	doc.body.className += " salastread_thread_"+threadid;
@@ -2309,7 +2320,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	// Replace post button
 	if (persistObject.getPreference("useQuickQuote") && !inGasChamber)
 	{
-		var postbuttons = persistObject.selectNodes(doc, doc, "//DIV[@id='content']//A[contains(@href,'action=newthread')]");
+		var postbuttons = persistObject.selectNodes(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newthread')]");
 		if (postbuttons.length > 0)
 		{
 			for (i in postbuttons)
@@ -2319,7 +2330,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 		}
 		if (!threadClosed)
 		{
-			var replybuttons = persistObject.selectNodes(doc, doc, "//DIV[@id='content']//A[contains(@href,'action=newreply&threadid')]");
+			var replybuttons = persistObject.selectNodes(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newreply&threadid')]");
 			if (replybuttons.length > 0)
 			{
 				for (i in replybuttons)
@@ -2343,7 +2354,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	for (i in postlist)
 	{
 		curPostId = postlist[i].id.match(/post(\d+)/)[1];
-		postcount = (perpage * (curPage-1)) + i + 1;
+		postcount = (perpage * (curPage-1)) + parseInt(i) + 1;
 		profileLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'userid=')]");
 		posterId = profileLink.href.match(/userid=(\d+)/i)[1];
 		userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR/TD//DL//DT[contains(@class,'author')]");
@@ -2376,7 +2387,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 			{
 				persistObject.colorPost(doc, postlist[i], posterBG, forumid);
 			}
-			else if (curPostId <= lastReadPostId)
+			else if (postcount <= lastReadPostCount)
 			{
 				if (colorDark)
 				{
@@ -2428,8 +2439,15 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 
 	// Insert timestamp of last viewing
 
+	}
+	catch (zzzz)
+	{
+		if (!persistObject.getPreference("suppressErrors"))
+		{
+			alert(zzzz);
+		}
+	}
 }
-
 	// below hasn't been rewritten
 try {
 
