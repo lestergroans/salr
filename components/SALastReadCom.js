@@ -690,6 +690,7 @@ salrPersistObject.prototype = {
 
    SaveThreadDataV2: function()
    {
+   	/* ~ Let's see if we can run with out this ~ 4/11 duz
       var fn = this.storedbFileName;
       var file = Components.classes["@mozilla.org/file/local;1"]
             .createInstance(Components.interfaces.nsILocalFile);
@@ -711,7 +712,7 @@ salrPersistObject.prototype = {
       {
         mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
       }
-      var nodes = this.xmlDoc.evaluate("/salastread/thread", this.xmlDoc, null, 7 /* XPathResult.ORDERED_NODE_SNAPSHOT_TYPE */, null);
+      var nodes = this.xmlDoc.evaluate("/salastread/thread", this.xmlDoc, null, 7 /* XPathResult.ORDERED_NODE_SNAPSHOT_TYPE , null);
       for (var x=0; x<nodes.snapshotLength; x++) {
          var thisLineDataArray = new Array();
 
@@ -762,11 +763,12 @@ salrPersistObject.prototype = {
            statement.execute();
          }
       }
-
+*/
    },
 
    RemovePostDataSQL: function(threadid)
    {
+   	/* ~ Let's see if we can run with out this ~ 4/11 duz
       var fn = this.storedbFileName;
       var file = Components.classes["@mozilla.org/file/local;1"]
             .createInstance(Components.interfaces.nsILocalFile);
@@ -797,10 +799,12 @@ salrPersistObject.prototype = {
         statement.bindInt32Parameter(0,threadid);
         statement.execute();
       }
+      */
    },
 
    SavePostDataSQL: function(threaddetails)
    {
+   	/* ~ Let's see if we can run with out this ~ 4/11 duz
       var fn = this.storedbFileName;
       var file = Components.classes["@mozilla.org/file/local;1"]
             .createInstance(Components.interfaces.nsILocalFile);
@@ -859,12 +863,13 @@ salrPersistObject.prototype = {
            }
            statement.execute();
        }
-
+*/
 
    },
 
    CleanupXML: function()
    {
+   	/* ~ Let's see if we can run with out this ~ 4/11 duz
       var xdoc = this.xmlDoc;
       if (typeof(xdoc)=="undefined" || !xdoc)
          return;
@@ -897,10 +902,12 @@ salrPersistObject.prototype = {
       }
       xdoc.documentElement.appendChild(xdoc.createTextNode("\n"));
       this.SaveXML();
+      */
    },
 
    CleanupSQL: function(threaddetails)
    {
+   	/* ~ Let's see if we can run with out this ~ 4/11 duz
       var fn = this.storedbFileName;
       var file = Components.classes["@mozilla.org/file/local;1"]
             .createInstance(Components.interfaces.nsILocalFile);
@@ -935,7 +942,7 @@ salrPersistObject.prototype = {
       var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` <= ?1");
       statement.bindStringParameter(0,expiredt);
       statement.execute();
-
+*/
    },
 
 /* these are old and retarded ~ tivac
@@ -1355,6 +1362,13 @@ salrPersistObject.prototype = {
 		return mDBConn;
 	},
 
+	// Returns the current unix timestamp in seconds
+	get currentTimeStamp()
+	{
+		var rightNow = new Date();
+		return Math.floor(rightNow.getTime()/1000);
+	},
+
 	// Returns the value at the given preference from the branch in the preference property
 	// @param: (string) Preference name
 	// @return: (boolean, string or int) Preference value or NULL if not found
@@ -1547,18 +1561,21 @@ salrPersistObject.prototype = {
 	// @return: nothing
 	addMod: function(userid, username)
 	{
-		var statement = this.database.createStatement("UPDATE `userdata` SET `username` = ?1, `mod` = 1 WHERE `userid` = ?2");
-		statement.bindStringParameter(0,username);
-		statement.bindInt32Parameter(1,userid);
-		if (!statement.executeStep())
+		if (!this.isMod(userid))
 		{
+			var statement = this.database.createStatement("UPDATE `userdata` SET `username` = ?1, `mod` = 1 WHERE `userid` = ?2");
+			statement.bindStringParameter(0,username);
+			statement.bindInt32Parameter(1,userid);
+			if (!statement.executeStep())
+			{
+				statement.reset();
+				statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, 0, null)");
+				statement.bindInt32Parameter(0,userid);
+				statement.bindStringParameter(1,username);
+				statement.executeStep();
+			}
 			statement.reset();
-			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, 0, null)");
-			statement.bindInt32Parameter(0,userid);
-			statement.bindStringParameter(1,username);
-			statement.executeStep();
 		}
-		statement.reset();
 	},
 
 	// Adds/updates a user as an admin
@@ -1566,19 +1583,21 @@ salrPersistObject.prototype = {
 	// @return: nothing
 	addAdmin: function(userid, username)
 	{
-		var statement = this.database.createStatement("UPDATE `userdata` SET `username` = ?1, `admin` = 1 WHERE `userid` = ?2");
-		statement.bindStringParameter(0,username);
-		statement.bindInt32Parameter(1,userid);
-		if (!statement.executeStep())
+		if (!this.isAdmin(userid))
 		{
+			var statement = this.database.createStatement("UPDATE `userdata` SET `username` = ?1, `admin` = 1 WHERE `userid` = ?2");
+			statement.bindStringParameter(0,username);
+			statement.bindInt32Parameter(1,userid);
+			if (!statement.executeStep())
+			{
+				statement.reset();
+				statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 0, 1, 0, null)");
+				statement.bindInt32Parameter(0,userid);
+				statement.bindStringParameter(1,username);
+				statement.executeStep();
+			}
 			statement.reset();
-			statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 0, 1, ?3, null)");
-			statement.bindInt32Parameter(0,userid);
-			statement.bindStringParameter(1,username);
-			statement.bindStringParameter(2, this.getPreference("adminColor"));
-			statement.executeStep();
 		}
-		statement.reset();
 	},
 
 	// Checks if a user id is flagged as a mod
@@ -1881,15 +1900,25 @@ salrPersistObject.prototype = {
 		return result;
 	},
 
-	// Adds a thread id # to the database
+	// Adds a thread id # to the database and the current time stamp
 	// @param:
 	// @return:
 	iAmReadingThis: function(threadid)
 	{
+		var lastviewdt = this.currentTimeStamp;
 		if (!this.threadIsInDB(threadid))
 		{
-			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`) VALUES (?1)");
+			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `lastviewdt`) VALUES (?1, ?2)");
 			statement.bindInt32Parameter(0,threadid);
+			statement.bindStringParameter(1,lastviewdt);
+			statement.execute();
+			statement.reset();
+		}
+		else
+		{
+			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastviewdt` = ?1 WHERE `id` = ?2");
+			statement.bindStringParameter(0,lastviewdt);
+			statement.bindInt32Parameter(1,threadid);
 			statement.execute();
 			statement.reset();
 		}

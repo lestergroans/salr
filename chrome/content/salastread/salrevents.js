@@ -1,12 +1,10 @@
-// <script>
-function unreadThisThread()
-{
-	alert('hi');
-}
+// <script> Reserved for future use
 /*
-persistObject = Components.classes["@evercrest.com/salastread/persist-object;1"]
+
+var persistObject = Components.classes["@evercrest.com/salastread/persist-object;1"]
 	.createInstance(Components.interfaces.nsISupports);
 persistObject = persistObject.wrappedJSObject;
 
-		var doc = evt.originalTarget.ownerDocument;
+var doc = evt.originalTarget.ownerDocument;
+
 */
