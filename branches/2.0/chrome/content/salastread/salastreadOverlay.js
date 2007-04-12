@@ -2347,39 +2347,67 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	persistObject.setLastReadPostCount(threadid, postcount);
 
 	var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId;
-	var posterColor, posterBG, userNameBox;
+	var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink;
 	doc.postlinks = new Array;
 	// Loop through each post
-	var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
+	var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')][not(@class='post ignored')]");
 	for (i in postlist)
 	{
+		if (postlist[i].className.search(/ignored/i) > -1)
+		{
+			// User is ignored by the system so skip doing anything else
+			continue;
+		}
 		curPostId = postlist[i].id.match(/post(\d+)/)[1];
 		postcount = (perpage * (curPage-1)) + parseInt(i) + 1;
 		profileLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'userid=')]");
 		posterId = profileLink.href.match(/userid=(\d+)/i)[1];
 		userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR/TD//DL//DT[contains(@class,'author')]");
+		posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
+		if (userNameBox.getElementsByTagName('img').length > 0)
+		{
+			// They have a mod star or something else
+			posterImg = userNameBox.getElementsByTagName('img')[0].title;
+			if (posterImg == 'Admin')
+			{
+				persistObject.addAdmin(posterId, posterName);
+			}
+			if (posterImg == 'Moderator')
+			{
+				persistObject.addMod(posterId, posterName);
+			}
+		}
 		posterColor = false;
 		posterBG = false;
+		posterNote = false;
 		if (posterId == threadOP)
 		{
 			posterColor = persistObject.getPreference("opColor");
 			posterBG =  persistObject.getPreference("opBackground");
+			posterNote = "Thread Poster";
 		}
 		if (persistObject.isMod(posterId))
 		{
 			posterColor = persistObject.getPreference("modColor");
 			posterBG =  persistObject.getPreference("modBackground");
+			posterNote = "Forum Moderator";
 		}
 		if (persistObject.isAdmin(posterId))
 		{
 			posterColor = persistObject.getPreference("adminColor");
 			posterBG =  persistObject.getPreference("adminBackground");
+			posterNote = "Forum Administrator";
 		}
-		//persistObject.getPosterColor(posterId);
-		//persistObject.getPosterBackground(posterId);
+		//posterColor = persistObject.getPosterColor(posterId);
+		//posterBG = persistObject.getPosterBackground(posterId);
+		//posterNote = persistObject.getPosterNote(posterId);
 		if (persistObject.getPreference("highlightUsernames") && posterColor != false)
 		{
 			userNameBox.style.color = posterColor;
+		}
+		if (posterNote != false)
+		{
+			userNameBox.innerHTML += "<p style='font-size:80%;margin:0;padding:0;'>"+posterNote+"</p>";
 		}
 		if (!persistObject.getPreference("dontHighlightPosts"))
 		{
@@ -2405,7 +2433,7 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 		postid = postIdLink.href.match(/#post(\d+)/i)[1];
 		if (persistObject.getPreference("insertPostTargetLink"))
 		{
-			var slink = doc.createElement("a");
+			slink = doc.createElement("a");
 			slink.href = "/showthread.php?action=showpost&postid="+postid;
 			slink.title = "Show Single Post";
 			slink.appendChild(doc.createTextNode("1"));
@@ -2430,7 +2458,6 @@ if (!inFYAD || persistObject.getPreference("enableFYAD"))
 		}
 		// TODO: Audit this function
 		SALR_ProcessPostImages(postlist[i]);
-		// TODO: Put some code here to read the mod/admin star and store that info
 	}
 
 	// Get the last post #
@@ -2556,12 +2583,12 @@ try {
 			  //} else {
 			  //   posternode = selectNodes(doc, thisel, "TBODY/TR[1]/TD[1]/DIV/B")[0];
 			  //}
+			  /* ~ duz
 			  var posternode = selectSingleNode(doc, thisel, "TBODY/TR/TD[@class='userinfo']/DL[@class='userinfo']/DT[@class='author']");
 			  if (posternode) {
 				 postername = posternode.firstChild.nodeValue;
 				 if ( posternode.lastChild != posternode.firstChild )
 				   postername = posternode.lastChild.nodeValue;
-
 				 if ( !postername ) { // to deal with radiums new name
 					 postername = posternode.childNodes[2].childNodes[0].nodeValue;
 				 }
@@ -2575,6 +2602,7 @@ try {
 			  }
 			  if (!inFYAD) {
 				 slurpIntoThreadCache(threadid);
+				 */
 				 /* ~ duz
 				 if ( cachedThreadEntry && cachedThreadEntry.getAttribute("op")==posteruserid ) {
 					thiselClassNameAdd += " somethingawfulforum_postbyOP";
@@ -2606,8 +2634,8 @@ try {
 					}
 				 }
 				 */
-			  }
-
+			  /*}*/
+/* ~ duz
 			  // Apply classes...
 			  if (thiselClassNameAdd!="") {
 				 thisel.className += thiselClassNameAdd;
@@ -2619,7 +2647,7 @@ try {
 				 posternode.parentNode.className += posternodeparentClassNameAdd;
 			  }
 			  //alert("classes applied");
-
+*/
 			  //var titlenode = selectSingleNode(doc, thisel, "TBODY/TR[1]/TD[1]/DIV[3]");
 		/*
 			  var titlenode = selectSingleNode(doc, thisel, "DL[@class='userinfo']/DD[@class='title']");
