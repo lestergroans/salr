@@ -1841,6 +1841,27 @@ salrPersistObject.prototype = {
 		return posted;
 	},
 
+	// Flag a thread as being posted in
+	// @param: (int) Thread ID
+	// @return: nothing
+	iPostedHere: function(threadid)
+	{
+		if (!this.threadIsInDB(threadid))
+		{
+			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `posted`) VALUES (?1, 1)");
+			statement.bindInt32Parameter(0,threadid);
+			statement.execute();
+			statement.reset();
+		}
+		else
+		{
+			var statement = this.database.createStatement("UPDATE `threaddata` SET `posted` = 1 WHERE `id` = ?1");
+			statement.bindInt32Parameter(0,threadid);
+			statement.execute();
+			statement.reset();
+		}
+	},
+
 	// Check to see if the thread is starred
 	// @param:
 	// @return:
@@ -2348,7 +2369,7 @@ salrPersistObject.prototype = {
 		quickbutton.style.cursor = "pointer";
 		quickbutton.SALR_threadid = threadid;
 		quickbutton.__salastread_threadid = threadid;
-		if (action != 'reply')
+		if (action == 'newthread')
 		{
 			quickbutton.SALR_forumid = forumid;
 		}

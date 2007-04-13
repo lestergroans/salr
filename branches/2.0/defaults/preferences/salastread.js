@@ -1,4 +1,4 @@
-pref('extensions.salastread.currentVersion', '1.99.070411');
+pref('extensions.salastread.currentVersion', '1.99.070412');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
@@ -78,7 +78,6 @@ pref('extensions.salastread.quickQuoteSwapPostPreview', false);
 pref('extensions.salastread.convertTextToImage', false);
 pref('extensions.salastread.thumbnailQuotedImagesInThreads', false);
 pref('extensions.salastread.shrinkTextToImages', true);
-pref('extensions.salastread.removeTargetNewFromTorrentLinks', true);
 pref('extensions.salastread.dontTextToImageIfMayBeNws', true);
 pref('extensions.salastread.dontTextToImageInSpoilers', true);
 pref('extensions.salastread.dontCheckKillSwitch', false);
