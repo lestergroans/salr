@@ -3,7 +3,7 @@
 	<Description about="urn:mozilla:install-manifest">
 		<!-- Extension Settings -->
 		<em:id>{fc6339b8-9581-4fc7-b824-dffcb091fcb7}</em:id>
-		<em:version>1.99.070411</em:version>
+		<em:version>1.99.070412</em:version>
 		<em:type>2</em:type>
 		<em:homepageURL>http://code.google.com/p/salr/</em:homepageURL>
 		<em:iconURL>chrome://salastread/skin/salastread-small.png</em:iconURL>
@@ -33,6 +33,7 @@
 		<em:name>SomethingAwful Last Read Enhancement</em:name>
 		<em:description>Adds "Last Read" support to the Something Awful forums</em:description>
 		<em:creator>Tim Fries (biznatchio)</em:creator>
+		<em:developer>Ben Dusinberre (duz)</em:developer>
 		<em:contributor>Joseph Wain (uncut product)</em:contributor>
 		<em:contributor>(8ender)</em:contributor>
 		<em:contributor>(LonelyKing)</em:contributor>
@@ -42,7 +43,6 @@
 		<em:contributor>(Defiler)</em:contributor>
 		<em:contributor>(Shii)</em:contributor>
 		<em:contributor>(cheesypeanut)</em:contributor>
-		<em:contributor>Ben Dusinberre (duz)</em:contributor>
 		<em:contributor>(cygnustm)</em:contributor>
 		<em:contributor>(alex.vidal)</em:contributor>
 		<em:contributor>Pat Cavit (Tivac)</em:contributor>

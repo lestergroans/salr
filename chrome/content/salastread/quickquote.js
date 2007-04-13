@@ -1,3 +1,4 @@
+//<script>
 var persistObject = Components.classes["@evercrest.com/salastread/persist-object;1"]
                       .createInstance(Components.interfaces.nsISupports).wrappedJSObject;
 
@@ -73,7 +74,7 @@ function getEmoticonsFromServer() {
       xht.send(null);
       var restext = xht.responseText;
 
-      persistObject.emoticons = new Array();  
+      persistObject.emoticons = new Array();
 
       emotRe = /<td class="smtxt">(.*?)<\/td>/gi;
       emotArray = restext.match(emotRe);
@@ -113,12 +114,12 @@ function startPostTextGrab(getFormKeyOnly, postid) {
    }
    if (window.__salastread_quickpost_forumid) {
       getter_isquote = 0;
-      targeturl = "http://forums.somethingawful.com/newthread.php?forumid=" + window.__salastread_quickpost_forumid;     
+      targeturl = "http://forums.somethingawful.com/newthread.php?forumid=" + window.__salastread_quickpost_forumid;
      getter_getFormKeyOnly = 1;
    }
    if (window.__salastread_is_edit) {
       getter_isquote = 1;
-      targeturl = "http://forums.somethingawful.com/editpost.php?s=&action=editpost&postid=" + postid;     
+      targeturl = "http://forums.somethingawful.com/editpost.php?s=&action=editpost&postid=" + postid;
    }
    //alert("targeturl = "+targeturl);
    pageGetter.open("GET", targeturl, true);
@@ -234,13 +235,13 @@ function finalizeTextGrab(restext) {
       document.getElementById("submit-swap").disabled = false;
       document.getElementById("submit-normal").disabled = false;
    }
-   
+
    if (window.__salastread_is_edit) {
       document.title = 'Quick Edit';
       document.getElementById('qrtitle').setAttribute('value', 'Quick Edit');
       document.getElementById('previewbtn').disabled = true;
    }
-      
+
    if (window.__salastread_quickpost_forumid) {
      //This is a Quick Post window - look the part!
      document.title = 'Quick Post';
@@ -272,8 +273,8 @@ function finalizeTextGrab(restext) {
        }
      }
    }
-   
-   return; 
+
+   return;
 
 
    var fkeygettext = restext;
@@ -318,7 +319,7 @@ function finalizeTextGrab(restext) {
    fkeygettext = fkeygettext.substring( fkeygettext.indexOf("value=\"")+7 );
    fkeygettext = fkeygettext.substring( 0, fkeygettext.indexOf("\"") );
    //alert(fkeygettext);
-  
+
    sa_formkey = fkeygettext;
    persistObject.__cachedFormKey = sa_formkey;
    if (!isDetached) {
@@ -390,6 +391,7 @@ function releaseVars() {
 
 function doSubmit(subtype) {
    persistObject.__quickreply__lastpost = document.getElementById("messagearea").value;
+   persistObject.iPostedHere(window.opener.__salastread_quotethreadid);
    window.opener.quickQuoteSubmit(
       document.getElementById("messagearea").value,
       document.getElementById("parseurl").checked,
@@ -526,7 +528,7 @@ function doAttach() {
    var fp = Components.classes["@mozilla.org/filepicker;1"]
            .createInstance(nsIFilePicker);
    fp.init(window, "Select an Image to Attach", nsIFilePicker.modeOpen);
-   fp.appendFilter("Image Files","*.gif; *.jpg; *.jpeg; *.png"); 
+   fp.appendFilter("Image Files","*.gif; *.jpg; *.jpeg; *.png");
    var res=fp.show();
    if (res==nsIFilePicker.returnOK){
       attachedFileName = fp.file.path;
@@ -540,7 +542,7 @@ function doAttach() {
 
 function getvBcode(command) {
    var str = null;
-    
+
    var theBox = document.getElementById("messagearea");
    var oPosition = theBox.scrollTop;
    var oHeight = theBox.scrollHeight;
@@ -548,7 +550,7 @@ function getvBcode(command) {
    var startPos = theBox.selectionStart;
    var endPos = theBox.selectionEnd;
    str = theBox.value.substring(startPos, endPos);
-			
+
    var nHeight = theBox.scrollHeight - oHeight;
    theBox.scrollTop = oPosition + nHeight;
 
@@ -577,7 +579,7 @@ function getvBcode(command) {
                insertTextAtCursor("[url=" + url + "]" + str + "[/url]");
             }
          }
-      break;  
+      break;
 
       case "bold":
          insertTextAtCursor("[b]" + str + "[/b]");
@@ -612,7 +614,7 @@ function getvBcode(command) {
       break;
 
       default : alert("vBcode error! No menu option selected.");
-   }	
+   }
 }
 
 function doPreview() {
@@ -650,9 +652,9 @@ function doPreview() {
    vbcode['<blockquote><pre><span style="font-family: verdana,arial,helvetica">code:</span><hr />$1<hr /></pre></blockquote>'] = /\[code\](.*?)\[\/code\]/gi;
    vbcode['<blockquote class="qb2"><h4>quote:</h4><p>$1</p></blockquote>'] = /\[quote\](.*?)\[\/quote\]/gi;
    vbcode['<blockquote class="qb2"><h4>$1 posted:</h4><p>$2</p></blockquote>'] = /\[quote=([^\]]+)\](.*?)\[\/quote\]/gi;
- 
+
    // Links and images
-   if (document.getElementById("parseurl").checked) {   
+   if (document.getElementById("parseurl").checked) {
       markup = markup.replace(/(^|\s)((((ht|f)tps?:\/\/)|(www|ftp)\.)[a-zA-Z0-9\.\#\@\:%&_/\?\=\~\-]+)/gim, "$1<a href=\"$2\" target=\"_blank\">$2</a>");
    }
 
@@ -663,7 +665,7 @@ function doPreview() {
    vbcode['<a title="$1" target=\"_blank\"><img width="100" border="0" src="$1" alt="$1"/></a>'] = /\[timg\](.*?)\[\/timg\]/gi;
 
    // Smileys
-   if (!document.getElementById("disablesmilies").checked) {   
+   if (!document.getElementById("disablesmilies").checked) {
 
       if ( typeof(persistObject.emoticons)=="undefined" || persistObject.emoticons==null ) {
          getEmoticonsFromServer();
@@ -676,7 +678,7 @@ function doPreview() {
       vbcode['<img src="http://i.somethingawful.com/mjolnir/images/livestock~01-14-04-whore.gif"/>'] = /;-\*/gi;
 
       var matches = markup.match(/\:(\w+|\?)\:/gi);
-   
+
       if (matches) {
          for (var i = 0; i < matches.length; i++) {
             for (var j=0; j<persistObject.emoticons.length; j++) {
