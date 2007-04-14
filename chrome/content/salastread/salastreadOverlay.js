@@ -1992,7 +1992,7 @@ function SALR_ProcessPostImages(thisel) {
          SALR_TextToImage(thisel);
    }
 
-
+// TODO: Convert this over
    if (persistObject.getPreference('thumbnailAllImages')) {
       setTimeout(function() {
 
@@ -2011,6 +2011,7 @@ function SALR_ProcessPostImages(thisel) {
       },1);
    }
 }
+
 
 // Ensure these correspond to the settings in thumbnail-images.css
 var SALR_THUMBNAIL_MAX_WIDTH = 250;
@@ -2124,6 +2125,7 @@ function SALR_BuildThumbnailControl(doc,image) {
 	image.__SALR_ThumbnailControl = outer;
 }
 
+/* Can delete this ~ duz 4/13
 function SALR_TextToImage(thisel) {
    var doc = thisel.ownerDocument;
    var bodylinknodes = selectNodes(doc, thisel, "TBODY/TR[1]/TD[2]/descendant::A");
@@ -2182,6 +2184,7 @@ function SALR_TextToImage(thisel) {
       }
    }
 }
+*/
 
 function handleShowThread(doc) {
 
@@ -2208,315 +2211,314 @@ function handleShowThread(doc) {
 	var inGasChamber = persistObject.inGasChamber(forumid);
 	var inSAMart = persistObject.inSAMart(forumid);
 
-if (!inFYAD || persistObject.getPreference("enableFYAD"))
-{
-	try {
-	// Insert the forums paginator & mouse gestures
-	if (persistObject.getPreference("enablePageNavigator"))
+	if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	{
-		persistObject.addPagination(doc);
-	}
-
-	if (persistObject.getPreference("gestureEnable"))
-	{
-		doc.body.addEventListener('mousedown', SALR_PageMouseDown, false);
-		doc.body.addEventListener('mouseup', SALR_PageMouseUp, false);
-	}
-
-	// Grab threads/posts per page
-	var perpage = persistObject.selectSingleNode(doc, doc, "//DIV[contains(@class,'pages')]//A[contains(@href,'perpage=')]");
-	if (perpage)
-	{
-		perpage = perpage.href.match(/perpage=(\d+)/i)[1];
-		persistObject.setPreference("postsPerPage", perpage);
-	}
-	else
-	{
-		perpage = 0;
-	}
-
-	var isloggedin = (doc.getElementById("notregistered") == null);
-
-	var pageList = this.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
-	if (pageList)
-	{
-		if (pageList.length >  1)
+		try {
+		// Insert the forums paginator & mouse gestures
+		if (persistObject.getPreference("enablePageNavigator"))
 		{
-			pageList = pageList[1];
+			persistObject.addPagination(doc);
+		}
+
+		if (persistObject.getPreference("gestureEnable"))
+		{
+			doc.body.addEventListener('mousedown', SALR_PageMouseDown, false);
+			doc.body.addEventListener('mouseup', SALR_PageMouseUp, false);
+		}
+
+		// Grab threads/posts per page
+		var perpage = persistObject.selectSingleNode(doc, doc, "//DIV[contains(@class,'pages')]//A[contains(@href,'perpage=')]");
+		if (perpage)
+		{
+			perpage = perpage.href.match(/perpage=(\d+)/i)[1];
+			persistObject.setPreference("postsPerPage", perpage);
 		}
 		else
 		{
-			pageList = pageList[0];
+			perpage = 0;
 		}
-		var numPages = pageList.innerHTML.match(/\((\d+)\)/);
-		var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
-		if (pageList.childNodes.length > 1) // Are there pages
+
+		var isloggedin = (doc.getElementById("notregistered") == null);
+
+		var pageList = this.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
+		if (pageList)
 		{
-			numPages = parseInt(numPages[1]);
-			curPage = parseInt(curPage[1]);
-		}
-		else
-		{
-			numPages = 1;
-			curPage = 1;
-		}
-	}
-
-	// Grab the go to dropdown
-	if (!persistObject.gotForumList)
-	{
-		var selectnode = persistObject.selectSingleNode(doc, doc.body, "//SELECT[@name='forumid']");
-		if (selectnode) {
-			// TODO: Audit this function
-			grabForumList(doc, selectnode);
-			persistObject.gotForumList = true;
-		}
-	}
-	doc.__SALR_forumid = forumid;
-	doc.body.className += " salastread_forum"+forumid;
-
-	// Figure out the current threadid
-	var replybutton = persistObject.selectSingleNode(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newreply&threadid=')]");
-	if (replybutton)
-	{
-		var threadid = replybutton.href.match(/threadid=(\d+)/)[1];
-	}
-	else
-	{
-		// If can't figure it out, abort so we don't screw anything up
-		return;
-	}
-	doc.__SALR_threadid = threadid;
-	persistObject.iAmReadingThis(threadid);
-	var lastReadPostCount = persistObject.getLastReadPostCount(threadid);
-
-	// used by the context menu to allow options for this thread
-	doc.body.className += " salastread_thread_"+threadid;
-
-	// Get the original poster and update the database if we don't know it yet
-	var threadOP = persistObject.GetOPFromData(threadid);
-	if (!threadOP && curPage == 1)
-	{
-		var opInfo = persistObject.selectSingleNode(doc, doc, "//TABLE[contains(@class,'post')]//A[contains(@href,'action=getinfo&userid=')]");
-		if (opInfo)
-		{
-			persistObject.StoreOPData(threadid, opInfo.href.match(/userid=(\d+)/)[1]);
-		}
-	}
-
-	// Grab the thread title
-	var threadtitle = '';
-	var titlematch = doc.title.match(/(.*) \- (.*)/);
-	if (titlematch) {
-		if (titlematch[1].search(/Something/i) > -1)
-		{
-			threadtitle = titlematch[2];
-		}
-		else
-		{
-			threadtitle = titlematch[1];
-		}
-		persistObject.setThreadTitle(threadid, threadtitle);
-	}
-
-	// Check if the thread is closed
-	if (persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newreply&threadid')]//IMG[contains(@src,'closed')]") == null)
-	{
-		var threadClosed = false;
-	}
-	else
-	{
-		var threadClosed = true;
-	}
-
-	// Replace post button
-	if (persistObject.getPreference("useQuickQuote") && !inGasChamber)
-	{
-		var postbuttons = persistObject.selectNodes(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newthread')]");
-		if (postbuttons.length > 0)
-		{
-			for (i in postbuttons)
+			if (pageList.length >  1)
 			{
-				attachQuickQuoteHandler(undefined,doc,persistObject.turnIntoQuickButton(doc, postbuttons[i], forumid),"",0);
+				pageList = pageList[1];
+			}
+			else
+			{
+				pageList = pageList[0];
+			}
+			var numPages = pageList.innerHTML.match(/\((\d+)\)/);
+			var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
+			if (pageList.childNodes.length > 1) // Are there pages
+			{
+				numPages = parseInt(numPages[1]);
+				curPage = parseInt(curPage[1]);
+			}
+			else
+			{
+				numPages = 1;
+				curPage = 1;
 			}
 		}
-		if (!threadClosed)
+
+		// Grab the go to dropdown
+		if (!persistObject.gotForumList)
 		{
-			var replybuttons = persistObject.selectNodes(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newreply&threadid')]");
-			if (replybuttons.length > 0)
+			var selectnode = persistObject.selectSingleNode(doc, doc.body, "//SELECT[@name='forumid']");
+			if (selectnode) {
+				// TODO: Audit this function
+				grabForumList(doc, selectnode);
+				persistObject.gotForumList = true;
+			}
+		}
+		doc.__SALR_forumid = forumid;
+		doc.body.className += " salastread_forum"+forumid;
+
+		// Figure out the current threadid
+		var replybutton = persistObject.selectSingleNode(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newreply&threadid=')]");
+		if (replybutton)
+		{
+			var threadid = replybutton.href.match(/threadid=(\d+)/)[1];
+		}
+		else
+		{
+			// If can't figure it out, abort so we don't screw anything up
+			return;
+		}
+		doc.__SALR_threadid = threadid;
+		persistObject.iAmReadingThis(threadid);
+		var lastReadPostCount = persistObject.getLastReadPostCount(threadid);
+
+		// used by the context menu to allow options for this thread
+		doc.body.className += " salastread_thread_"+threadid;
+
+		// Get the original poster and update the database if we don't know it yet
+		var threadOP = persistObject.GetOPFromData(threadid);
+		if (!threadOP && curPage == 1)
+		{
+			var opInfo = persistObject.selectSingleNode(doc, doc, "//TABLE[contains(@class,'post')]//A[contains(@href,'action=getinfo&userid=')]");
+			if (opInfo)
 			{
-				for (i in replybuttons)
+				persistObject.StoreOPData(threadid, opInfo.href.match(/userid=(\d+)/)[1]);
+				threadOP = opInfo.href.match(/userid=(\d+)/)[1];
+			}
+		}
+
+		// Grab the thread title
+		var threadtitle = '';
+		var titlematch = doc.title.match(/(.*) \- (.*)/);
+		if (titlematch) {
+			if (titlematch[1].search(/Something/i) > -1)
+			{
+				threadtitle = titlematch[2];
+			}
+			else
+			{
+				threadtitle = titlematch[1];
+			}
+			persistObject.setThreadTitle(threadid, threadtitle);
+		}
+
+		// Check if the thread is closed
+		if (persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newreply&threadid')]//IMG[contains(@src,'closed')]") == null)
+		{
+			var threadClosed = false;
+		}
+		else
+		{
+			var threadClosed = true;
+		}
+
+		// Replace post button
+		if (persistObject.getPreference("useQuickQuote") && !inGasChamber)
+		{
+			var postbuttons = persistObject.selectNodes(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newthread')]");
+			if (postbuttons.length > 0)
+			{
+				for (i in postbuttons)
 				{
-					attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, replybuttons[i], forumid),"",0);
+					attachQuickQuoteHandler(undefined,doc,persistObject.turnIntoQuickButton(doc, postbuttons[i], forumid),"",0);
+				}
+			}
+			if (!threadClosed)
+			{
+				var replybuttons = persistObject.selectNodes(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newreply&threadid')]");
+				if (replybuttons.length > 0)
+				{
+					for (i in replybuttons)
+					{
+						attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, replybuttons[i], forumid),"",0);
+					}
 				}
 			}
 		}
-	}
 
-	// Update the last read total
-	var editbuttons = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'postbar')]//A[contains(@href,'action=editpost')]");
-	var postcount = (perpage * (curPage-1)) + editbuttons.length;
-	persistObject.setLastReadPostCount(threadid, postcount);
+		// Update the last read total
+		var editbuttons = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'postbar')]//A[contains(@href,'action=editpost')]");
+		var postcount = (perpage * (curPage-1)) + editbuttons.length;
+		persistObject.setLastReadPostCount(threadid, postcount);
 
-	var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId;
-	var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink, quotebutton, editbutton;
-	doc.postlinks = new Array;
-	// Loop through each post
-	var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
-	for (i in postlist)
-	{
-		if (postlist[i].className.search(/ignored/i) > -1)
+		var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId, postbody;
+		var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink, quotebutton, editbutton;
+		doc.postlinks = new Array;
+		// Loop through each post
+		var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
+		for (i in postlist)
 		{
-			// User is ignored by the system so skip doing anything else
-			continue;
-		}
-		curPostId = postlist[i].id.match(/post(\d+)/)[1];
-		postcount = (perpage * (curPage-1)) + parseInt(i) + 1;
-		profileLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'userid=')]");
-		posterId = profileLink.href.match(/userid=(\d+)/i)[1];
-		if (!inFYAD)
-		{
-			userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR/TD//DL//DT[contains(@class,'author')]");
-		}
-		else
-		{
-			userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//DIV[contains(@class,'title')]//following-sibling::B");
-		}
-		titleBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR//TD//DL//DD[contains(@class,'title')]");
-		if (titleBox && persistObject.getPreference("resizeCustomTitleText"))
-		{
-			// Adds a scrollbar if they have a really wide custom title
-			titleBox.style.overflow = "auto";
-			titleBox.style.width = "159px";
-			if (titleBox.getElementsByTagName('font').length > 0)
+			if (postlist[i].className.search(/ignored/i) > -1)
 			{
-				// They likely have a large, red custom title
-				titleBox.getElementsByTagName('font')[0].style.fontSize = "10px";
+				// User is ignored by the system so skip doing anything else
+				continue;
 			}
-		}
-		posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
-		if (userNameBox.getElementsByTagName('img').length > 0)
-		{
-			// They have a mod star or something else
-			posterImg = userNameBox.getElementsByTagName('img')[0].title;
-			if (posterImg == 'Admin')
+			curPostId = postlist[i].id.match(/post(\d+)/)[1];
+			postcount = (perpage * (curPage-1)) + parseInt(i) + 1;
+			profileLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'userid=')]");
+			posterId = profileLink.href.match(/userid=(\d+)/i)[1];
+			if (!inFYAD)
 			{
-				persistObject.addAdmin(posterId, posterName);
+				userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR/TD//DL//DT[contains(@class,'author')]");
 			}
-			if (posterImg == 'Moderator')
+			else
 			{
-				persistObject.addMod(posterId, posterName);
+				userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//DIV[contains(@class,'title')]//following-sibling::B");
 			}
-		}
-		posterColor = false;
-		posterBG = false;
-		posterNote = false;
-		if (posterId == threadOP)
-		{
-			posterColor = persistObject.getPreference("opColor");
-			posterBG =  persistObject.getPreference("opBackground");
-			posterNote = "Thread Poster";
-		}
-		if (persistObject.isMod(posterId))
-		{
-			posterColor = persistObject.getPreference("modColor");
-			posterBG =  persistObject.getPreference("modBackground");
-			posterNote = "Forum Moderator";
-		}
-		if (persistObject.isAdmin(posterId))
-		{
-			posterColor = persistObject.getPreference("adminColor");
-			posterBG =  persistObject.getPreference("adminBackground");
-			posterNote = "Forum Administrator";
-		}
-		//posterColor = persistObject.getPosterColor(posterId);
-		//posterBG = persistObject.getPosterBackground(posterId);
-		//posterNote = persistObject.getPosterNote(posterId);
-		if (persistObject.getPreference("highlightUsernames") && posterColor != false)
-		{
-			userNameBox.style.color = posterColor;
-		}
-		if (posterNote != false)
-		{
-			userNameBox.innerHTML += "<p style='font-size:80%;margin:0;padding:0;'>"+posterNote+"</p>";
-		}
-		if (!persistObject.getPreference("dontHighlightPosts"))
-		{
-			if (posterBG != false)
+			titleBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR//TD//DL//DD[contains(@class,'title')]");
+			if (titleBox && persistObject.getPreference("resizeCustomTitleText"))
 			{
-				persistObject.colorPost(doc, postlist[i], posterBG, forumid);
-			}
-			else if (postcount <= lastReadPostCount)
-			{
-				if (colorDark)
+				// Adds a scrollbar if they have a really wide custom title
+				titleBox.style.overflow = "auto";
+				titleBox.style.width = "159px";
+				if (titleBox.getElementsByTagName('font').length > 0)
 				{
-					posterBG = persistObject.getPreference("seenPostDark");
+					// They likely have a large, red custom title
+					titleBox.getElementsByTagName('font')[0].style.fontSize = "10px";
 				}
-				else
+			}
+			posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
+			if (userNameBox.getElementsByTagName('img').length > 0)
+			{
+				// They have a mod star or something else
+				posterImg = userNameBox.getElementsByTagName('img')[0].title;
+				if (posterImg == 'Admin')
 				{
-					posterBG = persistObject.getPreference("seenPostLight");
+					persistObject.addAdmin(posterId, posterName);
 				}
-				persistObject.colorPost(doc, postlist[i], posterBG, forumid);
+				if (posterImg == 'Moderator')
+				{
+					persistObject.addMod(posterId, posterName);
+				}
+			}
+			posterColor = false;
+			posterBG = false;
+			posterNote = false;
+			if (posterId == threadOP)
+			{
+				posterColor = persistObject.getPreference("opColor");
+				posterBG =  persistObject.getPreference("opBackground");
+				posterNote = "Thread Poster";
+			}
+			if (persistObject.isMod(posterId))
+			{
+				posterColor = persistObject.getPreference("modColor");
+				posterBG =  persistObject.getPreference("modBackground");
+				posterNote = "Forum Moderator";
+			}
+			if (persistObject.isAdmin(posterId))
+			{
+				posterColor = persistObject.getPreference("adminColor");
+				posterBG =  persistObject.getPreference("adminBackground");
+				posterNote = "Forum Administrator";
+			}
+			//posterColor = persistObject.getPosterColor(posterId);
+			//posterBG = persistObject.getPosterBackground(posterId);
+			//posterNote = persistObject.getPosterNote(posterId);
+			if (persistObject.getPreference("highlightUsernames") && posterColor != false)
+			{
+				userNameBox.style.color = posterColor;
+			}
+			if (posterNote != false)
+			{
+				userNameBox.innerHTML += "<p style='font-size:80%;margin:0;padding:0;'>"+posterNote+"</p>";
+			}
+			if (!persistObject.getPreference("dontHighlightPosts"))
+			{
+				if (posterBG != false)
+				{
+					persistObject.colorPost(doc, postlist[i], posterBG, forumid);
+				}
+				else if (postcount <= lastReadPostCount)
+				{
+					if (colorDark)
+					{
+						posterBG = persistObject.getPreference("seenPostDark");
+					}
+					else
+					{
+						posterBG = persistObject.getPreference("seenPostLight");
+					}
+					persistObject.colorPost(doc, postlist[i], posterBG, forumid);
+				}
+			}
+			colorDark = !colorDark;
+			postIdLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'#post')]");
+			postid = postIdLink.href.match(/#post(\d+)/i)[1];
+			if (persistObject.getPreference("insertPostTargetLink"))
+			{
+				slink = doc.createElement("a");
+				slink.href = "/showthread.php?action=showpost&postid="+postid;
+				slink.title = "Show Single Post";
+				slink.appendChild(doc.createTextNode("1"));
+				postIdLink.parentNode.insertBefore(slink, postIdLink);
+				postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
+			}
+			if (persistObject.getPreference("insertPostLastMarkLink"))
+			{
+				// If SALR_ChangeLastReadOnThread gets rewritten, then this should work
+				resetLink = doc.createElement("a");
+				resetLink.href = "javascript:void('lr',"+postid+");";
+				resetLink.title = "Set \"Last Read\" post in this thread to this post";
+				resetLink.threadid = threadid;
+				resetLink.postid = postid;
+				resetLink.postcount = postcount;
+				resetLink.parentpost = postlist[i];
+				resetLink.onclick = SALR_ChangeLastReadOnThread;
+				resetLink.appendChild(doc.createTextNode("<"));
+				doc.postlinks[doc.postlinks.length] = resetLink;
+				postIdLink.parentNode.insertBefore(resetLink, postIdLink);
+				postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
+			}
+			if (persistObject.getPreference('useQuickQuote') && !threadClosed)
+			{
+				quotebutton = selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
+				if (quotebutton) {
+					attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, quotebutton, forumid),posterName,1,postid);
+				}
+				editbutton = selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
+				if (editbutton) {
+					attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, editbutton, forumid),posterName,1,postid,true);
+				}
+			}
+			//SALR_ProcessPostImages(postlist[i]);
+			postbody = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TD[contains(@class,'postbody')]");
+			persistObject.convertSpecialLinks(doc, postbody);
+		}
+
+		// Get the last post #
+		lastPostId = postIdLink.href.match(/#post(\d+)/i)[1];
+		persistObject.setLastPostID(threadid, lastPostId);
+		}
+		catch (zzzz)
+		{
+			if (!persistObject.getPreference("suppressErrors"))
+			{
+				alert(zzzz);
 			}
 		}
-		colorDark = !colorDark;
-		postIdLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'#post')]");
-		postid = postIdLink.href.match(/#post(\d+)/i)[1];
-		if (persistObject.getPreference("insertPostTargetLink"))
-		{
-			slink = doc.createElement("a");
-			slink.href = "/showthread.php?action=showpost&postid="+postid;
-			slink.title = "Show Single Post";
-			slink.appendChild(doc.createTextNode("1"));
-			postIdLink.parentNode.insertBefore(slink, postIdLink);
-			postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
-		}
-		if (persistObject.getPreference("insertPostLastMarkLink"))
-		{
-			// If SALR_ChangeLastReadOnThread gets rewritten, then this should work
-			resetLink = doc.createElement("a");
-			resetLink.href = "javascript:void('lr',"+postid+");";
-			resetLink.title = "Set \"Last Read\" post in this thread to this post";
-			resetLink.threadid = threadid;
-			resetLink.postid = postid;
-			resetLink.postcount = postcount;
-			resetLink.parentpost = postlist[i];
-			resetLink.onclick = SALR_ChangeLastReadOnThread;
-			resetLink.appendChild(doc.createTextNode("<"));
-			doc.postlinks[doc.postlinks.length] = resetLink;
-			postIdLink.parentNode.insertBefore(resetLink, postIdLink);
-			postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
-		}
-		if (persistObject.getPreference('useQuickQuote') && !threadClosed)
-		{
-			quotebutton = selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
-			if (quotebutton) {
-				attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, quotebutton, forumid),posterName,1,postid);
-			}
-			editbutton = selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
-			if (editbutton) {
-				attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, editbutton, forumid),posterName,1,postid,true);
-			}
-		}
-		// TODO: Audit this function
-		SALR_ProcessPostImages(postlist[i]);
 	}
-
-	// Get the last post #
-	lastPostId = postIdLink.href.match(/#post(\d+)/i)[1];
-	persistObject.setLastPostID(threadid, lastPostId);
-
-	// Insert timestamp of last viewing
-
-	}
-	catch (zzzz)
-	{
-		if (!persistObject.getPreference("suppressErrors"))
-		{
-			alert(zzzz);
-		}
-	}
-}
 	// below hasn't been rewritten
 try {
 
@@ -2941,6 +2943,7 @@ function SALR_NoteFade(targetEl) {
    }
 }
 
+/* Can delete this? duz 4/13
 function makeQuickReplyButton(threadid,doc,replybutton, inBYOB) {
 
 
@@ -2966,7 +2969,8 @@ function makeQuickReplyButton(threadid,doc,replybutton, inBYOB) {
    attachQuickQuoteHandler(threadid,doc,newreply,"",0);
    replybutton.parentNode.parentNode.insertBefore(newreply, replybutton.parentNode);
 }
-
+*/
+/* Can delete this? duz 4/13
 function makeQuickPostButton(threadid,doc,replybutton) {
    var forumid = replybutton.parentNode.href.match(/forumid=[0-9]+/);
    if (forumid.length) forumid = forumid[0].split(/=/);
@@ -2996,7 +3000,9 @@ function makeQuickPostButton(threadid,doc,replybutton) {
    attachQuickQuoteHandler(undefined,doc,newreply,"",0);
    replybutton.parentNode.parentNode.insertBefore(newreply, replybutton.parentNode);
 }
+*/
 
+// TODO: Convert this function
 function setupThumbnailImage(img,isquoted,istti) {
    img.__fullsize = false;
    img.__salastread_isquoted = isquoted;

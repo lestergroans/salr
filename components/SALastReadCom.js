@@ -1353,7 +1353,7 @@ salrPersistObject.prototype = {
 		}
 		if (!mDBConn.tableExists('userdata'))
 		{
-			mDBConn.executeSimpleSQL("CREATE TABLE `userdata` (userid INTEGER PRIMARY KEY, username VARCHAR(50), mod BOOLEAN, admin BOOLEAN, status VARCHAR(8), notes TEXT)");
+			mDBConn.executeSimpleSQL("CREATE TABLE `userdata` (userid INTEGER PRIMARY KEY, username VARCHAR(50), mod BOOLEAN, admin BOOLEAN, color VARCHAR(8), background VARCHAR(8), status VARCHAR(8), notes TEXT)");
 		}
 		if (!mDBConn.tableExists('posticons'))
 		{
@@ -2005,7 +2005,7 @@ salrPersistObject.prototype = {
 	},
 	inBYOB: function(forumid)
 	{
-		return (forumid == 174 || forumid == 176);
+		return (forumid == 174 || forumid == 176 || forumid == 194);
 	},
 	inDump: function(forumid)
 	{
@@ -2318,6 +2318,44 @@ salrPersistObject.prototype = {
 			}
 		}
 		return result;
+	},
+
+	// Convert image/videos links in threads to inline images/videos
+	// @param: td
+	// @return: nothing
+	convertSpecialLinks: function(doc, postbody)
+	{
+		var newImg;
+		var linksInPost = this.selectNodes(doc, postbody, "descendant::A");
+		for (var i in linksInPost)
+		{
+			if (linksInPost[i].href.search(/\.(gif|jpg|jpeg|png)$/i) > -1 && this.getPreference("convertTextToImage"))
+			{
+				if (!this.getPreference("dontTextToImageIfMayBeNws") || linksInPost[i].innerHTML.search(/(nsfw|nws|nms|t work safe|t safe for work)/i) == -1)
+				{
+					if (linksInPost[i].parentNode.className.search(/spoiler/i) == -1 || !this.getPreference("dontTextToImageInSpoilers"))
+					{
+						newImg = doc.createElement("img");
+						newImg.src = linksInPost[i].href;
+						newImg.title = "Link converted by SALR";
+						newImg.style.border = "1px dashed #f00";
+						if (this.getPreference("shrinkTextToImages"))
+						{
+							// Do something
+						}
+						if (linksInPost[i].href.search(/http:/i) == 0)
+						{
+							linksInPost[i].textContent = '';
+							linksInPost[i].appendChild(newImg);
+						}
+						else
+						{
+							linksInPost[i].parentNode.insertBefore(newImg, linksInPost[i]);
+						}
+					}
+				}
+			}
+		}
 	},
 
 	// Takes a button and turns it into a quick button
