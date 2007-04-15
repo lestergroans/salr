@@ -1,10 +1,11 @@
-pref('extensions.salastread.currentVersion', '1.99.070413');
+pref('extensions.salastread.currentVersion', '1.99.070414');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
 pref('extensions.salastread.disableNewReCount', false);
 pref('extensions.salastread.newPostCountUseOneLine', false);
 pref('extensions.salastread.enableVideoEmbedder', true);
+pref('extensions.salastread.videoEmbedderBG', '#ffcccc');
 
 pref('extensions.salastread.modColor', '#bb4400');
 pref('extensions.salastread.adminColor', '#44bb00');
@@ -76,11 +77,16 @@ pref('extensions.salastread.dontHighlightThreads', false);
 pref('extensions.salastread.dontHighlightPosts', false);
 pref('extensions.salastread.removePageTitlePrefix', true);
 pref('extensions.salastread.quickQuoteSwapPostPreview', false);
+
 pref('extensions.salastread.convertTextToImage', false);
+pref('extensions.salastread.dontConvertQuotedImages', true);
+pref('extensions.salastread.maxWidthOfConvertedImages', 800);
+pref('extensions.salastread.maxHeightOfConvertedImages', -1);
 pref('extensions.salastread.thumbnailQuotedImagesInThreads', false);
 pref('extensions.salastread.shrinkTextToImages', true);
 pref('extensions.salastread.dontTextToImageIfMayBeNws', true);
 pref('extensions.salastread.dontTextToImageInSpoilers', true);
+
 pref('extensions.salastread.dontCheckKillSwitch', false);
 pref('extensions.salastread.highlightUsernames', true);
 pref('extensions.salastread.removeHeaderAndFooter', false);
