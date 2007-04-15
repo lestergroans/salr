@@ -1,5 +1,33 @@
 // <script> This line added because my IDE has problems detecting JS ~ 0330 ~ duz
 
+function SALR_vidClick(e, videoId, vidSrc)
+{
+	var linkNode = e.target;
+	var doc = e.originalTarget.ownerDocument;
+	//var videoId = e.vidid, vidSrc = e.vidsrc;
+	var embedEl = doc.createElement("EMBED");
+	embedEl.setAttribute('width', 450);
+	embedEl.setAttribute('height', 370);
+	embedEl.setAttribute('type', "application/x-shockwave-flash");
+	switch (vidSrc)
+	{
+		case "google":
+			embedEl.setAttribute('flashvars', '');
+			embedEl.setAttribute('src', 'http://video.google.com/googleplayer.swf?docId=' + videoId + '&hl=en');
+			break;
+		case "youtube":
+			embedEl.setAttribute('quality',"high");
+			embedEl.setAttribute('bgcolor',"#FFFFFF");
+			embedEl.setAttribute('wmode', "transparent");
+			embedEl.setAttribute('src', "http://www.youtube.com/v/" + videoId);
+			break;
+	}
+	linkNode.parentNode.insertBefore(embedEl, linkNode);
+	//this.insertRemoveLink(linkNode, embedEl);
+	linkNode.parentNode.removeChild(linkNode);
+	e.preventDefault();
+}
+
 const SALR_CONTRACTID = "@evercrest.com/salastread/persist-object;1";
 const SALR_CID = Components.ID("{f5d9093b-8210-4a26-89ba-4c987de04efc}");
 const nsISupports = Components.interfaces.nsISupports;
@@ -1272,7 +1300,7 @@ salrPersistObject.prototype = {
    },
 	*/
    IsDebugEnabled: function() {
-      return this.IsDevelopmentRelease();
+      return this.IsDevelopmentRelease;
    },
 
    // XPCOM Glue stuff
@@ -1450,7 +1478,7 @@ salrPersistObject.prototype = {
 
 	// Returns the last version ran
 	// @param: nothing
-	// @return: (string) Version number
+	// @return: (string) Version number, 0 if no last run version
 	get LastRunVersion()
 	{
 		// Check to see if they have a value stored in the old location
@@ -1463,9 +1491,13 @@ salrPersistObject.prototype = {
 		prefType = this.preferences.getPrefType("lastRunVersion");
 		if (prefType == this.preferences.PREF_INVALID)
 		{
-			this.LastRunVersion = this.getPreference("currentVersion");
+			var lrver = 0;
 		}
-		return this.getPreference("lastRunVersion");
+		else
+		{
+			var lrver = this.getPreference("lastRunVersion");
+		}
+		return lrver;
 	},
 
 	// This function seems to no longer work?
@@ -1502,7 +1534,7 @@ salrPersistObject.prototype = {
 	// If the build value is 6 digits (a date), then it's a development build
 	// @param: nothing
 	// @return: (boolean) true if development build, false otherwise
-	IsDevelopmentRelease: function()
+	get IsDevelopmentRelease()
 	{
 		var isDev = false;
 		var ver = this.getPreference("currentVersion");
@@ -1513,6 +1545,25 @@ salrPersistObject.prototype = {
 			isDev = (build.length == 6);
 		}
 		return isDev;
+	},
+
+	// Returns the build number (third value in a.b.c)
+	// @param: nothing
+	// @return: (int) 6 digit build date
+	get buildNumber()
+	{
+		var isDev = false;
+		var ver = this.getPreference("currentVersion");
+		var vm = ver.match(/^(\d+)\.(\d+)\.(\d+)$/);
+		if (vm)
+		{
+			var build = parseInt(vm[3]);
+		}
+		else
+		{
+			var build = 0;
+		}
+		return build;
 	},
 
 	// This function has been superseded by getPreference, do not use for new code
@@ -1569,7 +1620,7 @@ salrPersistObject.prototype = {
 			if (!statement.executeStep())
 			{
 				statement.reset();
-				statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 1, 0, 0, null)");
+				statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `color`, `background`, `status`, `notes`) VALUES (?1, ?2, 1, 0, 0, 0, 0, null)");
 				statement.bindInt32Parameter(0,userid);
 				statement.bindStringParameter(1,username);
 				statement.executeStep();
@@ -1591,7 +1642,7 @@ salrPersistObject.prototype = {
 			if (!statement.executeStep())
 			{
 				statement.reset();
-				statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `status`, `notes`) VALUES (?1, ?2, 0, 1, 0, null)");
+				statement = this.database.createStatement("INSERT INTO `userdata` (`userid`, `username`, `mod`, `admin`, `color`, `background`, `status`, `notes`) VALUES (?1, ?2, 0, 1, 0, 0, 0, null)");
 				statement.bindInt32Parameter(0,userid);
 				statement.bindStringParameter(1,username);
 				statement.executeStep();
@@ -2019,13 +2070,10 @@ salrPersistObject.prototype = {
 	{
 		return (forumid == 25);
 	},
-	inSAMart: function(forumid)
+	hasNoRatingBox: function(forumid)
 	{
-		return (forumid == 61 || forumid == 77 || forumid == 78 || forumid == 79);
-	},
-	inQCS: function(forumid)
-	{
-		return (forumid == 188);
+		return (forumid == 93 || forumid == 188 || forumid == 61 || forumid == 77 ||
+		 forumid == 78 || forumid == 79 || forumid == 115);
 	},
 
 	// Colors the post passed to it
@@ -2069,7 +2117,7 @@ salrPersistObject.prototype = {
 		{
 			threadIconBox = this.selectSingleNode(doc, thread, "TD[@class='icon']");
 		}
-		if (!this.inSAMart(forumID) && !this.inDump(forumID) && !this.inQCS(forumID))
+		if (!this.inDump(forumID) && !this.hasNoRatingBox(forumID))
 		{
 			threadRatingBox = this.selectSingleNode(doc, thread, "TD[@class='rating']");
 		}
@@ -2086,7 +2134,7 @@ salrPersistObject.prototype = {
 		threadAuthorBox.style.backgroundColor = darkColorToUse;
 		threadRepliesBox.style.backgroundColor = lightColorToUse;
 		threadViewsBox.style.backgroundColor = darkColorToUse;
-		if (!this.inSAMart(forumID) && !this.inQCS(forumID))
+		if (!this.hasNoRatingBox(forumID))
 		{
 			threadRatingBox.style.backgroundColor = lightColorToUse;
 		}
@@ -2133,11 +2181,18 @@ salrPersistObject.prototype = {
 	// Inserts the jump to last read post icon
 	// @param: doc, TD
 	// @return: nothing
-	insertLastIcon: function(doc, titleBox, threadId)
+	insertLastIcon: function(doc, titleBox, threadId, lrCount)
 	{
-		lpGo = doc.createElement("a");
-		lastPostID = this.getLastPostID(threadId);
-		lpGo.setAttribute("href", "/showthread.php?postid=" + lastPostID + "#post" + lastPostID);
+		var lpGo = doc.createElement("a");
+		if (lrCount % this.getPreference("postsPerPage") == 0)
+		{
+			lpGo.setAttribute("href", "/showthread.php?threadid=" + threadId + "&pagenumber=" + (lrCount/this.getPreference("postsPerPage")+1));
+		}
+		else
+		{
+			var lastPostID = this.getLastPostID(threadId);
+			lpGo.setAttribute("href", "/showthread.php?postid=" + lastPostID + "#post" + lastPostID);
+		}
 		lpGo.setAttribute("id", "jumptolast_"+threadId);
 		lpIcon = doc.createElement("img");
 		lpIcon.setAttribute("src", "chrome://salastread/skin/lastpost.png");
@@ -2325,35 +2380,76 @@ salrPersistObject.prototype = {
 	// @return: nothing
 	convertSpecialLinks: function(doc, postbody)
 	{
-		var newImg;
+		var newImg, vidIdSearch, vidid, vidsrc;
 		var linksInPost = this.selectNodes(doc, postbody, "descendant::A");
 		for (var i in linksInPost)
 		{
-			if (linksInPost[i].href.search(/\.(gif|jpg|jpeg|png)$/i) > -1 && this.getPreference("convertTextToImage"))
+			if (this.getPreference("convertTextToImage") &&
+				linksInPost[i].href.search(/\.(gif|jpg|jpeg|png)(#?.*)$/i) > -1 &&
+				linksInPost[i].href.search(/paintedover\.com/i) == -1 && // PaintedOver sucks, we can't embed them
+				linksInPost[i].innerHTML != "") // Quotes have fake links for some reason
 			{
-				if (!this.getPreference("dontTextToImageIfMayBeNws") || linksInPost[i].innerHTML.search(/(nsfw|nws|nms|t work safe|t safe for work)/i) == -1)
+				if (!this.getPreference("dontTextToImageIfMayBeNws") ||
+					linksInPost[i].parentNode.innerHTML.search(/(nsfw|nws|nms|t work safe|t safe for work)/i) == -1)
 				{
-					if (linksInPost[i].parentNode.className.search(/spoiler/i) == -1 || !this.getPreference("dontTextToImageInSpoilers"))
+					if (!this.getPreference("dontTextToImageInSpoilers") ||
+						(linksInPost[i].parentNode.className.search(/spoiler/i) == -1 &&
+						linksInPost[i].textContent.search(/spoiler/i) == -1))
 					{
+						if (this.getPreference("dontConvertQuotedImages"))
+						{
+							// Check if it's in a blockquote
+							if (linksInPost[i].parentNode.parentNode.className.search(/qb2/i) > -1 ||
+								linksInPost[i].parentNode.parentNode.parentNode.className.search(/qb2/i) > -1)
+							{
+								continue;
+							}
+						}
 						newImg = doc.createElement("img");
 						newImg.src = linksInPost[i].href;
 						newImg.title = "Link converted by SALR";
 						newImg.style.border = "1px dashed #f00";
 						if (this.getPreference("shrinkTextToImages"))
 						{
-							// Do something
+							newImg.style.maxWidth = this.getPreference("maxWidthOfConvertedImages") + "px";
+							newImg.style.maxHeight = this.getPreference("maxHeightOfConvertedImages") + "px";
+							newImg.addEventListener("click", function() { this.style.maxWidth = ''; this.style.maxHeight = ''; this.title = "Link converted by SALR";},false);
+							newImg.title += " - Click to enlarge";
 						}
-						if (linksInPost[i].href.search(/http:/i) == 0)
+						if ((linksInPost[i].firstChild == linksInPost[i].lastChild && (linksInPost[i].firstChild.tagName && linksInPost[i].firstChild.tagName.search(/img/i) > -1)) ||
+							linksInPost[i].textContent.search(/http:/i) == 0)
 						{
 							linksInPost[i].textContent = '';
-							linksInPost[i].appendChild(newImg);
+							linksInPost[i].parentNode.replaceChild(newImg, linksInPost[i]);
 						}
 						else
 						{
-							linksInPost[i].parentNode.insertBefore(newImg, linksInPost[i]);
+							linksInPost[i].previousSibling.textContent += linksInPost[i].textContent;
+							linksInPost[i].textContent = '';
+							linksInPost[i].parentNode.replaceChild(newImg, linksInPost[i]);
+							//linksInPost[i].appendChild(newImg);
 						}
 					}
 				}
+			}
+			if (this.getPreference("enableVideoEmbedder") &&
+				(linksInPost[i].href.search(/^http\:\/\/(www\.)?youtube\.com\/watch\?v=([-_0-9a-zA-Z]+)/i) > -1 ||
+				linksInPost[i].href.search(/^http\:\/\/video\.google\.com\/videoplay\?docid=([-0-9]+)/i) > -1))
+			{
+				linksInPost[i].style.backgroundColor = this.getPreference("videoEmbedderBG");
+				vidIdSearch = linksInPost[i].href.match(/^http\:\/\/(www\.)?youtube\.com\/watch\?v=([-_0-9a-zA-Z]+)/);
+				if (vidIdSearch)
+				{
+					vidid = vidIdSearch[2];
+					vidsrc = "youtube";
+				}
+				else
+				{
+					vidIdSearch = linksInPost[i].href.match(/^http\:\/\/video\.google\.com\/videoplay\?docid=([-0-9]+)/);
+					vidid = vidIdSearch[2];
+					vidsrc = "google";
+				}
+				linksInPost[i].addEventListener('click', function(e) { SALR_vidClick(e, vidid, vidsrc); }, false);
 			}
 		}
 	},

@@ -1,7 +1,6 @@
 // <script> This line added because my IDE has problems detecting JS ~ 0330 ~ duz
 
 var needToShowChangeLog = false;
-var upgradeFromVersion = null;
 
 var THREAD_ICON_COUNT = 2;
 
@@ -1156,7 +1155,7 @@ function handleSubscriptions(doc) {
 			if ((persistObject.getPreference("showGoToLastIcon") && ((threadRe+1) > threadLRCount)) ||
 				persistObject.getPreference("alwaysShowGoToLastIcon"))
 			{
-				persistObject.insertLastIcon(doc, threadTitleBox, threadId);
+				persistObject.insertLastIcon(doc, threadTitleBox, threadId, threadLRCount);
 			}
 			if (persistObject.getPreference("showUnvisitIcon") && !persistObject.getPreference("swapIconOrder"))
 			{
@@ -1337,7 +1336,6 @@ try {
 	var inDump = persistObject.inDump(forumid);
 	var inAskTell = persistObject.inAskTell(forumid);
 	var inGasChamber = persistObject.inGasChamber(forumid);
-	var inSAMart = persistObject.inSAMart(forumid);
 
 	if (!inFYAD || persistObject.getPreference("enableFYAD")) {
 
@@ -1401,7 +1399,7 @@ try {
 
 		// We'll need lots of variables for this
 		var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox;
-		var threadLastpostBox, threadTitle, threadId, threadOPId, threadRe;
+		var threadTitle, threadId, threadOPId, threadRe;
 		var threadLRCount, posterColor, posterBG, unvistIcon, lpIcon, lastPostID;
 		// Here be where we work on the thread rows
 		var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
@@ -1427,7 +1425,6 @@ try {
 				// It's an announcement so skip the rest
 				continue;
 			}
-			threadLastpostBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='lastpost']");
 			threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
 			threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
 			// If thread is ignored might as well stop now
@@ -1512,7 +1509,7 @@ try {
 				if ((persistObject.getPreference("showGoToLastIcon") && ((threadRe+1) > threadLRCount)) ||
 					persistObject.getPreference("alwaysShowGoToLastIcon"))
 				{
-					persistObject.insertLastIcon(doc, threadTitleBox, threadId);
+					persistObject.insertLastIcon(doc, threadTitleBox, threadId, parseInt(threadLRCount));
 				}
 				if (persistObject.getPreference("showUnvisitIcon") && !persistObject.getPreference("swapIconOrder"))
 				{
@@ -2209,11 +2206,10 @@ function handleShowThread(doc) {
 	var inDump = persistObject.inDump(forumid);
 	var inAskTell = persistObject.inAskTell(forumid);
 	var inGasChamber = persistObject.inGasChamber(forumid);
-	var inSAMart = persistObject.inSAMart(forumid);
 
 	if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	{
-		try {
+
 		// Insert the forums paginator & mouse gestures
 		if (persistObject.getPreference("enablePageNavigator"))
 		{
@@ -2362,7 +2358,7 @@ function handleShowThread(doc) {
 		var postcount = (perpage * (curPage-1)) + editbuttons.length;
 		persistObject.setLastReadPostCount(threadid, postcount);
 
-		var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId, postbody;
+		var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId, postbody, f;
 		var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink, quotebutton, editbutton;
 		doc.postlinks = new Array;
 		// Loop through each post
@@ -2395,7 +2391,10 @@ function handleShowThread(doc) {
 				if (titleBox.getElementsByTagName('font').length > 0)
 				{
 					// They likely have a large, red custom title
-					titleBox.getElementsByTagName('font')[0].style.fontSize = "10px";
+					for(f=0;f<titleBox.getElementsByTagName('font').length;f++)
+					{
+						titleBox.getElementsByTagName('font')[f].style.fontSize = "10px";
+					}
 				}
 			}
 			posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
@@ -2510,14 +2509,7 @@ function handleShowThread(doc) {
 		// Get the last post #
 		lastPostId = postIdLink.href.match(/#post(\d+)/i)[1];
 		persistObject.setLastPostID(threadid, lastPostId);
-		}
-		catch (zzzz)
-		{
-			if (!persistObject.getPreference("suppressErrors"))
-			{
-				alert(zzzz);
-			}
-		}
+
 	}
 	// below hasn't been rewritten
 try {
@@ -3893,11 +3885,10 @@ function SALR_ThreadWatch() {
 }
 
 function showChangelogWindow() {
-   //window.open("chrome://salastread/content/changelog.xul?autopop=1", "changelog", "chrome,centerscreen,resizable,modal");
-   var param = new Object();
-   param["upgradeFromVersion"] = upgradeFromVersion;
-   //window.open("chrome://salastread/content/changelog.xul?autopop=1", "changelog", "chrome,centerscreen,resizable", param);
-   openDialog("chrome://salastread/content/newfeatures/newfeatures.xul", "SALR_newfeatures", "chrome,centerscreen,dialog=no", param);
+	var param = new Object();
+	param["upgradeFromVersion"] = persistObject.LastRunVersion;
+	param["currentVersion"] = SALR_CURRENT_VERSION;
+	openDialog("chrome://salastread/content/newfeatures/newfeatures.xul", "SALR_newfeatures", "chrome,centerscreen,dialog=no", param);
 }
 
 var killcheckxmlhttp;
@@ -3958,18 +3949,15 @@ function saLastReadKillCheck() {
 }
 
 try {
-   persistObject = Components.classes["@evercrest.com/salastread/persist-object;1"]
-                      .createInstance(Components.interfaces.nsISupports);
-   persistObject = persistObject.wrappedJSObject;
-   if (!persistObject)
-      throw "Failed to create persistObject.";
+	persistObject = Components.classes["@evercrest.com/salastread/persist-object;1"]
+		.createInstance(Components.interfaces.nsISupports);
+	persistObject = persistObject.wrappedJSObject;
+	if (!persistObject)
+	{
+		throw "Failed to create persistObject.";
+	}
+	var SALR_CURRENT_VERSION = persistObject.getPreference('currentVersion');
 
-	SALR_CURRENT_VERSION = persistObject.getPreference('currentVersion');
-
-   if (persistObject.SALRversion != persistObject.getPreference('currentVersion')) {
-      persistObject = null;
-      throw "XPCOM/Overlay version mismatch. Your Firefox profile is probably corrupt. Google for \"firefox profile support\" for help in setting up a new, clean profile.";
-   }
    if (!persistObject._syncTransferObject) {
       persistObject.SetSyncTransferObject(new SALR_FTPTransferObject());
    }
@@ -3985,18 +3973,22 @@ try {
    if (persistObject._killChecked == false) {
       saLastReadKillCheck();
    }
-      if ( persistObject && persistObject.LastRunVersion != SALR_CURRENT_VERSION ) {
-         needToShowChangeLog = !persistObject.IsDevelopmentRelease;
-         upgradeFromVersion = persistObject.LastRunVersion;
-         persistObject.LastRunVersion = SALR_CURRENT_VERSION;
-      }
-      if ( typeof(persistObject.xmlDoc) != "undefined" ) {
-         window.addEventListener('load', salastread_windowOnLoad, true);
-         window.addEventListener('beforeunload', salastread_windowOnBeforeUnload, true);
-         window.addEventListener('unload', salastread_windowOnUnload, true);
-      } else {
-         alert("persistObject._starterr =\n" + persistObject._starterr);
-      }
+	if (persistObject && persistObject.LastRunVersion != SALR_CURRENT_VERSION) {
+		needToShowChangeLog = !persistObject.IsDevelopmentRelease;
+		// Here we have to put special cases for specific dev build numbers that require the changelog dialog to appear
+		if (persistObject.LastRunVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3] < 70414)
+		{
+			needToShowChangeLog = true;
+		}
+		persistObject.LastRunVersion = SALR_CURRENT_VERSION;
+	}
+	if ( typeof(persistObject.xmlDoc) != "undefined" ) {
+		window.addEventListener('load', salastread_windowOnLoad, true);
+		window.addEventListener('beforeunload', salastread_windowOnBeforeUnload, true);
+		window.addEventListener('unload', salastread_windowOnUnload, true);
+	} else {
+		alert("persistObject._starterr =\n" + persistObject._starterr);
+	}
 }
 catch (e)
 {
