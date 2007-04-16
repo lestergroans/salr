@@ -3980,7 +3980,7 @@ try {
 		needToShowChangeLog = !persistObject.IsDevelopmentRelease;
 		// Here we have to put special cases for specific dev build numbers that require the changelog dialog to appear
 		var buildNum = parseInt(persistObject.LastRunVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3], 10);
-		if (buildNum == 70414 || buildNum == 70415 || buildNum == 0)
+		if (buildNum <= 70415) // Put the latest build number to need an SQL patch here
 		{
 			needToShowChangeLog = true;
 		}
