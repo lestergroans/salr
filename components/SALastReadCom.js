@@ -275,18 +275,6 @@ salrPersistObject.prototype = {
    get gotForumList() { return this._gotForumList; },
    set gotForumList(value) { this._gotForumList = value; },
 
-	/* This function has been rewritten for 2.0, remove before release
-   get LastRunVersion() {
-      if ( this.pref.getPrefType("salastread.lastRunVersion") == this.pref.PREF_STRING )
-      {
-         return this.pref.getCharPref("salastread.lastRunVersion");
-      }
-      return "";
-   },
-	*/
-	/* This function has been rewritten for 2.0, remove before release
-   set LastRunVersion(ver) { this.pref.setCharPref("salastread.lastRunVersion", ver); },
-	*/
    _TimeManager: null,
    get TimeManager() { return this._TimeManager; },
    set TimeManager(value) {
@@ -1478,7 +1466,7 @@ salrPersistObject.prototype = {
 
 	// Returns the last version ran
 	// @param: nothing
-	// @return: (string) Version number, 0 if no last run version
+	// @return: (string) Version number, 0.0.0 if no last run version
 	get LastRunVersion()
 	{
 		// Check to see if they have a value stored in the old location
@@ -1491,7 +1479,7 @@ salrPersistObject.prototype = {
 		prefType = this.preferences.getPrefType("lastRunVersion");
 		if (prefType == this.preferences.PREF_INVALID)
 		{
-			var lrver = 0;
+			var lrver = "0.0.0";
 		}
 		else
 		{
@@ -1557,11 +1545,11 @@ salrPersistObject.prototype = {
 		var vm = ver.match(/^(\d+)\.(\d+)\.(\d+)$/);
 		if (vm)
 		{
-			var build = parseInt(vm[3]);
+			var build = parseInt(vm[3], 10);
 		}
 		else
 		{
-			var build = 0;
+			var build = "0";
 		}
 		return build;
 	},
@@ -1783,6 +1771,26 @@ salrPersistObject.prototype = {
 		return userbgcolor;
 	},
 
+	// Fetches the user's notes from the database
+	// @param: (int) User ID
+	// @returns: (string) Notes about the user, or (bool) false if not found
+	getPosterNotes: function(userid)
+	{
+		var usernotes;
+		var statement = this.database.createStatement("SELECT `notes` FROM `userdata` WHERE `userid` = ?1");
+		statement.bindInt32Parameter(0,userid);
+		if (statement.executeStep())
+		{
+			usernotes = statement.getString(0);
+		}
+		else
+		{
+			usernotes = false;
+		}
+		statement.reset();
+		return usernotes;
+	},
+
 	// Get the Post ID of the last read post
 	// @param:
 	// @return:
@@ -1899,7 +1907,8 @@ salrPersistObject.prototype = {
 	{
 		if (!this.threadIsInDB(threadid))
 		{
-			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `posted`) VALUES (?1, 1)");
+			// This shouldn't happen, but it's here just incase
+			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `posted`, `ignore`, `star`) VALUES (?1, 1, 0, 0)");
 			statement.bindInt32Parameter(0,threadid);
 			statement.execute();
 			statement.reset();
@@ -1953,6 +1962,28 @@ salrPersistObject.prototype = {
 		return ignored;
 	},
 
+	// Toggles a thread's starred status in the database
+	// @param: (int) thread id, bool
+	// @return: nothing
+	toggleThreadStar: function(threadid)
+	{
+		var statement = this.database.createStatement("UPDATE `threaddata` SET `star` = not(`star`) WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		statement.execute();
+		statement.reset();
+	},
+
+	// Toggles a thread's ignored status in the database
+	// @param: (int) thread id, bool
+	// @return: nothing
+	toggleThreadIgnore: function(threadid)
+	{
+		var statement = this.database.createStatement("UPDATE `threaddata` SET `ignore` = not(`ignore`) WHERE `id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		statement.execute();
+		statement.reset();
+	},
+
 	// Removes a thread from the database
 	// @param: (int) Thread ID
 	// @return: (booler) true on success, false on failure
@@ -1980,7 +2011,7 @@ salrPersistObject.prototype = {
 		var lastviewdt = this.currentTimeStamp;
 		if (!this.threadIsInDB(threadid))
 		{
-			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `lastviewdt`) VALUES (?1, ?2)");
+			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `lastviewdt`, `posted`, `ignore`, `star`) VALUES (?1, ?2, 0, 0, 0)");
 			statement.bindInt32Parameter(0,threadid);
 			statement.bindStringParameter(1,lastviewdt);
 			statement.execute();
@@ -2159,7 +2190,8 @@ salrPersistObject.prototype = {
 	// @return: nothing
 	addGradient: function(thread)
 	{
-		for (var i=0;i<thread.getElementsByTagName('td').length;i++)
+		var cellCount = (thread.getElementsByTagName('td').length > 8 ? 8 : thread.getElementsByTagName('td').length);
+		for (var i=0;i<cellCount;i++)
 		{
 			thread.getElementsByTagName('td')[i].style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
 			thread.getElementsByTagName('td')[i].style.backgroundRepeat = "repeat-x";
@@ -2247,8 +2279,8 @@ salrPersistObject.prototype = {
 		var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
 		if (pageList.childNodes.length > 1) // Are there pages
 		{
-			numPages = parseInt(numPages[1]);
-			curPage = parseInt(curPage[1]);
+			numPages = parseInt(numPages[1], 10);
+			curPage = parseInt(curPage[1], 10);
 			var navDiv = doc.createElement("div");
 			navDiv.className = "salastread_pagenavigator";
 			var firstButtonImg = doc.createElement("img");

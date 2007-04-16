@@ -2360,6 +2360,7 @@ function handleShowThread(doc) {
 
 		var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId, postbody, f;
 		var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink, quotebutton, editbutton;
+		var userPosterColor, userPosterBG, userPosterNote;
 		doc.postlinks = new Array;
 		// Loop through each post
 		var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
@@ -2432,16 +2433,29 @@ function handleShowThread(doc) {
 				posterBG =  persistObject.getPreference("adminBackground");
 				posterNote = "Forum Administrator";
 			}
-			//posterColor = persistObject.getPosterColor(posterId);
-			//posterBG = persistObject.getPosterBackground(posterId);
-			//posterNote = persistObject.getPosterNote(posterId);
+			userPosterColor = persistObject.getPosterColor(posterId);
+			userPosterBG = persistObject.getPosterBackground(posterId);
+			userPosterNote = persistObject.getPosterNotes(posterId);
+			if (userPosterColor != false)
+			{
+				posterColor = userPosterColor;
+			}
+			if (userPosterBG != false)
+			{
+				posterBG = userPosterBG;
+			}
 			if (persistObject.getPreference("highlightUsernames") && posterColor != false)
 			{
 				userNameBox.style.color = posterColor;
 			}
 			if (posterNote != false)
 			{
-				userNameBox.innerHTML += "<p style='font-size:80%;margin:0;padding:0;'>"+posterNote+"</p>";
+				newNoteBox = doc.createElement("p");
+				newNoteBox.style.fontSize = "80%";
+				newNoteBox.style.margin = "0";
+				newNoteBox.style.padding = "0";
+				newNoteBox.textContent = posterNote;
+				userNameBox.appendChild(newNoteBox);
 			}
 			if (!persistObject.getPreference("dontHighlightPosts"))
 			{
@@ -3832,51 +3846,44 @@ function SALR_ContextVis_ThreadWatch(doc) {
    }
 }
 
-function SALR_StarThread() {
-   var threadid = document.getElementById("salastread-context-starthread").data;
-   var lpdtvalue = document.getElementById("salastread-context-starthread").lpdtvalue;
-   var target = document.getElementById("salastread-context-starthread").target;
-   if (threadid) {
-      slurpIntoThreadCache(threadid);
-      cachedThreadEntry.setAttribute("star", (cachedThreadEntry.getAttribute("star")=="1") ? "0" : "1");
-      //persistObject.SaveXML();
-      var threaddetails = new Array();
-      threaddetails['id'] = threadid;
-      threaddetails['star'] = cachedThreadEntry.getAttribute("star");
-      persistObject.SavePostDataSQL(threaddetails);
-      if ( target.ownerDocument.location.href.indexOf("showthread.php")==-1 ) {
-         target.ownerDocument.location = target.ownerDocument.location;
-      } else {
-         var startext = cachedThreadEntry.getAttribute("star")=="0" ? "unstarred" : "starred";
-         alert("This thread is now "+startext+".");
-      }
-   }
+function SALR_StarThread()
+{
+	var threadid = document.getElementById("salastread-context-starthread").data;
+	var lpdtvalue = document.getElementById("salastread-context-starthread").lpdtvalue;
+	var target = document.getElementById("salastread-context-starthread").target;
+	if (threadid)
+	{
+		var starStatus = persistObject.isThreadStarred(threadid);
+		persistObject.toggleThreadStar(threadid);
+		if (target.ownerDocument.location.href.search(/showthread.php/i) == -1)
+		{
+			target.ownerDocument.location = target.ownerDocument.location;
+		}
+		else
+		{
+			var startext = starStatus ? "starred" : "unstarred";
+			alert("This thread is now "+startext+".");
+		}
+	}
 }
 
-function SALR_IgnoreThread() {
-   var threadid = document.getElementById("salastread-context-ignorethread").data;
-   var lpdtvalue = document.getElementById("salastread-context-ignorethread").lpdtvalue;
-   var target = document.getElementById("salastread-context-ignorethread").target;
-   if (threadid) {
-      if ( confirm("Are you sure you want to ignore thread #"+threadid+"?") ) {
-         slurpIntoThreadCache(threadid);
-         cachedThreadEntry.setAttribute("ignore", "1");
-         if ( cachedThreadEntry.getBypassAttribute("lastpostdt")==0 ) {
-            cachedThreadEntry.setAttribute("lastpostdt", GetCurrentLPDateTime());
-            cachedThreadEntry.setAttribute("lastpostid", "1");
-         }
-         //persistObject.SaveXML();
-         var threaddetails = new Array();
-         threaddetails['id'] = threadid;
-         threaddetails['ignore'] = 1;
-         threaddetails['lastpostdt'] = GetCurrentLPDateTime();
-         threaddetails['lastpostid'] = 1;
-         persistObject.SavePostDataSQL(threaddetails);
-         target.style.display = "none";
-      }
-   } else {
-      alert("menu item with no threadid.");
-   }
+function SALR_IgnoreThread()
+{
+	var threadid = document.getElementById("salastread-context-ignorethread").data;
+	var lpdtvalue = document.getElementById("salastread-context-ignorethread").lpdtvalue;
+	var target = document.getElementById("salastread-context-ignorethread").target;
+	if (threadid)
+	{
+		if (confirm("Are you sure you want to ignore thread #"+threadid+"?"))
+		{
+			var ignoreStatus = persistObject.isThreadIgnored(threadid);
+			persistObject.toggleThreadIgnore(threadid);
+			if (target.ownerDocument.location.href.search(/showthread.php/i) == -1)
+			{
+				target.style.display = "none";
+			}
+		}
+	}
 }
 
 function SALR_ThreadWatch() {
@@ -3885,10 +3892,7 @@ function SALR_ThreadWatch() {
 }
 
 function showChangelogWindow() {
-	var param = new Object();
-	param["upgradeFromVersion"] = persistObject.LastRunVersion;
-	param["currentVersion"] = SALR_CURRENT_VERSION;
-	openDialog("chrome://salastread/content/newfeatures/newfeatures.xul", "SALR_newfeatures", "chrome,centerscreen,dialog=no", param);
+	openDialog("chrome://salastread/content/newfeatures/newfeatures.xul", "SALR_newfeatures", "chrome,centerscreen,dialog=no");
 }
 
 var killcheckxmlhttp;
@@ -3956,7 +3960,6 @@ try {
 	{
 		throw "Failed to create persistObject.";
 	}
-	var SALR_CURRENT_VERSION = persistObject.getPreference('currentVersion');
 
    if (!persistObject._syncTransferObject) {
       persistObject.SetSyncTransferObject(new SALR_FTPTransferObject());
@@ -3973,14 +3976,14 @@ try {
    if (persistObject._killChecked == false) {
       saLastReadKillCheck();
    }
-	if (persistObject && persistObject.LastRunVersion != SALR_CURRENT_VERSION) {
+	if (persistObject && persistObject.LastRunVersion != persistObject.SALRversion) {
 		needToShowChangeLog = !persistObject.IsDevelopmentRelease;
 		// Here we have to put special cases for specific dev build numbers that require the changelog dialog to appear
-		if (persistObject.LastRunVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3] < 70414)
+		var buildNum = parseInt(persistObject.LastRunVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3], 10);
+		if (buildNum == 70414 || buildNum == 70415 || buildNum == 0)
 		{
 			needToShowChangeLog = true;
 		}
-		persistObject.LastRunVersion = SALR_CURRENT_VERSION;
 	}
 	if ( typeof(persistObject.xmlDoc) != "undefined" ) {
 		window.addEventListener('load', salastread_windowOnLoad, true);
