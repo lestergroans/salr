@@ -15,15 +15,16 @@ var showingChangelog = false;
 
 function windowLoad()
 {
-	var currentVersion = window.arguments[0]["currentVersion"];
-	var currentBuild = parseInt(currentVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3]);
-	var oldVersion = window.arguments[0]["upgradeFromVersion"];
-	if (oldVersion == 0)
+	var currentVersion = persistObject.SALRversion;
+	var currentBuild = parseInt(currentVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3], 10);
+	var oldVersion = persistObject.LastRunVersion;
+	persistObject.LastRunVersion = persistObject.SALRversion;
+	if (oldVersion == "0.0.0")
 	{
 		// This is their first time running it
 		return;
 	}
-	var oldBuild = parseInt(oldVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3]);;
+	var oldBuild = parseInt(oldVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3], 10);;
 	for (var i=0; i<featurePages.length; i++) {
 		if (featurePages[i].v > oldBuild) {
 			currentPage = i;
@@ -79,10 +80,11 @@ function changeFeature(p) {
 
 function checkForSQLPatches(build)
 {
+	var statement;
 	if (build < 70414)
 	{
 		// Userdata schema changed, let's test to make sure it needs to be changed, just incase
-		var statement = persistObject.database.createStatement("SELECT * FROM `userdata` WHERE 1=1");
+		statement = persistObject.database.createStatement("SELECT * FROM `userdata` WHERE 1=1");
 		statement.executeStep();
 		if (statement.getColumnName(4) != 'color')
 		{
@@ -90,5 +92,12 @@ function checkForSQLPatches(build)
 			persistObject.database.executeSimpleSQL("ALTER TABLE `userdata` ADD `color` VARCHAR(8)");
 			persistObject.database.executeSimpleSQL("ALTER TABLE `userdata` ADD `background` VARCHAR(8)");
 		}
+	}
+	if (build < 70415)
+	{
+		// Not setting a default value makes things harder so let's fix that
+		statement = persistObject.database.executeSimpleSQL("UPDATE `threaddata` SET `star` = 0 WHERE `star` IS NULL");
+		statement = persistObject.database.executeSimpleSQL("UPDATE `threaddata` SET `ignore` = 0 WHERE `ignore` IS NULL");
+		statement = persistObject.database.executeSimpleSQL("UPDATE `threaddata` SET `posted` = 0 WHERE `posted` IS NULL");
 	}
 }
