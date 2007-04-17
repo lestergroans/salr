@@ -75,6 +75,7 @@ pref('extensions.salastread.hideOtherSAMenus', true);
 pref('extensions.salastread.quickQuoteImagesAsLinks', true);
 pref('extensions.salastread.dontHighlightThreads', false);
 pref('extensions.salastread.dontHighlightPosts', false);
+pref('extensions.salastread.removePageTitlePrefix', true);
 pref('extensions.salastread.quickQuoteSwapPostPreview', false);
 
 pref('extensions.salastread.convertTextToImage', false);
