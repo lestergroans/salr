@@ -3353,6 +3353,19 @@ function salastread_windowOnLoad(e) {
 							dbg.innerHTML = SALR_debugLog.join("<br>");
 							doc.body.appendChild(dbg);
 					}
+
+					if (persistObject.getPreference("removePageTitlePrefix")) {
+						var threadtitle = doc.title;
+						var titlematch = doc.title.match(/(.*) \- (.*)/);
+						if (titlematch) {
+							if(titlematch[1].search(/Something/i) > -1) {
+								threadtitle = titlematch[2];
+							} else {
+								threadtitle = titlematch[1];
+							}
+							doc.title = threadtitle;
+						}
+					}	
 					
 					if (persistObject.getPreference('removeHeaderAndFooter')) {
 						salastread_hidePageHeader(doc);

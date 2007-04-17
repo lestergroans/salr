@@ -42,6 +42,8 @@
   <vbox>
    <checkbox id="toggle_reanchorThreadOnLoad"
              label="Reanchor threads to targetted post after all images have loaded" />
+   <checkbox id="toggle_removePageTitlePrefix"
+             label="Move 'The Awful Forums' prefix to end of page titles" />
    <checkbox id="toggle_insertPostLastMarkLink"
              label="Add a &quot;&lt;&quot; link to reset the last post of each thread" />
    <checkbox id="toggle_enablePageNavigator"
