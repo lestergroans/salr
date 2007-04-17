@@ -1385,6 +1385,34 @@ salrPersistObject.prototype = {
 		return Math.floor(rightNow.getTime()/1000);
 	},
 
+	// Returns an associative array of the ignored threads with the thread id as the key and the thread title as the value
+	get ignoreList()
+	{
+		var threadid, threadtitle, ignoredThreads = new Array();
+		var statement = this.database.createStatement("SELECT `id`, `title` FROM `threaddata` WHERE `ignore` = 1");
+		while (statement.executeStep())
+		{
+			threadid = statement.getInt32(0);
+			threadtitle = statement.getString(1);
+			ignoredThreads[threadid] = threadtitle;
+		}
+		return ignoredThreads;
+	},
+
+	// Returns an associative array of the ignored threads with the thread id as the key and the thread title as the value
+	get starList()
+	{
+		var threadid, threadtitle, starredThreads = new Array();
+		var statement = this.database.createStatement("SELECT `id`, `title` FROM `threaddata` WHERE `star` = 1");
+		while (statement.executeStep())
+		{
+			threadid = statement.getInt32(0);
+			threadtitle = statement.getString(1);
+			starredThreads[threadid] = threadtitle;
+		}
+		return starredThreads;
+	},
+
 	// Returns the value at the given preference from the branch in the preference property
 	// @param: (string) Preference name
 	// @return: (boolean, string or int) Preference value or NULL if not found
@@ -1967,10 +1995,22 @@ salrPersistObject.prototype = {
 	// @return: nothing
 	toggleThreadStar: function(threadid)
 	{
-		var statement = this.database.createStatement("UPDATE `threaddata` SET `star` = not(`star`) WHERE `id` = ?1");
-		statement.bindInt32Parameter(0,threadid);
-		statement.execute();
-		statement.reset();
+		var lastviewdt = this.currentTimeStamp;
+		if (this.threadIsInDB(threadid))
+		{
+			var statement = this.database.createStatement("UPDATE `threaddata` SET `star` = not(`star`) WHERE `id` = ?1");
+			statement.bindInt32Parameter(0,threadid);
+			statement.executeStep();
+			statement.reset();
+		}
+		else
+		{
+			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `lastviewdt`, `posted`, `ignore`, `star`) VALUES (?1, ?2, 0, 0, 1)");
+			statement.bindInt32Parameter(0,threadid);
+			statement.bindStringParameter(1,lastviewdt);
+			statement.execute();
+			statement.reset();
+		}
 	},
 
 	// Toggles a thread's ignored status in the database
@@ -1978,10 +2018,22 @@ salrPersistObject.prototype = {
 	// @return: nothing
 	toggleThreadIgnore: function(threadid)
 	{
-		var statement = this.database.createStatement("UPDATE `threaddata` SET `ignore` = not(`ignore`) WHERE `id` = ?1");
-		statement.bindInt32Parameter(0,threadid);
-		statement.execute();
-		statement.reset();
+		var lastviewdt = this.currentTimeStamp;
+		if (this.threadIsInDB(threadid))
+		{
+			var statement = this.database.createStatement("UPDATE `threaddata` SET `ignore` = not(`ignore`) WHERE `id` = ?1");
+			statement.bindInt32Parameter(0,threadid);
+			statement.execute();
+			statement.reset();
+		}
+		else
+		{
+			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `lastviewdt`, `posted`, `ignore`, `star`) VALUES (?1, ?2, 0, 1, 0)");
+			statement.bindInt32Parameter(0,threadid);
+			statement.bindStringParameter(1,lastviewdt);
+			statement.execute();
+			statement.reset();
+		}
 	},
 
 	// Removes a thread from the database
@@ -2009,19 +2061,19 @@ salrPersistObject.prototype = {
 	iAmReadingThis: function(threadid)
 	{
 		var lastviewdt = this.currentTimeStamp;
-		if (!this.threadIsInDB(threadid))
+		if (this.threadIsInDB(threadid))
 		{
-			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `lastviewdt`, `posted`, `ignore`, `star`) VALUES (?1, ?2, 0, 0, 0)");
-			statement.bindInt32Parameter(0,threadid);
-			statement.bindStringParameter(1,lastviewdt);
+			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastviewdt` = ?1 WHERE `id` = ?2");
+			statement.bindStringParameter(0,lastviewdt);
+			statement.bindInt32Parameter(1,threadid);
 			statement.execute();
 			statement.reset();
 		}
 		else
 		{
-			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastviewdt` = ?1 WHERE `id` = ?2");
-			statement.bindStringParameter(0,lastviewdt);
-			statement.bindInt32Parameter(1,threadid);
+			var statement = this.database.createStatement("INSERT INTO `threaddata` (`id`, `lastviewdt`, `posted`, `ignore`, `star`) VALUES (?1, ?2, 0, 0, 0)");
+			statement.bindInt32Parameter(0,threadid);
+			statement.bindStringParameter(1,lastviewdt);
 			statement.execute();
 			statement.reset();
 		}
@@ -2216,13 +2268,13 @@ salrPersistObject.prototype = {
 	insertLastIcon: function(doc, titleBox, threadId, lrCount)
 	{
 		var lpGo = doc.createElement("a");
-		if (lrCount % this.getPreference("postsPerPage") == 0)
+		var lastPostID = this.getLastPostID(threadId);
+		if (lrCount % this.getPreference("postsPerPage") == 0 || lastPostID == 0)
 		{
-			lpGo.setAttribute("href", "/showthread.php?threadid=" + threadId + "&pagenumber=" + (lrCount/this.getPreference("postsPerPage")+1));
+			lpGo.setAttribute("href", "/showthread.php?threadid=" + threadId + "&pagenumber=" + parseInt(lrCount/this.getPreference("postsPerPage")+1,10));
 		}
 		else
 		{
-			var lastPostID = this.getLastPostID(threadId);
 			lpGo.setAttribute("href", "/showthread.php?postid=" + lastPostID + "#post" + lastPostID);
 		}
 		lpGo.setAttribute("id", "jumptolast_"+threadId);
