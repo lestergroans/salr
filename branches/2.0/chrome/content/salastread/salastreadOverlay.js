@@ -611,6 +611,8 @@ function SAmenuitemCommandGoToLastPost(event, el, etype, threadid) {
 		
 		if(postid != 0) {
 			SAmenuitemCommandURL2(event, "http://forums.somethingawful.com/showthread.php?s=&postid=" + postid + "#post" + postid, etype);
+		} else {
+			SAmenuitemCommandURL2(event, "http://forums.somethingawful.com/showthread.php?s=&threadid=" + threadid, etype);
 		}
 	} catch(e) {
 		Components.utils.reportError("Couldn't find thread id: " + threadid);
@@ -919,7 +921,7 @@ function buildSAForumMenu() {
       pinnedForumNumbers = persistObject.getPreference('menuPinnedForums').split(",");
    }
    menuel.setAttribute("label","Something Awful");
-   menuel.setAttribute("image", "chrome://salastread/content/sa.png");
+   menuel.setAttribute("image", "chrome://salastread/skin/sa.png");
    menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','click');");
    menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','command');");
    menuel.setAttribute("class","menuitem-iconic lastread_menu_frontpage");
@@ -983,7 +985,7 @@ function buildSAForumMenu() {
          else if (pinnedForumNumbers[j]=="starred") {
             var menuel = document.createElement("menu");
             menuel.setAttribute("label", "Starred Threads");
-            menuel.setAttribute("image", "chrome://salastread/content/star.png");
+            menuel.setAttribute("image", "chrome://salastread/skin/star.png");
             menuel.setAttribute("class", "menu-iconic lastread_menu_starred");
 
             var subpopup = document.createElement("menupopup");
@@ -1002,7 +1004,7 @@ function buildSAForumMenu() {
          var menuel = document.createElement("menuitem");
          menuel.id = "salr_pinhelper_item";
          menuel.setAttribute("label", "Learn how to pin forums to this menu...");
-         menuel.setAttribute("image", "chrome://salastread/content/eng101-16x16.png");
+         menuel.setAttribute("image", "chrome://salastread/skin/eng101-16x16.png");
          menuel.setAttribute("oncommand", "SALR_LaunchPinHelper();");
          menuel.setAttribute("class", "menuitem-iconic lastread_menu_sub");
          menupopup.appendChild(menuel);
@@ -1901,10 +1903,10 @@ function SALR_ToggleThumbnailControl(image,up) {
 	var tci = tc.firstChild;
 	if(up) {
 		tci.__up = true;
-		tci.src = "chrome://salastread/content/scale_image_up.png";
+		tci.src = "chrome://salastread/skin/scale_image_up.png";
 	} else {
 		tci.__up = false;
-		tci.src = "chrome://salastread/content/scale_image.png";
+		tci.src = "chrome://salastread/skin/scale_image.png";
 	}
 }
 
@@ -1914,7 +1916,7 @@ function SALR_BuildThumbnailControl(doc,image) {
 		outer.style.display = "none";
 	
 	var inner = doc.createElement("img");
-		inner.src = "chrome://salastread/content/scale_image_up.png";
+		inner.src = "chrome://salastread/skin/scale_image_up.png";
 		inner.style.position = "relative";
 		inner.style.top = "-11px";
 		inner.style.left = "-11px";
@@ -2461,7 +2463,7 @@ function SALR_PageMouseDown(event) {
          el.SALR_dir = ""+dir;
          el.id = "salastread_gesturenav"+dir;
          el.className = "salastread_gesturenav";
-         el.src = "chrome://salastread/content/gesturenav-"+dir+".png";
+         el.src = "chrome://salastread/skin/gesturenav-" + dir + ".png";
          el.style.left = ((event.clientX - 36) + (77 * ofsx)) + "px";
          el.style.top = ((event.clientY - 36) + (77 * ofsy)) + "px";
          doc.body.appendChild(el);
@@ -2528,7 +2530,7 @@ function SALR_SearchForThreadPages(doc, type) {
                   //navDiv.style.padding = "4px 4px 4px 4px";
 
                   var firstBtn = doc.createElement("IMG");
-                  firstBtn.src = "chrome://salastread/content/nav-firstpage.png";
+                  firstBtn.src = "chrome://salastread/skin/nav-firstpage.png";
                   firstBtn.title = "Go to First Page";
                   //firstBtn.appendChild(doc.createTextNode("<<"));
                   //firstBtn.appendChild(firstPageImg);
@@ -2540,7 +2542,7 @@ function SALR_SearchForThreadPages(doc, type) {
                   }
 
                   var prevBtn = doc.createElement("IMG");
-                  prevBtn.src = "chrome://salastread/content/nav-prevpage.png";
+                  prevBtn.src = "chrome://salastread/skin/nav-prevpage.png";
                   prevBtn.title = "Go to Previous Page";
                   if (curPage==1) {
                      //prevBtn.disabled = true;
@@ -2564,7 +2566,7 @@ function SALR_SearchForThreadPages(doc, type) {
                   pageSel.onchange = function() { doc.location = turl.replace(/pagenumber=(\d+)/, "pagenumber="+(Number(pageSel.selectedIndex)+1)); };
 
                   var nextBtn = doc.createElement("IMG");
-                  nextBtn.src = "chrome://salastread/content/nav-nextpage.png";
+                  nextBtn.src = "chrome://salastread/skin/nav-nextpage.png";
                   nextBtn.title = "Go to Next Page";
                   if (curPage==maxPages) {
                      //nextBtn.disabled = true;
@@ -2576,7 +2578,7 @@ function SALR_SearchForThreadPages(doc, type) {
                   }
 
                   var lastBtn = doc.createElement("IMG");
-                  lastBtn.src = "chrome://salastread/content/nav-lastpage.png";
+                  lastBtn.src = "chrome://salastread/skin/nav-lastpage.png";
                   lastBtn.title = "Go to Last Page";
                   if (curPage==maxPages) {
                      //lastBtn.disabled = true;
@@ -2705,17 +2707,17 @@ function makeQuickReplyButton(threadid,doc,replybutton, inBYOB) {
    replybutton.style.width = "12px !important";
    replybutton.style.height = "20px !important";
    if(inBYOB){
-   	replybutton.src = "chrome://salastread/content/byobarrow.gif";
+   	replybutton.src = "chrome://salastread/skin/byobarrow.gif";
    }else{
-   	replybutton.src = "chrome://salastread/content/button-normalreply.gif";
+   	replybutton.src = "chrome://salastread/skin/button-normalreply.gif";
    }
    replybutton.alt = "Normal Reply";
 
    var newreply = doc.createElement("IMG");
    if(inBYOB){
-   	newreply.src = "chrome://salastread/content/byob-qreply.gif";
+   	newreply.src = "chrome://salastread/skin/byob-qreply.gif";
    }else{
-   	newreply.src = "chrome://salastread/content/button-quickreply.gif";
+   	newreply.src = "chrome://salastread/skin/button-quickreply.gif";
    }
    newreply.alt = "Quick Reply";
    newreply.border = "0"
@@ -2735,17 +2737,17 @@ function makeQuickPostButton(threadid,doc,replybutton) {
    replybutton.style.width = "12px !important";
    replybutton.style.height = "20px !important";
    if(forumid== 174){
-   	replybutton.src = "chrome://salastread/content/byobarrow.gif";
+   	replybutton.src = "chrome://salastread/skin/byobarrow.gif";
    }else{
-   	replybutton.src = "chrome://salastread/content/button-normalpost.gif";
+   	replybutton.src = "chrome://salastread/skin/button-normalpost.gif";
    }
    replybutton.alt = "Normal Post";
 
    var newreply = doc.createElement("IMG");
    if(forumid== 174){
-      	newreply.src = "chrome://salastread/content/byob-qpost.gif";
+      	newreply.src = "chrome://salastread/skin/byob-qpost.gif";
    }else{
-   	newreply.src = "chrome://salastread/content/button-quickpost.gif";
+   	newreply.src = "chrome://salastread/skin/button-quickpost.gif";
    }
    newreply.alt = "Quick Post";
    newreply.border = "0"
@@ -2958,10 +2960,10 @@ function salastread_addUpdateIcon(doc) {
       var updicon = doc.createElement("IMG");
       updlink.href = persistObject._updateURL;
       if ( persistObject._killed==true ) {
-         updicon.src = "chrome://salastread/content/killedicon.png";
+         updicon.src = "chrome://salastread/contenskin/killedicon.png";
          updicon.title = "SA Last Read Update REQUIRED";
       } else {
-         updicon.src = "chrome://salastread/content/updateicon.png";
+         updicon.src = "chrome://salastread/skin/updateicon.png";
          updicon.title = "SA Last Read Update Available";
       }
       updicon.style.width = "35px";
@@ -3286,8 +3288,10 @@ function salastread_windowOnLoad(e) {
 				window.removeEventListener('load', salastread_windowOnLoad, true);
 				window.addEventListener('load', SALR_windowOnLoadMini, true);
 			}
+			
 			//var doc = e.originalTarget;
 			//var location = doc.location;
+			
 			if (doc.__salastread_processed) {
 				if(persistObject.getPreference('reanchorThreadOnLoad') ) {
 					var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i);
@@ -3332,7 +3336,9 @@ function salastread_windowOnLoad(e) {
 					var hcliresult = handleConfigLinkInsertion(e);
 					handleBodyClassing(e);
 					//salastread_addUpdateIcon(doc);
+					
 					doc.__salastread_processed = true;
+					
 					// XXX: The unload prevents FF 1.5 from using Quick Back Button.
 					//      SALR needs to work with it, but this works to prevent trouble in the meantime.
 					if (true) {
@@ -3475,7 +3481,7 @@ function SALR_ContextMenuShowing(e) {
 		SALR_HideContextMenuItems();
 		try {
 			var doc = document.getElementById("content").mCurrentBrowser.contentDocument;
-			if ( doc.__salastread_processed == true ) {
+			if(doc.__salastread_processed == true) {
 				SALR_ContextVis_IgnoreThisThread(doc);
 				SALR_ContextVis_StarThisThread(doc);
 			}
@@ -3517,7 +3523,7 @@ function SALR_ContextVis_StarThisThread(doc) {
 				document.getElementById("salastread-context-starthread").lpdtvalue = target.lpdtvalue;
 				document.getElementById("salastread-context-starthread").target = target;
 				
-				document.getElementById("salastread-context-starthread").label = (persistObject.isThreadStarred(threadid) ? 'Star' : 'Unstar') + " This Thread (" + threadid + ")";
+				document.getElementById("salastread-context-starthread").label = (persistObject.isThreadStarred(threadid) ? 'Unstar' : 'Star') + " This Thread (" + threadid + ")";
 			}
 		}
 		target = target.parentNode;
@@ -3554,7 +3560,7 @@ function SALR_StarThread()
 		else
 		{
 			var startext = starStatus ? "starred" : "unstarred";
-			alert("This thread is now "+startext+".");
+			alert("This thread is now " + startext + ".");
 		}
 	}
 }
