@@ -49,13 +49,14 @@
   background-color: #C1D2EE;
 }
 
-#catGeneralButton .button-icon    {-moz-image-region: rect(0px, 32px,  32px, 0px  ) !important}
-#catColorButton .button-icon      {-moz-image-region: rect(0px, 64px,  32px, 32px ) !important}
-#catMenuButton .button-icon       {-moz-image-region: rect(0px, 96px,  32px, 64px ) !important}
-#catQuickReplyButton .button-icon {-moz-image-region: rect(0px, 160px, 32px, 128px ) !important}
-#catFilesButton .button-icon      {-moz-image-region: rect(0px, 192px, 32px, 160px) !important}
-#catImagesButton .button-icon     {-moz-image-region: rect(0px, 224px, 32px, 192px) !important}
-#catIgnoredButton .button-icon    {-moz-image-region: rect(0px, 256px, 32px, 224px) !important}
+#catGeneralButton .button-icon 		{-moz-image-region: rect(0px, 32px,  32px, 0px  ) !important}
+#catColorButton .button-icon 		{-moz-image-region: rect(0px, 64px,  32px, 32px ) !important}
+#catMenuButton .button-icon 		{-moz-image-region: rect(0px, 96px,  32px, 64px ) !important}
+#catQuickReplyButton .button-icon 	{-moz-image-region: rect(0px, 160px, 32px, 128px) !important}
+#catFilesButton .button-icon 		{-moz-image-region: rect(0px, 192px, 32px, 160px) !important}
+#catImagesButton .button-icon 		{-moz-image-region: rect(0px, 224px, 32px, 192px) !important}
+#catIgnoredButton .button-icon 		{-moz-image-region: rect(0px, 256px, 32px, 224px) !important}
+#catUsersButton .button-icon 		{-moz-image-region: rect(0px, 288px, 32px, 256px) !important}
 
 #catDownloadsButton {-moz-image-region: rect(0px, 128px, 32px, 96px)}
 #catThemesButton    {-moz-image-region: rect(0px, 160px, 32px, 128px)}
