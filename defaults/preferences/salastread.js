@@ -1,10 +1,10 @@
-pref('extensions.salastread.currentVersion', '1.99.070415');
+pref('extensions.salastread.currentVersion', '1.99.070416');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
 pref('extensions.salastread.disableNewReCount', false);
 pref('extensions.salastread.newPostCountUseOneLine', false);
-pref('extensions.salastread.enableVideoEmbedder', true);
+pref('extensions.salastread.enableVideoEmbedder', false);
 pref('extensions.salastread.videoEmbedderBG', '#ffcccc');
 
 pref('extensions.salastread.modColor', '#bb4400');
