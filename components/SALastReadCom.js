@@ -131,98 +131,6 @@ salrPersistObject.prototype = {
    get pref() { return Components.classes["@mozilla.org/preferences-service;1"].
                    getService(Components.interfaces.nsIPrefBranch); },
 
-   get defaultcolor_readLight() { return "#ddeeff"; },
-   get defaultcolor_readDark() { return "#bbccdd"; },
-   get defaultcolor_readWithNewLight() { return "#e1f1e1"; },
-   get defaultcolor_readWithNewDark() { return "#cfdfcf"; },
-   get defaultcolor_unreadLight() { return "#f1f1f1"; },
-   get defaultcolor_unreadDark() { return "#dfdfdf"; },
-   get defaultcolor_unreadLightFYAD() { return "#ffccff"; },
-   get defaultcolor_unreadDarkFYAD() { return "#ffcccc"; },
-   get defaultcolor_postedInThreadRe() { return "#fcfd99"; },
-
-   get defaultcolor_readLightHighlight() { return "#f5faff"; },
-   get defaultcolor_readDarkHighlight() { return "#dbe9f8"; },
-   get defaultcolor_readWithNewLightHighlight() { return "#f9fff9"; },
-   get defaultcolor_readWithNewDarkHighlight() { return "#e1efe1"; },
-   get defaultcolor_unreadLightHighlight() { return "#f1f1f1"; },
-   get defaultcolor_unreadDarkHighlight() { return "#dfdfdf"; },
-   //get defaultcolor_unreadLightFYADHighlight() { return "#ffccff"; },
-   //get defaultcolor_unreadDarkFYADHighlight() { return "#ffcccc"; },
-   get defaultcolor_postedInThreadReHighlight() { return "#ffffcc"; },
-
-   get defaultcolor_seenPostLight() { return "#ddeeff"; },
-   get defaultcolor_seenPostDark() { return "#bbccdd"; },
-   get defaultcolor_seenPostLightFYAD() { return "#ddeeff"; },
-   get defaultcolor_seenPostDarkFYAD() { return "#bbccdd"; },
-   get defaultcolor_unseenPostLight() { return "#f1f1f1"; },
-   get defaultcolor_unseenPostDark() { return "#dfdfdf"; },
-   get defaultcolor_unseenPostLightFYAD() { return "#ffccff"; },
-   get defaultcolor_unseenPostDarkFYAD() { return "#ffcccc"; },
-
-   get defaulturl_goToLastReadPost() { return "chrome://salastread/content/go_to_first_unread_post.png"; },
-   get defaulturl_markThreadUnvisited() { return "chrome://salastread/content/mark_thread_unvisited.png"; },
-
-   get defaulttoggle_showUnvisitIcon() { return true; },
-   get defaulttoggle_showGoToLastIcon() { return true; },
-   get defaulttoggle_alwaysShowGoToLastIcon() { return false; },
-   get defaulttoggle_reanchorThreadOnLoad() { return true; },
-   get defaulttoggle_useQuickQuote() { return true; },
-   get defaulttoggle_quickQuoteSubscribeDefault() { return false; },
-   get defaulttoggle_quickQuoteSignatureDefault() { return false; },
-   get defaulttoggle_quickQuoteDisableSmiliesDefault() { return false; },
-   get defaulttoggle_quickQuoteLivePreview() { return false; },
-   get defaulttoggle_showSAForumMenu() { return true; },
-   get defaulttoggle_nestSAForumMenu() { return true; },
-   get defaulttoggle_useSAForumMenuBackground() { return true; },
-   get defaulttoggle_hideOtherSAMenus() { return true; },
-   get defaulttoggle_quickQuoteImagesAsLinks() { return true; },
-   get defaulttoggle_dontHighlightThreads() { return false; },
-   get defaulttoggle_dontHighlightPosts() { return false; },
-   get defaulttoggle_removePageTitlePrefix() { return true; },
-   get defaulttoggle_quickQuoteSwapPostPreview() { return false; },
-   get defaulttoggle_convertTextToImage() { return false; },
-   get defaulttoggle_thumbnailQuotedImagesInThreads() { return false; },
-   get defaulttoggle_shrinkTextToImages() { return true; },
-   get defaulttoggle_removeTargetNewFromTorrentLinks() { return true; },
-   get defaulttoggle_insertPostTargetLink() { return true; },
-   get defaulttoggle_dontTextToImageIfMayBeNws() { return true; },
-   get defaulttoggle_dontTextToImageInSpoilers() { return true; },
-   get defaulttoggle_dontCheckKillSwitch() { return false; },
-   get defaulttoggle_props() { return true; },
-   get defaulttoggle_removeHeaderAndFooter() { return false; },
-   get defaulttoggle_contextMenuOnBottom() { return true; },
-   get defaulttoggle_hideSignature() { return false; },
-   get defaulttoggle_hideTitle() { return false; },
-   get defaulttoggle_suppressErrors() { return true; },
-
-   get defaulttoggle_insertPostLastMarkLink() { return true; },
-   get defaulttoggle_disableGradients() { return false; },
-   get defaulttoggle_resizeCustomTitleText() { return true; },
-   get defaulttoggle_enablePageNavigator() { return true; },
-   get defaulttoggle_enableForumNavigator() { return true; },
-   get defaulttoggle_thumbnailAllImages() { return true; },
-
-   get defaulttoggle_showMenuPinHelper() { return true; },
-
-   get defaulttoggle_enableDebugMarkup() { return false; },
-
-   get defaultstring_threadIconOrder() { return "12"; },
-   get defaultstring_databaseStoragePath() { return "%profile%salastread.sqlite"; },
-   get defaultstring_persistStoragePath() { return "%profile%salastread.xml"; },
-   get defaultstring_forumListStoragePath() { return "%profile%saforumlist.xml"; },
-   get defaultstring_menuPinnedForums() { return "1,22,44"; },
-   get defaultstring_quoteIntroText() { return "[who] came out of the closet to say:"; },
-
-   get defaultstring_remoteSyncStorageUrl() { return "ftp://username:password@example.com/.salastread.syncdata"; },
-   get defaulttoggle_useRemoteSyncStorage() { return false; },
-
-   get defaultint_expireMinAge() { return 7; },
-
-   get defaultint_gestureButton() { return 2; },
-   get defaulttoggle_gestureEnable() { return true; },
-   get defaulttoggle_scrollPostEnable() { return false; },
-
    SET_toggle_thumbnailAllImages: function(value) {
       if(!("@mozilla.org/content/style-sheet-service;1" in Components.classes))
          return;
@@ -349,28 +257,7 @@ salrPersistObject.prototype = {
       this.GenerateNextSyncTime();
       return res;
    },
-
-/*
-   _DoSynchronousSync: function(trace)
-   {
-      var sto = this._syncTransferObject;
-      // Get the remote file
-      if (trace) { trace("getting remote file..."); }
-      try {
-         sto.getFileSync( this.GetSyncUrl(), this._fn );
-      } catch (err) { }
-      // Merge it in
-      if (trace) { trace("merging..."); }
-      this.LoadXML(true);
-      // Rewrite out the local file
-      if (trace) { trace("saving..."); }
-      this.SaveXML();
-      // Upload it
-      if (trace) { trace("uploading..."); }
-      sto.sendFileSync( this.GetSyncUrl(), this._fn );
-   },
-*/
-
+   
    _syncTrace: null,
 
    _DoAsynchronousSync: function(syncCallback, trace)
@@ -703,284 +590,6 @@ salrPersistObject.prototype = {
 
    },
 
-
-   SaveThreadDataV2: function()
-   {
-   	/* ~ Let's see if we can run with out this ~ 4/11 duz
-      var fn = this.storedbFileName;
-      var file = Components.classes["@mozilla.org/file/local;1"]
-            .createInstance(Components.interfaces.nsILocalFile);
-      file.initWithPath(fn);
-      if ( file.exists() == false ) {
-         try {
-            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
-         }
-         catch (ex) {
-            throw "file.create error ("+ex.name+") on "+fn;
-         }
-         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
-      }
-      var storageService = Components.classes["@mozilla.org/storage/service;1"]
-                                     .getService(Components.interfaces.mozIStorageService);
-      var mDBConn = storageService.openDatabase(file);
-
-      if (!mDBConn.tableExists('threaddata'))
-      {
-        mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
-      }
-      var nodes = this.xmlDoc.evaluate("/salastread/thread", this.xmlDoc, null, 7 /* XPathResult.ORDERED_NODE_SNAPSHOT_TYPE , null);
-      for (var x=0; x<nodes.snapshotLength; x++) {
-         var thisLineDataArray = new Array();
-
-         var thisNode = nodes.snapshotItem(x);
-         var tnChildren = thisNode.attributes;
-         for (var i=0; i<tnChildren.length; i++) {
-            if ( tnChildren[i].nodeType == 2 ) {  // ATTRIBUTE_NODE
-               var thisName = tnChildren.item(i).nodeName;
-               var thisValue = tnChildren.item(i).nodeValue;
-               thisLineDataArray[thisName] = thisValue;
-            }
-         }
-
-         var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
-         statement.bindInt32Parameter(0,thisLineDataArray['id']);
-         if (statement.executeStep()) {
-           statement.reset();
-           var sqlstatement = "UPDATE `threaddata` SET ";
-           var i = 1;
-           for (thisName in thisLineDataArray) {
-             sqlstatement += (i>1?",":"") + "`" + thisName + "` = ?" + i++ + " ";
-           }
-           sqlstatement += "WHERE `id` = ?1";
-           var statement = mDBConn.createStatement(sqlstatement);
-           var i = 0;
-           for (thisName in thisLineDataArray) {
-             statement.bindStringParameter(i++, thisLineDataArray[thisName]);
-           }
-           statement.execute();
-         } else {
-           statement.reset();
-           var sqlstatement = "INSERT INTO `threaddata` (";
-           var i = 1;
-           for (thisName in thisLineDataArray) {
-             sqlstatement += (i++>1?",":"") + "`" + thisName + "` ";
-           }
-           sqlstatement += ") VALUES (";
-           var i = 1;
-           for (thisName in thisLineDataArray) {
-             sqlstatement += (i>1?",":"") + " ?" + i++;
-           }
-           sqlstatement += ")";
-           var statement = mDBConn.createStatement(sqlstatement);
-           var i = 0;
-           for (thisName in thisLineDataArray) {
-             statement.bindStringParameter(i++, thisLineDataArray[thisName]);
-           }
-           statement.execute();
-         }
-      }
-*/
-   },
-
-   RemovePostDataSQL: function(threadid)
-   {
-   	/* ~ Let's see if we can run with out this ~ 4/11 duz
-      var fn = this.storedbFileName;
-      var file = Components.classes["@mozilla.org/file/local;1"]
-            .createInstance(Components.interfaces.nsILocalFile);
-      file.initWithPath(fn);
-      if ( file.exists() == false ) {
-         try {
-            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
-         }
-         catch (ex) {
-            throw "file.create error ("+ex.name+") on "+fn;
-         }
-         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
-      }
-      var storageService = Components.classes["@mozilla.org/storage/service;1"]
-                                     .getService(Components.interfaces.mozIStorageService);
-      var mDBConn = storageService.openDatabase(file);
-
-      if (!mDBConn.tableExists('threaddata'))
-      {
-        mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
-      }
-
-      var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
-      statement.bindInt32Parameter(0,threadid);
-      if (statement.executeStep()) {
-        statement.reset();
-        var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `id` = ?1");
-        statement.bindInt32Parameter(0,threadid);
-        statement.execute();
-      }
-      */
-   },
-
-   SavePostDataSQL: function(threaddetails)
-   {
-   	/* ~ Let's see if we can run with out this ~ 4/11 duz
-      var fn = this.storedbFileName;
-      var file = Components.classes["@mozilla.org/file/local;1"]
-            .createInstance(Components.interfaces.nsILocalFile);
-      file.initWithPath(fn);
-      if ( file.exists() == false ) {
-         try {
-            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
-         }
-         catch (ex) {
-            throw "file.create error ("+ex.name+") on "+fn;
-         }
-         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
-      }
-      var storageService = Components.classes["@mozilla.org/storage/service;1"]
-                                     .getService(Components.interfaces.mozIStorageService);
-      var mDBConn = storageService.openDatabase(file);
-
-      if (!mDBConn.tableExists('threaddata'))
-      {
-        mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
-      }
-
-      var statement = mDBConn.createStatement("SELECT `id` FROM `threaddata` WHERE `id` = ?1");
-      statement.bindInt32Parameter(0,threaddetails['id']);
-      if (statement.executeStep()) {
-         statement.reset();
-         var sqlstatement = "UPDATE `threaddata` SET ";
-         var i = 1;
-         for (thisName in threaddetails) {
-           sqlstatement += (i>1?",":"") + "`" + thisName + "` = ?" + i++ + " ";
-         }
-         sqlstatement += "WHERE `id` = ?1";
-         var statement = mDBConn.createStatement(sqlstatement);
-         var i = 0;
-         for (thisName in threaddetails) {
-           statement.bindStringParameter(i++, threaddetails[thisName]);
-         }
-         statement.execute();
-       } else {
-           statement.reset();
-           var sqlstatement = "INSERT INTO `threaddata` (";
-           var i = 1;
-           for (thisName in threaddetails) {
-             sqlstatement += (i++>1?",":"") + "`" + thisName + "` ";
-           }
-           sqlstatement += ") VALUES (";
-           var i = 1;
-           for (thisName in threaddetails) {
-             sqlstatement += (i>1?",":"") + " ?" + i++;
-           }
-           sqlstatement += ")";
-           var statement = mDBConn.createStatement(sqlstatement);
-           var i = 0;
-           for (thisName in threaddetails) {
-             statement.bindStringParameter(i++, threaddetails[thisName]);
-           }
-           statement.execute();
-       }
-*/
-
-   },
-
-   CleanupXML: function()
-   {
-   	/* ~ Let's see if we can run with out this ~ 4/11 duz
-      var xdoc = this.xmlDoc;
-      if (typeof(xdoc)=="undefined" || !xdoc)
-         return;
-      var expireDate = new Date( (new Date().getTime()) - (this.getPreference('expireMinAge') * (1000*60*60*24)) );
-      var expireyear = new String( expireDate.getYear()+1900 );
-      var expiremonth = new String( expireDate.getMonth()+1 );
-      var expireday = new String( expireDate.getDate() );
-      while (expireyear.length<4) expireyear = "0"+expireyear;
-      while (expiremonth.length<2) expiremonth = "0"+expiremonth;
-      while (expireday.length<2) expireday = "0"+expireday;
-      var expiredt = expireyear + expiremonth + expireday + "0000";
-      var curNode = this.xmlDoc.documentElement.firstChild;
-      while (curNode) {
-         var thisNode = curNode;
-         curNode = curNode.nextSibling;
-         if ( thisNode.nodeType == 1 ) {   // 1 = XML Element, 3 = Text Node
-            var lastpostdt = thisNode.getAttribute("lastpostdt");
-            if ( thisNode.getAttribute("lastviewdt") && thisNode.getAttribute("lastviewdt")>0 ) {
-               lastpostdt = thisNode.getAttribute("lastviewdt");
-            }
-            if ( lastpostdt < expiredt ) {
-               thisNode.parentNode.removeChild(thisNode);
-            } else {
-               thisNode.parentNode.insertBefore(xdoc.createTextNode("\n"), thisNode);
-            }
-         }
-         else if ( thisNode.nodeType == 3 ) {
-            thisNode.parentNode.removeChild(thisNode);
-         }
-      }
-      xdoc.documentElement.appendChild(xdoc.createTextNode("\n"));
-      this.SaveXML();
-      */
-   },
-
-   CleanupSQL: function(threaddetails)
-   {
-   	/* ~ Let's see if we can run with out this ~ 4/11 duz
-      var fn = this.storedbFileName;
-      var file = Components.classes["@mozilla.org/file/local;1"]
-            .createInstance(Components.interfaces.nsILocalFile);
-      file.initWithPath(fn);
-      if ( file.exists() == false ) {
-         try {
-            file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
-         }
-         catch (ex) {
-            throw "file.create error ("+ex.name+") on "+fn;
-         }
-         //console.log("The SALastRead extension is initializing a new database. You should only see this once.");
-      }
-      var storageService = Components.classes["@mozilla.org/storage/service;1"]
-                                     .getService(Components.interfaces.mozIStorageService);
-      var mDBConn = storageService.openDatabase(file);
-
-      if (!mDBConn.tableExists('threaddata'))
-      {
-        mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER);");
-      }
-
-      var expireDate = new Date( (new Date().getTime()) - (this.getPreference('expireMinAge') * (1000*60*60*24)) );
-      var expireyear = new String( expireDate.getYear()+1900 );
-      var expiremonth = new String( expireDate.getMonth()+1 );
-      var expireday = new String( expireDate.getDate() );
-      while (expireyear.length<4) expireyear = "0"+expireyear;
-      while (expiremonth.length<2) expiremonth = "0"+expiremonth;
-      while (expireday.length<2) expireday = "0"+expireday;
-      var expiredt = expireyear + expiremonth + expireday + "0000";
-
-      var statement = mDBConn.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` <= ?1");
-      statement.bindStringParameter(0,expiredt);
-      statement.execute();
-*/
-   },
-
-/* these are old and retarded ~ tivac
-   LoadPrefs: function()
-   {
-      this._LoadTypePrefs("color","char");
-      this._LoadTypePrefs("url","char");
-      this._LoadTypePrefs("toggle","bool");
-      this._LoadTypePrefs("string","char");
-      this._LoadTypePrefs("int","int");
-   },
-
-   SavePrefs: function()
-   {
-      this._SaveTypePrefs("color","char");
-      this._SaveTypePrefs("url","char");
-      this._SaveTypePrefs("toggle","bool");
-      this._SaveTypePrefs("string","char");
-      this._SaveTypePrefs("int","int");
-   },
-*/
-
    ProfileInit: function(isWindows)
    {
       if (this._profileInitialized)
@@ -1006,7 +615,6 @@ salrPersistObject.prototype = {
             this._flfn = this.getPreference('forumListStoragePath');
          }
          this.LoadXML();
-         this.CleanupSQL();
          this.LoadForumListXML();
 
          // Get Timer Value
@@ -1016,56 +624,11 @@ salrPersistObject.prototype = {
          }
          this._TimerValueSaveAt = this._TimerValue + 60;
          this._TimerValueLoaded = true;
-
-         // cachedThreadEntryList
-         this._cachedThreadEntryList = new Array();
       }
       catch (e) {
          this._starterr = e + "\nLine: " + e.lineNumber;
       }
    },
-
-   MAX_OPDATA_LENGTH: 400,
-   _opData: null,
-
-	/* This function has been rewritten for 2.0, remove before release
-   StoreOPData: function(threadid, op)
-   {
-      var i;
-      var storewhat;
-
-      if ( this._opData == null )
-         this._opData = new Array();
-
-      for (i=0; i < this._opData.length; i++) {
-         if ( this._opData[i].t == threadid ) {
-            this._opData[i].o = op;
-            return;
-         }
-      }
-
-      while ( this._opData.length >= this.MAX_OPDATA_LENGTH ) {
-         this._opData.pop();
-      }
-
-      this._opData.unshift( { t: threadid, o: op } );
-   },
-	*/
-	/* This function has been rewritten for 2.0, remove before release
-   GetOPFromData: function(threadid)
-   {
-      if ( this._opData == null )
-         this._opData = new Array();
-
-      for (i=0; i < this._opData.length; i++) {
-         if ( this._opData[i].t == threadid ) {
-            return this._opData[i].o;
-         }
-      }
-
-      return null;
-   },
-	*/
 
    _killed: false,
    _killChecked: false,
@@ -1078,161 +641,6 @@ salrPersistObject.prototype = {
    _flfn: null,
    _xmlDoc: null,
 
-/* remove before 2.0 release
-   _LoadTypePrefs: function(prefType,dataType)
-   {
-      var propname;
-      for (propname in this)
-      {
-         if ( propname.indexOf("default"+prefType+"_")==0 )
-         {
-            this._LoadTypePrefsInt(prefType, dataType, propname);
-         }
-      }
-   },
-
-   _LoadTypePrefsInt: function(prefType,dataType,propname)
-   {
-      var prefName = propname.substring( 8 + prefType.length );
-      var s = "SET_"+prefType+"_"+prefName;
-      var realPrefName = "salastread."+prefType+"."+prefName;
-      var initValue = this._ReadPrefOrDefault(
-                                          realPrefName,
-                                          this[propname],
-                                          dataType);
-      if (typeof(this[s])=="function") {
-         var that = this;
-         this[prefType+"_"+prefName] getter = function() {
-                                     return that._ReadPrefOrDefault(
-                                          realPrefName,
-                                          that[propname],
-                                          dataType);
-         };
-         this[prefType+"_"+prefName] setter = function(value) {
-                                     that._SetPref(
-                                          realPrefName,
-                                          value,
-                                          dataType);
-                                     that[s](value);
-         };
-         this[s](initValue);
-      } else {
-         this[prefType+"_"+prefName] = initValue;
-      }
-   },
-
-   _SetPref: function(prefName, value, dataType)
-   {
-      if (dataType=="char")
-         this.pref.setCharPref(prefName, value);
-      else if (dataType=="bool")
-         this.pref.setBoolPref(prefName, value);
-      else if (dataType=="int")
-         this.pref.setIntPref(prefName, value);
-   },
-
-   _SaveTypePrefs: function(prefType,dataType) {
-	  var propname;
-      for (propname in this)
-      {
-         if( propname.indexOf(prefType + "_") == 0)
-         {
-            var prefName = propname.substring( 1 + prefType.length );
-            prefName = "salastread." + prefType + "." + prefName;
-            this._SetPref(prefName, this[propname], dataType);
-         }
-      }
-   },
-*/
-	/* Is this function safe to delete?
-   _OLDSaveTypePrefs: function(prefType,dataType)
-   {
-      var propname;
-      for (propname in this)
-      {
-         if ( propname.indexOf(prefType+"_")==0 )
-         {
-            var prefName = propname.substring( 1 + prefType.length );
-            if (dataType=="char")
-            {
-               this.pref.setCharPref("salastread."+prefType+"."+prefName, this[propname]);
-            }
-            else if (dataType=="bool")
-            {
-               this.pref.setBoolPref("salastread."+prefType+"."+prefName, this[propname]);
-            }
-            else if (dataType=="int")
-            {
-               this.pref.setIntPref("salastread."+prefType+"."+prefName, this[propname]);
-            }
-         }
-      }
-   },
-	*/
-	/* This preference has been rewritten for 2.0, remove before release
-			This preference has been superseded by getPreference, do not use this function for new code
-   _ReadPrefOrDefault: function(prefname, defaultvalue, preftype)
-   {
-      var typeval = this.pref.PREF_STRING;
-      if (preftype == "bool")
-      {
-         typeval = this.pref.PREF_BOOL;
-      }
-      else if (preftype == "int")
-      {
-         typeval = this.pref.PREF_INT;
-      }
-      var setPref = true;
-      var result = defaultvalue;
-      if (this.pref.getPrefType(prefname)==typeval)
-      {
-         var prefval;
-         if (typeval == this.pref.PREF_STRING)
-         {
-            prefval = this.pref.getCharPref(prefname);
-            if (prefval != "")
-            {
-               result = prefval;
-               setPref = false;
-            }
-         }
-         else if (typeval == this.pref.PREF_BOOL)
-         {
-            prefval = this.pref.getBoolPref(prefname);
-            if (typeof(prefval) != "undefined")
-            {
-               result = prefval;
-               setPref = false;
-            }
-         }
-         else if (typeval == this.pref.PREF_INT)
-         {
-            prefval = this.pref.getIntPref(prefname);
-            if (typeof(prefval) != "undefined")
-            {
-               result = prefval;
-               setPref = false;
-            }
-         }
-      }
-      if (setPref)
-      {
-         if (preftype == this.pref.PREF_STRING)
-         {
-            this.pref.setCharPref(prefname, result);
-         }
-         else if (preftype == this.pref.PREF_BOOL)
-         {
-            this.pref.setBoolPref(prefname, result);
-         }
-         else if (preftype == this.pref.PREF_INT)
-         {
-            this.pref.setIntPref(prefname, result);
-         }
-      }
-      return result;
-   },
-	*/
    EscapeMenuURL: function(murl)
    {
       var res = murl.replace("&","&amp;");
@@ -1262,31 +670,6 @@ salrPersistObject.prototype = {
       }
    },
 
-	/* This function has been rewritten for 2.0, remove before release
-   SaveTimerValue: function()
-   {
-      if ( this._TimerValueLoaded ) {
-         this.pref.setIntPref("salastread.int.timeSpentOnForums", this._TimerValue);
-      }
-      this._TimerValueSaveAt = this._TimerValue + 60;
-   },
-	*/
-	/* This function has been rewritten for 2.0, remove before release
-   IsDevelopmentRelease: function()
-   {
-      var ver = "1.15.1912";
-      var vm = ver.match(/^(\d+)\.(\d+)\.(\d+)$/);
-      if (vm) {
-         var major = vm[1];
-         var minor = vm[2];
-         var build = vm[3];
-
-         return (minor % 2 != 0);
-      } else {
-         return false;
-      }
-   },
-	*/
    IsDebugEnabled: function() {
       return this.IsDevelopmentRelease;
    },
@@ -1399,7 +782,7 @@ salrPersistObject.prototype = {
 		return ignoredThreads;
 	},
 
-	// Returns an associative array of the ignored threads with the thread id as the key and the thread title as the value
+	// Returns an associative array of the starred threads with the thread id as the key and the thread title as the value
 	get starList()
 	{
 		var threadid, threadtitle, starredThreads = new Array();
@@ -1582,47 +965,6 @@ salrPersistObject.prototype = {
 		return build;
 	},
 
-	// This function has been superseded by getPreference, do not use for new code
-	// This function has been rewritten for legacy support
-	// @param: (string) Absolute preference name, (string) Default value
-	// @return: (boolean, string or int) Preference value or defaultValue if not found
-	_ReadPrefOrDefault: function(oldPrefName, defaultValue)
-	{
-		// prefName is in the form of "salastread."+prefType+"."+prefName
-		var prefValue, prefName = oldPrefName.split('.')[2];
-		// Since only legacy code calls this function,
-		// we have to check if the preference is in the old location
-		// and move it to the new location if it is
-		var prefType = this.pref.getPrefType(oldPrefName);
-		if (prefType != this.pref.PREF_INVALID)
-		{
-			switch (prefType)
-			{
-				case this.pref.PREF_BOOL:
-					prefValue = this.pref.getBoolPref(oldPrefName);
-					break;
-				case this.pref.PREF_INT:
-					prefValue = this.pref.getIntPref(oldPrefName);
-					break;
-				case this.pref.PREF_STRING:
-					prefValue = this.pref.getCharPref(oldPrefName);
-					break;
-				case this.pref.PREF_INVALID:
-				default:
-					prefValue = null;
-			}
-			this.setPreference(prefName, prefValue);
-			this.pref.deleteBranch(oldPrefName);
-		}
-		prefValue = this.getPreference(prefName);
-		if (prefValue == null) // In theory, should never be true
-		{
-			prefValue = defaultValue;
-			this.setPreference(prefName, defaultValue);
-		}
-		return prefValue;
-	},
-
 	// Adds/updates a user as a mod
 	// @param: (int) User ID, (string) Username
 	// @return: nothing
@@ -1740,12 +1082,12 @@ salrPersistObject.prototype = {
 	},
 
 	// Puts the count of posts in a thread read into the database
-	// @param: (int) Thread ID, (int) Total number of posts read
-	// @return:
-	setLastReadPostCount: function(threadid, lrcount)
+	// @param: (int) Thread ID, (int) Total number of posts read, (bool) Force an Update
+	// @return: (bool) did the call succeed?
+	setLastReadPostCount: function(threadid, lrcount, forceUpdate)
 	{
 		var result = false;
-		if (lrcount > this.getLastReadPostCount(threadid))
+		if (lrcount > this.getLastReadPostCount(threadid) || forceUpdate)
 		{
 			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastreplyct` = ?1 WHERE `id` = ?2");
 			statement.bindInt32Parameter(0,lrcount);
@@ -1820,8 +1162,8 @@ salrPersistObject.prototype = {
 	},
 
 	// Get the Post ID of the last read post
-	// @param:
-	// @return:
+	// @param: (int) Thread ID
+	// @return: (int) ID of the last read post in the thread
 	getLastPostID: function(threadid)
 	{
 		var lastread;
@@ -1844,12 +1186,12 @@ salrPersistObject.prototype = {
 	},
 
 	// Sets the Post ID of the last read post
-	// @param:
-	// @return:
-	setLastPostID: function(threadid, lastpostid)
+	// @param: (int) Thread ID, (int) Last Post ID, (bool) Force Update
+	// @return: (bool) status of update success
+	setLastPostID: function(threadid, lastpostid, forceUpdate)
 	{
 		var result = false;
-		if (lastpostid > this.getLastPostID(threadid))
+		if (lastpostid > this.getLastPostID(threadid) || forceUpdate)
 		{
 			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastpostid` = ?1 WHERE `id` = ?2");
 			statement.bindStringParameter(0,lastpostid);
@@ -1864,8 +1206,8 @@ salrPersistObject.prototype = {
 	},
 
 	// Get the title of the selected thread
-	// @param:
-	// @return:
+	// @param: (int) Thread ID
+	// @return: (bool) status of thread title update
 	getThreadTitle: function(threadid)
 	{
 		var title;
@@ -1888,8 +1230,8 @@ salrPersistObject.prototype = {
 	},
 
 	// Stores the thread title in the database
-	// @param:
-	// @return:
+	// @param: (int) Thread ID, (string) Thread Title
+	// @return: (bool) update success
 	setThreadTitle: function(threadid, title)
 	{
 		var statement = this.database.createStatement("UPDATE `threaddata` SET `title` = ?1 WHERE `id` = ?2");
@@ -2279,7 +1621,7 @@ salrPersistObject.prototype = {
 		}
 		lpGo.setAttribute("id", "jumptolast_"+threadId);
 		lpIcon = doc.createElement("img");
-		lpIcon.setAttribute("src", "chrome://salastread/skin/lastpost.png");
+		lpIcon.setAttribute("src", this.getPreference("goToLastReadPost"));
 		lpIcon.style.cssFloat = "right";
 		lpIcon.style.marginRight = "3px";
 		lpIcon.style.marginLeft = "3px";
@@ -2495,9 +1837,16 @@ salrPersistObject.prototype = {
 						newImg.style.border = "1px dashed #f00";
 						if (this.getPreference("shrinkTextToImages"))
 						{
-							newImg.style.maxWidth = this.getPreference("maxWidthOfConvertedImages") + "px";
-							newImg.style.maxHeight = this.getPreference("maxHeightOfConvertedImages") + "px";
-							newImg.addEventListener("click", function() { this.style.maxWidth = ''; this.style.maxHeight = ''; this.title = "Link converted by SALR";},false);
+							var maxWidth = this.getPreference("maxWidthOfConvertedImages") + "px";
+							var maxHeight = this.getPreference("maxHeightOfConvertedImages") + "px";
+							newImg.style.maxWidth = maxWidth;
+							newImg.style.maxHeight = maxHeight
+							newImg.addEventListener("click", 
+							function() { 
+								this.style.maxWidth = (this.style.maxWidth == '') ? maxWidth : ''; 
+								this.style.maxHeight = (this.style.maxHeight == '') ? maxHeight : ''; 
+								this.title = "Link converted by SALR";
+							},false);
 							newImg.title += " - Click to enlarge";
 						}
 						if ((linksInPost[i].firstChild == linksInPost[i].lastChild && (linksInPost[i].firstChild.tagName && linksInPost[i].firstChild.tagName.search(/img/i) > -1)) ||

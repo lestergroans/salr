@@ -42,8 +42,6 @@
   <vbox>
    <checkbox id="toggle_reanchorThreadOnLoad"
              label="Reanchor threads to targetted post after all images have loaded" />
-   <checkbox id="toggle_removePageTitlePrefix"
-             label="Move 'The Awful Forums' prefix to end of page titles" />
    <checkbox id="toggle_insertPostLastMarkLink"
              label="Add a &quot;&lt;&quot; link to reset the last post of each thread" />
    <checkbox id="toggle_enablePageNavigator"
@@ -60,8 +58,6 @@
            label="Hide Forum Header and Footer" />
  <checkbox id="toggle_resizeCustomTitleText"
            label="Shrink Large Custom Title Texts" />
- <checkbox id="toggle_contextMenuOnBottom"
-           label="Put the SALR context submenu on the bottom of the context menu instead of the top" />
  <checkbox id="toggle_hideSignature"
            label="Hide user signatures in posts" />
  <checkbox id="toggle_hideTitle"

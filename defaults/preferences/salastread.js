@@ -48,8 +48,8 @@ pref('extensions.salastread.expireMinAge', 7);
 pref('extensions.salastread.gestureButton', 2);
 pref('extensions.salastread.timeSpentOnForums', 0);
 
-pref('extensions.salastread.goToLastReadPost', 'chrome://salastread/skin/go_to_first_unread_post.png');
-pref('extensions.salastread.markThreadUnvisited', 'chrome://salastread/skin/mark_thread_unvisited.png');
+pref('extensions.salastread.goToLastReadPost', 'chrome://salastread/skin/lastpost.png');
+pref('extensions.salastread.markThreadUnvisited', 'chrome://salastread/skin/unvisit.png');
 
 pref('extensions.salastread.swapIconOrder', false);
 pref('extensions.salastread.databaseStoragePath', '%profile%salastread.sqlite');
@@ -75,7 +75,6 @@ pref('extensions.salastread.hideOtherSAMenus', true);
 pref('extensions.salastread.quickQuoteImagesAsLinks', true);
 pref('extensions.salastread.dontHighlightThreads', false);
 pref('extensions.salastread.dontHighlightPosts', false);
-pref('extensions.salastread.removePageTitlePrefix', true);
 pref('extensions.salastread.quickQuoteSwapPostPreview', false);
 
 pref('extensions.salastread.convertTextToImage', false);
@@ -101,6 +100,7 @@ pref('extensions.salastread.disableGradients', false);
 pref('extensions.salastread.resizeCustomTitleText', true);
 pref('extensions.salastread.enablePageNavigator', true);
 pref('extensions.salastread.enableForumNavigator', true);
+pref('extensions.salastread.enableContextMenu', true);
 pref('extensions.salastread.thumbnailAllImages', true);
 
 pref('extensions.salastread.showMenuPinHelper', true);
