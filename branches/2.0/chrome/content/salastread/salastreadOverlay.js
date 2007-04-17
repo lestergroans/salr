@@ -1085,6 +1085,7 @@ function handleSubscribedThreadTable(e, subTable) {
    }
 }
 */
+// Do anything needed to the subscribed threads list
 function handleSubscriptions(doc) {
 	var subForm = persistObject.selectSingleNode(doc, doc, "//FORM[@method='get'][contains(@action,'member2.php')]");
 	if (!subForm) {
@@ -1092,6 +1093,7 @@ function handleSubscriptions(doc) {
 	}
 	var subTable = subForm.parentNode;
 	var threadlist = persistObject.selectNodes(doc, subTable, "TBODY/TR");
+	var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
 	for (i in threadlist)
 	{
 		if (threadlist[i].getElementsByTagName('td')[0].colSpan > "1")
@@ -1113,6 +1115,11 @@ function handleSubscriptions(doc) {
 		threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'javascript:who(')]").parentNode.parentNode;
 		threadRe = parseInt(persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'javascript:who(')]").innerHTML);
 		threadLRCount = persistObject.getLastReadPostCount(threadId);
+		// If thread is ignored
+		if (ignoredthreads[threadId] != undefined)
+		{
+			threadlist[i].parentNode.deleteRow(i);
+		}
 		// So right click star/ignore works
 		threadlist[i].className = "salastread_thread_" + threadId;
 		// If this thread is in the DB as being read
@@ -1162,14 +1169,9 @@ function handleSubscriptions(doc) {
 				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 			}
 		}
-		if (persistObject.isThreadStarred(threadId))
+		if (starredthreads[threadId] != undefined)
 		{
 			persistObject.insertStar(doc, threadTitleBox);
-		}
-		// If thread is ignored
-		if (persistObject.isThreadIgnored(threadId))
-		{
-			threadlist[i].parentNode.deleteRow(i);
 		}
 	}
 }
@@ -1327,7 +1329,6 @@ function setUpThreadIcons(doc,thisel,threadid,lpdate,lptime,isFYAD,setClasses,to
 // Do anything needed to the post list in a forum
 function handleForumDisplay(doc)
 {
-try {
 	var failed, i, e;	// Little variables that'll get reused
 	var forumid = persistObject.getForumID(doc);
 	// The following forums have special needs that must be dealt with
@@ -1401,6 +1402,8 @@ try {
 		var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox;
 		var threadTitle, threadId, threadOPId, threadRe;
 		var threadLRCount, posterColor, posterBG, unvistIcon, lpIcon, lastPostID;
+		var userPosterColor, userPosterBG, userPosterNote;
+		var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
 		// Here be where we work on the thread rows
 		var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
 		for (i in threadlist)
@@ -1427,10 +1430,12 @@ try {
 			}
 			threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
 			threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
-			// If thread is ignored might as well stop now
-			if (persistObject.isThreadIgnored(threadId))
+			if (ignoredthreads[threadId] != undefined)
 			{
-				threadlist[i].parentNode.deleteRow(i);
+				// If thread is ignored might as well stop now
+				threadlist[i].parentNode.style.display = "none";
+				// Update the title just incase it doesn't know what it is
+				persistObject.setThreadTitle(threadId, threadTitle);
 				continue;
 			}
 			threadLRCount = persistObject.getLastReadPostCount(threadId);
@@ -1448,9 +1453,16 @@ try {
 				posterColor = persistObject.getPreference("adminColor");
 				posterBG =  persistObject.getPreference("adminBackground");
 			}
-			//persistObject.getPosterColor(threadOPId);
-			//persistObject.getPosterBackground(threadOPId);
-
+			userPosterColor = persistObject.getPosterColor(threadOPId);
+			userPosterBG = persistObject.getPosterBackground(threadOPId);
+			if (userPosterColor != false)
+			{
+				posterColor = userPosterColor;
+			}
+			if (userPosterBG != false)
+			{
+				posterBG = userPosterBG;
+			}
 			// So right click star/ignore works
 			threadlist[i].className = "salastread_thread_" + threadId;
 			// Replace the thread icon with a linked thread icon
@@ -1516,7 +1528,7 @@ try {
 					persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 				}
 			}
-			if (persistObject.isThreadStarred(threadId))
+			if (starredthreads[threadId] != undefined)
 			{
 				persistObject.insertStar(doc, threadTitleBox);
 			}
@@ -1540,12 +1552,6 @@ try {
 	}
 
   }
-} catch(e) {
-	if (!persistObject.getPreference("suppressErrors"))
-	{
-		alert(e);
-	}
-}
 }
 function removeThread(evt) {
 	//var doc = evt.originalTarget.ownerDocument;
@@ -2455,6 +2461,15 @@ function handleShowThread(doc) {
 				newNoteBox.style.margin = "0";
 				newNoteBox.style.padding = "0";
 				newNoteBox.textContent = posterNote;
+				userNameBox.appendChild(newNoteBox);
+			}
+			if (userPosterNote != false)
+			{
+				newNoteBox = doc.createElement("p");
+				newNoteBox.style.fontSize = "80%";
+				newNoteBox.style.margin = "0";
+				newNoteBox.style.padding = "0";
+				newNoteBox.textContent = userPosterNote;
 				userNameBox.appendChild(newNoteBox);
 			}
 			if (!persistObject.getPreference("dontHighlightPosts"))
@@ -3980,7 +3995,7 @@ try {
 		needToShowChangeLog = !persistObject.IsDevelopmentRelease;
 		// Here we have to put special cases for specific dev build numbers that require the changelog dialog to appear
 		var buildNum = parseInt(persistObject.LastRunVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3], 10);
-		if (buildNum <= 70415) // Put the latest build number to need an SQL patch here
+		if (buildNum <= 70416) // Put the latest build number to need an SQL patch here
 		{
 			needToShowChangeLog = true;
 		}
