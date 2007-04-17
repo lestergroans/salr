@@ -1,9 +1,9 @@
 sacolorpicker {
-  -moz-binding: url('chrome://salastread/content/colorpicker.xbl#colorpicker');
+  -moz-binding: url('chrome://salastread/content/colorpicker/colorpicker.xbl#colorpicker');
 }
 
 sacolorpickerwin {
-  -moz-binding: url('chrome://salastread/content/colorpicker.xbl#colorpicker-window');
+  -moz-binding: url('chrome://salastread/content/colorpicker/colorpicker.xbl#colorpicker-window');
 }
 
 .colorpickerthumbnail {
@@ -43,7 +43,7 @@ sacolorpickerwin {
 
 .cbbox-hue {
  -moz-box-sizing: content-box;
- background-image: url('chrome://salastread/content/huebar.png');
+ background-image: url('chrome://salastread/content/colorpicker/huebar.png');
  width: 19px;
  height: 256px;
  border: 1px solid black;

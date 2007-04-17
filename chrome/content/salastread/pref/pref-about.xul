@@ -14,7 +14,7 @@
 
   <hbox>
    <spacer flex="1"/>
-   <image src="chrome://salastread/content/salastread-large.png"/>
+   <image src="chrome://salastread/skin/salastread-large.png"/>
    <spacer style="width: 15px;"/>
    <vbox>
     <spacer flex="1"/>

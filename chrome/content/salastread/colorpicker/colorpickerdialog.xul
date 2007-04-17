@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://salastread/content/colorpickerdialog.css" type="text/css"?>
+<?xml-stylesheet href="chrome://salastread/content/colorpicker/colorpickerdialog.css" type="text/css"?>
 
 <dialog id="salastread-colorpickerdialog"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -9,15 +9,15 @@
         ondialogaccept="return acceptIt();"
         title="Color Picker">
 
- <script language="JavaScript" src="chrome://salastread/content/colorpickerdialog.js" />
+ <script language="JavaScript" src="chrome://salastread/content/colorpicker/colorpickerdialog.js" />
 
  <hbox>
   <stack class="box-inset cbbox-hsb"
         id="selbox"
         onclick="imageClick(event);">
-     <image src="chrome://salastread/content/hsboverlay.png"
+     <image src="chrome://salastread/content/colorpicker/hsboverlay.png"
             onclick="imageClick(event);"/>
-     <image src="chrome://salastread/content/colorselection.png"
+     <image src="chrome://salastread/content/colorpicker/colorselection.png"
             onclick="imageClick(event);"
             id="colorselection"
             class="cbbox-colorselection"/>
@@ -25,7 +25,7 @@
   <vbox class="box-inset cbbox-hue"
         id="hsbox"
         onclick="hueClick(event);">
-   <image src="chrome://salastread/content/hueselection.png"
+   <image src="chrome://salastread/content/colorpicker/hueselection.png"
           id="huesel"
           class="cbbox-huesel" />
   </vbox>

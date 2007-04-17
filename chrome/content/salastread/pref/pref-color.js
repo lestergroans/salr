@@ -172,7 +172,7 @@ function editColor(event, targetEl, ctype, ldtype, ishighlight) {
 				}
 			}
 			
-			window.openDialog("chrome://salastread/content/colorpickerdialog.xul", "colorpickerdialog", "chrome", pobj);
+			window.openDialog("chrome://salastread/content/colorpicker/colorpickerdialog.xul", "colorpickerdialog", "chrome", pobj);
 			if(pobj.accepted) {
 				var newvalue = "#" + pobj.value;
 				

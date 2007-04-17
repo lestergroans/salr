@@ -1293,8 +1293,8 @@ salrPersistObject.prototype = {
 	},
 
 	// Check to see if the thread is starred
-	// @param:
-	// @return:
+	// @param: (int) Thread ID
+	// @return: (bool) thread's star status
 	isThreadStarred: function(threadid)
 	{
 		var statement = this.database.createStatement("SELECT `star` FROM `threaddata` WHERE `id` = ?1");

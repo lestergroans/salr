@@ -36,14 +36,14 @@
 
   <statusbar id="status-bar">
    <statusbarpanel insertafter="security-button" id="somethingawful-button" style="display: none;">
-    <image src="chrome://salastread/content/sa.png" width="16" height="16"
+    <image src="chrome://salastread/skin/sa.png" width="16" height="16"
            title="Something Awful"/>
    </statusbarpanel>
   </statusbar>
 
   <popup id="contentAreaContextMenu">
    <menu label="SA Last Read Options" id="salastread-context-menu"
-         image="chrome://salastread/content/sa.png"
+         image="chrome://salastread/skin/sa.png"
          class="menuitem-iconic salastread_context_menu" position="1">
     <menupopup id="salastread-context-menupopup">
      <menuitem id="salastread-context-ignorethread" label="Ignore This Thread" accesskey="i" oncommand="SALR_IgnoreThread();" />
