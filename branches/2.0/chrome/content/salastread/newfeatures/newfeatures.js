@@ -93,16 +93,12 @@ function checkForSQLPatches(build)
 			persistObject.database.executeSimpleSQL("ALTER TABLE `userdata` ADD `background` VARCHAR(8)");
 		}
 	}
-	if (build < 70415)
+	if (build < 70418)
 	{
 		// Not setting a default value makes things harder so let's fix that
 		statement = persistObject.database.executeSimpleSQL("UPDATE `threaddata` SET `star` = 0 WHERE `star` IS NULL");
 		statement = persistObject.database.executeSimpleSQL("UPDATE `threaddata` SET `ignore` = 0 WHERE `ignore` IS NULL");
 		statement = persistObject.database.executeSimpleSQL("UPDATE `threaddata` SET `posted` = 0 WHERE `posted` IS NULL");
-	}
-	if (build < 70416)
-	{
-		// Not setting a default value makes things harder so let's fix that
 		statement = persistObject.database.executeSimpleSQL("UPDATE `userdata` SET `color` = 0 WHERE `color` IS NULL");
 		statement = persistObject.database.executeSimpleSQL("UPDATE `userdata` SET `background` = 0 WHERE `background` IS NULL");
 	}

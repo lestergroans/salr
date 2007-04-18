@@ -257,7 +257,7 @@ salrPersistObject.prototype = {
       this.GenerateNextSyncTime();
       return res;
    },
-   
+
    _syncTrace: null,
 
    _DoAsynchronousSync: function(syncCallback, trace)
@@ -1087,7 +1087,7 @@ salrPersistObject.prototype = {
 	setLastReadPostCount: function(threadid, lrcount, forceUpdate)
 	{
 		var result = false;
-		if (lrcount > this.getLastReadPostCount(threadid) || forceUpdate)
+		if (lrcount > this.getLastReadPostCount(threadid) || (forceUpdate != undefined && forceUpdate == true))
 		{
 			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastreplyct` = ?1 WHERE `id` = ?2");
 			statement.bindInt32Parameter(0,lrcount);
@@ -1191,7 +1191,7 @@ salrPersistObject.prototype = {
 	setLastPostID: function(threadid, lastpostid, forceUpdate)
 	{
 		var result = false;
-		if (lastpostid > this.getLastPostID(threadid) || forceUpdate)
+		if (lastpostid > this.getLastPostID(threadid) || (forceUpdate != undefined && forceUpdate == true))
 		{
 			var statement = this.database.createStatement("UPDATE `threaddata` SET `lastpostid` = ?1 WHERE `id` = ?2");
 			statement.bindStringParameter(0,lastpostid);
@@ -1636,7 +1636,7 @@ salrPersistObject.prototype = {
 	insertUnreadIcon: function(doc, titleBox, threadId)
 	{
 		unvisitIcon = doc.createElement("img");
-		unvisitIcon.setAttribute("src", "chrome://salastread/skin/unvisit.png");
+		unvisitIcon.setAttribute("src", this.getPreference("markThreadUnvisited"));
 		unvisitIcon.setAttribute("id", "unread_"+threadId);
 		unvisitIcon.style.cssFloat = "right";
 		unvisitIcon.style.marginRight = "3px";
@@ -1841,10 +1841,10 @@ salrPersistObject.prototype = {
 							var maxHeight = this.getPreference("maxHeightOfConvertedImages") + "px";
 							newImg.style.maxWidth = maxWidth;
 							newImg.style.maxHeight = maxHeight
-							newImg.addEventListener("click", 
-							function() { 
-								this.style.maxWidth = (this.style.maxWidth == '') ? maxWidth : ''; 
-								this.style.maxHeight = (this.style.maxHeight == '') ? maxHeight : ''; 
+							newImg.addEventListener("click",
+							function() {
+								this.style.maxWidth = (this.style.maxWidth == '') ? maxWidth : '';
+								this.style.maxHeight = (this.style.maxHeight == '') ? maxHeight : '';
 								this.title = "Link converted by SALR";
 							},false);
 							newImg.title += " - Click to enlarge";
