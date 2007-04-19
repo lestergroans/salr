@@ -748,7 +748,7 @@ salrPersistObject.prototype = {
 		var mDBConn = storageService.openDatabase(file);
 		if (!mDBConn.tableExists('threaddata'))
 		{
-			mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostdt INTEGER, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER)");
+			mDBConn.executeSimpleSQL("CREATE TABLE `threaddata` (id INTEGER PRIMARY KEY, lastpostid INTEGER, lastviewdt INTEGER, op INTEGER, title VARCHAR(161), lastreplyct INTEGER, posted BOOLEAN, ignore BOOLEAN, star BOOLEAN, options INTEGER)");
 		}
 		if (!mDBConn.tableExists('userdata'))
 		{
@@ -794,6 +794,90 @@ salrPersistObject.prototype = {
 			starredThreads[threadid] = threadtitle;
 		}
 		return starredThreads;
+	},
+
+	// Returns an associative array of thread icons with the filename as the key and the icon num as the value
+	get iconList()
+	{
+		var iconnum, filename, threadIcons = new Array();
+		var statement = this.database.createStatement("SELECT `iconnumber`, `filename` FROM `posticons`");
+		while (statement.executeStep())
+		{
+			iconnum = statement.getInt32(0);
+			filename = statement.getString(1);
+			threadIcons[filename] = iconnum;
+		}
+		return threadIcons;
+	},
+
+	// Returns an associative array of the mods with their userid as the key and name as the value
+	get modList()
+	{
+		var userid, username, mods = new Array();
+		var statement = this.database.createStatement("SELECT `userid`, `username` FROM `userdata` WHERE `mod` = 1");
+		while (statement.executeStep())
+		{
+			userid = statement.getInt32(0);
+			username = statement.getString(1);
+			mods[userid] = username;
+		}
+		return mods;
+	},
+
+	// Returns an associative array of the admins with their userid as the key and name as the value
+	get adminList()
+	{
+		var userid, username, admins = new Array();
+		var statement = this.database.createStatement("SELECT `userid`, `username` FROM `userdata` WHERE `admin` = 1");
+		while (statement.executeStep())
+		{
+			userid = statement.getInt32(0);
+			username = statement.getString(1);
+			admins[userid] = username;
+		}
+		return admins;
+	},
+
+	// Retrieves all the data on a given thread id including any
+	// @param: (int) thread id
+	// @return: (array)
+	getThreadDetails: function(threadid)
+	{
+		var results = new Array();
+		var statement = this.database.createStatement("SELECT `threaddata`.`lastpostid`, `threaddata`.`lastviewdt`, `threaddata`.`op`, `threaddata`.`title`, `threaddata`.`lastreplyct`, `threaddata`.`posted`, `threaddata`.`ignore`, `threaddata`.`star`, `threaddata`.`options`, `userdata`.`username`, `userdata`.`mod`, `userdata`.`admin`, `userdata`.`color`, `userdata`.`background`, `userdata`.`status` FROM `threaddata` LEFT JOIN `userdata` ON `threaddata`.`op` = `userdata`.`userid` WHERE `threaddata`.`id` = ?1");
+		statement.bindInt32Parameter(0,threadid);
+		if (statement.executeStep())
+		{
+			results['threadid'] = threadid;
+			for (var i=0;i<statement.numEntries;i++)
+			{
+				results[statement.getColumnName(i)] = statement.getString(i);
+			}
+/*
+			results['lastpostid']
+			results['lastviewdt']
+			results['op']
+			results['title']
+			results['lastreplyct']
+			results['posted']
+			results['ignore']
+			results['star']
+			results['options']
+			results['username']
+			results['mod']
+			results['admin']
+			results['color']
+			results['background']
+			results['status']
+*/
+			statement.reset();
+			return results;
+		}
+		else
+		{
+			statement.reset();
+			return false;
+		}
 	},
 
 	// Returns the value at the given preference from the branch in the preference property
