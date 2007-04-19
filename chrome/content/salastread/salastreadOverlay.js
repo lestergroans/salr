@@ -463,7 +463,7 @@ function SALR_MakeForumDisplayCSS() {
 }
 
 function changeBGColorsFromTo(doc, context, xpathbase, bgfrom, bgto, bgtohighlight) {
-   var xarray = selectNodes(doc, context, xpathbase+"[@bgcolor='"+bgfrom+"']");
+   var xarray = persistObject.selectNodes(doc, context, xpathbase+"[@bgcolor='"+bgfrom+"']");
    for (var x=0; x<xarray.length; x++) {
       xarray[x].style.backgroundColor = bgto;
       if ( bgtohighlight && !persistObject.getPreference('disableGradients') ) {
@@ -652,7 +652,7 @@ function SAmenuitemGoto(event,url,target) {
 }
 
 function grabForumList(doc, selectnode) {
-   var optionlist = selectNodes(doc, selectnode, "OPTION");
+   var optionlist = persistObject.selectNodes(doc, selectnode, "OPTION");
    var oDomParser = new DOMParser();
    var forumsDoc = oDomParser.parseFromString("<?xml version=\"1.0\"?>\n<forumlist></forumlist>", "text/xml");
    var targetEl = forumsDoc.documentElement;
@@ -667,7 +667,7 @@ function grabForumList(doc, selectnode) {
 
          // Carry over sticky attributes
          if ( oldForumXml ) {
-            var oldEl = selectSingleNode(oldForumXml, oldForumXml, "//forum[@id='"+myid+"']");
+            var oldEl = persistObject.selectSingleNode(oldForumXml, oldForumXml, "//forum[@id='"+myid+"']");
             if (oldEl) {
                if ( oldEl.hasAttribute("mods") ) {
                   fel.setAttribute("mods", oldEl.getAttribute("mods"));
@@ -1159,12 +1159,11 @@ function handleForumDisplay(doc)
 	var inGasChamber = persistObject.inGasChamber(forumid);
 
 	if (!inFYAD || persistObject.getPreference("enableFYAD")) {
-
-	var ourTransaction = false;
-	if (persistObject.database.transactionInProgress) {
-		ourTransaction = true;
-		persistObject.database.beginTransactionAs(persistObject.database.TRANSACTION_DEFERRED);
-	}
+		var ourTransaction = false;
+		if (persistObject.database.transactionInProgress) {
+			ourTransaction = true;
+			persistObject.database.beginTransactionAs(persistObject.database.TRANSACTION_DEFERRED);
+		}
 		// Insert the forums paginator & mouse gestures
 		if (persistObject.getPreference("enableForumNavigator"))
 		{
@@ -1219,26 +1218,19 @@ function handleForumDisplay(doc)
 		}
 
 		// We'll need lots of variables for this
-		var threadIconBox, threadIcon2Box, threadTitleBox, threadAuthorBox, threadRepliesBox;
-		var threadTitle, threadId, threadOPId, threadRe;
+		var threadIconBox, threadTitleBox, threadAuthorBox, threadRepliesBox;
+		var threadTitle, threadId, threadOPId, threadRe, threadDetails;
 		var threadLRCount, posterColor, posterBG, unvistIcon, lpIcon, lastPostID;
 		var userPosterColor, userPosterBG, userPosterNote;
 		var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
+		var iconlist = persistObject.iconList;
 		// Here be where we work on the thread rows
 		var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
 		for (i in threadlist)
 		{
-			if (inDump)
-			{
-				threadVoteBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='votes']");
-			}
-			else
+			if (!inDump)
 			{
 				threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
-			}
-			if (inAskTell)
-			{
-				threadIcon2Box = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon2']");
 			}
 			threadTitleBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='title']");
 			threadAuthorBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='author']");
@@ -1250,7 +1242,8 @@ function handleForumDisplay(doc)
 			}
 			threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
 			threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
-			if (ignoredthreads[threadId] != undefined)
+			threadDetails = persistObject.getThreadDetails(threadId);
+			if (threadDetails['ignore'] == '1')
 			{
 				// If thread is ignored might as well stop now
 				threadlist[i].parentNode.style.display = "none";
@@ -1258,23 +1251,23 @@ function handleForumDisplay(doc)
 				persistObject.setThreadTitle(threadId, threadTitle);
 				continue;
 			}
-			threadLRCount = persistObject.getLastReadPostCount(threadId);
+			threadLRCount = threadDetails['lastreplyct'];
 			threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
 			threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
 			posterColor = false;
 			posterBG = false;
-			if (persistObject.isMod(threadOPId))
+			if (threadDetails['mod'] == '1')
 			{
 				posterColor = persistObject.getPreference("modColor");
 				posterBG =  persistObject.getPreference("modBackground");
 			}
-			if (persistObject.isAdmin(threadOPId))
+			if (threadDetails['admin'] == '1')
 			{
 				posterColor = persistObject.getPreference("adminColor");
 				posterBG =  persistObject.getPreference("adminBackground");
 			}
-			userPosterColor = persistObject.getPosterColor(threadOPId);
-			userPosterBG = persistObject.getPosterBackground(threadOPId);
+			userPosterColor = threadDetails['color'];
+			userPosterBG = threadDetails['background'];
 			if (userPosterColor != false)
 			{
 				posterColor = userPosterColor;
@@ -1288,22 +1281,28 @@ function handleForumDisplay(doc)
 			// Replace the thread icon with a linked thread icon
 			if (!inDump && threadIconBox.firstChild.src.search(/posticons\/(.*)/i) > -1)
 			{
-				iconGo = doc.createElement("a");
-				iconNumber = persistObject.getIconNumber(threadIconBox.firstChild.src.match(/posticons\/(.*)/i)[1]);
-				if (iconNumber)
+				iconFilename = threadIconBox.firstChild.src.match(/posticons\/(.*)/i)[1];
+				if (iconlist[iconFilename] != undefined)
 				{
-					iconGo.setAttribute("href", "/forumdisplay.php?forumid=" + forumid + "&posticon=" + iconNumber);
+					iconGo = doc.createElement("a");
+					iconGo.setAttribute("href", "/forumdisplay.php?forumid=" + forumid + "&posticon=" + iconlist[iconFilename]);
+					iconGo.appendChild(threadIconBox.firstChild.cloneNode(true));
+					iconGo.firstChild.style.border = "none";
+					threadIconBox.removeChild(threadIconBox.firstChild);
+					threadIconBox.appendChild(iconGo);
 				}
-				iconGo.appendChild(threadIconBox.firstChild.cloneNode(true));
-				iconGo.firstChild.style.border = "none";
-				threadIconBox.removeChild(threadIconBox.firstChild);
-				threadIconBox.appendChild(iconGo);
 			}
 			// If this thread is in the DB as being read
 			if (threadLRCount > -1)
 			{
-				persistObject.setThreadTitle(threadId, threadTitle);
-				persistObject.StoreOPData(threadId, threadOPId);
+				if (threadDetails['title'] == null)
+				{
+					persistObject.setThreadTitle(threadId, threadTitle);
+				}
+				if (threadDetails['op'] == null)
+				{
+					persistObject.StoreOPData(threadId, threadOPId);
+				}
 				if (!persistObject.getPreference("dontHighlightThreads"))
 				{
 					if ((threadRe+1) > threadLRCount) // If there are new posts
@@ -1329,7 +1328,7 @@ function handleForumDisplay(doc)
 					{
 						persistObject.addGradient(threadlist[i]);
 					}
-					if (persistObject.didIPostHere(threadId))
+					if (threadDetails['posted'] == '1')
 					{
 						threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
 					}
@@ -1348,7 +1347,7 @@ function handleForumDisplay(doc)
 					persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 				}
 			}
-			if (starredthreads[threadId] != undefined)
+			if (threadDetails['star'] == '1')
 			{
 				persistObject.insertStar(doc, threadTitleBox);
 			}
@@ -1365,12 +1364,10 @@ function handleForumDisplay(doc)
 				}
 			}
 		}
-
-	if (ourTransaction)
-	{
-		persistObject.database.commitTransaction();
-	}
-
+		if (ourTransaction)
+		{
+			persistObject.database.commitTransaction();
+		}
   }
 }
 function removeThread(evt) {
@@ -1988,7 +1985,7 @@ function handleShowThread(doc) {
 
 		var isloggedin = (doc.getElementById("notregistered") == null);
 
-		var pageList = this.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
+		var pageList = persistObject.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
 		if (pageList)
 		{
 			if (pageList.length >  1)
@@ -2266,11 +2263,11 @@ function handleShowThread(doc) {
 			}
 			if (persistObject.getPreference('useQuickQuote') && !threadClosed)
 			{
-				quotebutton = selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
+				quotebutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
 				if (quotebutton) {
 					attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, quotebutton, forumid),posterName,1,postid);
 				}
-				editbutton = selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
+				editbutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
 				if (editbutton) {
 					attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, editbutton, forumid),posterName,1,postid,true);
 				}
@@ -2842,7 +2839,7 @@ function setImageThumbnailSize(img, fullsizetoggle) {
 function reanchorThreadToLink(doc) {
 	if(persistObject.getPreference('reanchorThreadOnLoad')){
 		if (doc.location.href.match(/\#(.*)$/)) {
-			var anchorNode = selectNodes(doc, doc.body, "//table[@id='"+doc.location.href.match(/\#(.*)$/)[1]+"']")[0];
+			var anchorNode = persistObject.selectNodes(doc, doc.body, "//table[@id='"+doc.location.href.match(/\#(.*)$/)[1]+"']")[0];
 
 			if (anchorNode) {
 				anchorNode.scrollIntoView(true);
@@ -2862,8 +2859,8 @@ function SALR_runConfig(page) {
 
 function handleEditPost(e) {
    var doc = e.originalTarget;
-   var submitbtn = selectNodes(doc, doc.body, "//INPUT[@type='submit'][@value='Save Changes']")[0];
-   var tarea = selectNodes(doc, doc.body, "//TEXTAREA[@name='message']")[0];
+   var submitbtn = persistObject.selectNodes(doc, doc.body, "//INPUT[@type='submit'][@value='Save Changes']")[0];
+   var tarea = persistObject.selectNodes(doc, doc.body, "//TEXTAREA[@name='message']")[0];
    if (submitbtn && tarea) {
       submitbtn.addEventListener("click", function() { parsePLTagsInEdit(tarea); }, true);
       submitbtn.style.backgroundColor = persistObject.getPreference('postedInThreadRe');
@@ -2878,19 +2875,19 @@ function setRegReplyFillOn() {
 
 function handleNewReply(e) {
    var doc = e.originalTarget;
-   var threadlink = selectSingleNode(doc, doc.body, "DIV[contains(@id, 'container')]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/SPAN[1]/B/A[contains(@href,'showthread.php')][contains(@href,'threadid=')]");
+   var threadlink = persistObject.selectSingleNode(doc, doc.body, "DIV[contains(@id, 'container')]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/SPAN[1]/B/A[contains(@href,'showthread.php')][contains(@href,'threadid=')]");
    if (threadlink) {
       var tlmatch = threadlink.href.match( /threadid=(\d+)/ );
       if ( tlmatch ) {
          var threadid = tlmatch[1];
          if ( salastread_needRegReplyFill ) {
-            var msgEl = selectSingleNode(doc, doc.body, "//TEXTAREA[@name='message']");
+            var msgEl = persistObject.selectSingleNode(doc, doc.body, "//TEXTAREA[@name='message']");
             if (msgEl) {
                msgEl.value = salastread_savedQuickReply;
             }
             salastread_needRegReplyFill = false;
          }
-         var postbtn = selectNodes(doc, doc.body, "//FORM[@name='vbform'][contains(@action,'newreply.php')]//INPUT[@type='submit'][@name='submit']")[0];
+         var postbtn = persistObject.selectNodes(doc, doc.body, "//FORM[@name='vbform'][contains(@action,'newreply.php')]//INPUT[@type='submit'][@name='submit']")[0];
          if (postbtn) {
             postbtn.addEventListener("click", function() { markThreadReplied(threadid); }, true);
             postbtn.style.backgroundColor = persistObject.getPreference('postedInThreadRe');
@@ -2898,7 +2895,7 @@ function handleNewReply(e) {
       }
    } else {
       if (salastread_savedQuickReply!="") {
-         var forgeCheck = selectSingleNode(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[2]/TD[1]/FONT[contains(text(),'have been forged')]");
+         var forgeCheck = persistObject.selectSingleNode(doc, doc.body, "TABLE/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/TABLE[1]/TBODY[1]/TR[2]/TD[1]/FONT[contains(text(),'have been forged')]");
          if (forgeCheck) {
             persistObject.__cachedFormKey = "";
             var reqMsg = doc.createElement("P");
@@ -2933,7 +2930,7 @@ function markThreadReplied(threadid) {
 
 function handleConfigLinkInsertion(e) {
 	var doc = e.originalTarget;
-	var usercpnode = selectSingleNode(doc, doc.body, "//UL[@id='navigation']/LI/A[contains(@href,'usercp.php?s=')]");
+	var usercpnode = persistObject.selectSingleNode(doc, doc.body, "//UL[@id='navigation']/LI/A[contains(@href,'usercp.php?s=')]");
 	if (usercpnode) {
 		var containerLi = doc.createElement("LI");
 		var sep = doc.createTextNode(" - ");
@@ -3064,7 +3061,7 @@ function salastread_hidePageHeader(doc) {
       if (nav && nav.nodeName != "DIV") {
          nav = nav.nextSibling;
       }
-      if (nav && selectSingleNode(doc, nav, "A[@target='_new']/IMG")) {
+      if (nav && persistObject.selectSingleNode(doc, nav, "A[@target='_new']/IMG")) {
          hideEl(nav);
       }
    }
@@ -3073,7 +3070,7 @@ function salastread_hidePageHeader(doc) {
    if (copyright) {
       if (copyright) copyright = copyright.previousSibling;
       if (copyright && copyright.nodeName != "DIV") copyright = copyright.previousSibling;
-      if (copyright && selectSingleNode(doc, copyright, "A[@target='_new']/IMG")) {
+      if (copyright && persistObject.selectSingleNode(doc, copyright, "A[@target='_new']/IMG")) {
          hideEl(copyright);
       }
    }
@@ -3143,9 +3140,9 @@ function SALR_HandleProfileInsertion(e) {
             openDialog("chrome://salastread/content/profileEditConfirm.xul","_blank",
                        "chrome,titlebar,modal,resizable", data);
             if (data["continue"]) {
-               var formtag = selectSingleNode(doc, doc.body, "//form[@action='member.php']");
-               var captext = selectSingleNode(doc, doc.body, "//input[@name='captcha']");
-               var f1 = selectSingleNode(doc, doc.body, "//input[@name='field1']");
+               var formtag = persistObject.selectSingleNode(doc, doc.body, "//form[@action='member.php']");
+               var captext = persistObject.selectSingleNode(doc, doc.body, "//input[@name='captcha']");
+               var f1 = persistObject.selectSingleNode(doc, doc.body, "//input[@name='field1']");
                if (formtag && captext && f1) {
                   f1.value = "SALR["+ params["salr_addprofilekey"] +"]";
                   formtag.action = "member.php?salr_profileinsertcontinue=true" + SALR_ParamsToUrl(params);
