@@ -4,22 +4,21 @@
 <page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       onload="generalInit();">
 
- <script language="JavaScript" src="chrome://salastread/content/pref/pref-common.js" />
- <script language="JavaScript" src="chrome://salastread/content/pref/pref-quickreply.js" />
-
- <!-- <description>woof woof</description> -->
-   <checkbox id="toggle_useQuickQuote"
-             label="Use 'Quick Quote' and 'Quick Reply' buttons"
-             oncommand="cbSet()" />
-   <vbox id="qqtoggles" style="margin-left: 20px">
-    <checkbox id="toggle_quickQuoteSubscribeDefault"
-              label="Default 'Subscribe' to checked" />
-    <checkbox id="toggle_quickQuoteSignatureDefault"
-              label="Default 'Show Signature' to checked (for first post in thread only)" />
-    <checkbox id="toggle_quickQuoteDisableSmiliesDefault"
-              label="Default 'Disable Smilies' to checked" />
-    <checkbox id="toggle_quickQuoteSwapPostPreview"
-              label="Swap position of 'Submit Reply' and 'Preview Reply' buttons" />
-
-   </vbox>
+	<script language="JavaScript" src="chrome://salastread/content/pref/pref-common.js" />
+	<script language="JavaScript" src="chrome://salastread/content/pref/pref-quickreply.js" />
+	
+	<!-- <description>woof woof</description> -->
+	<groupbox>
+		<caption label="Quick Reply Options"/>
+		<vbox>
+			<checkbox id="toggle_useQuickQuote" label="Use 'Quick Quote' and 'Quick Reply' buttons" oncommand="cbSet()" />
+			<vbox id="qqtoggles" style="margin-left: 20px">
+				<checkbox id="toggle_quickQuoteSubscribeDefault" label="Default 'Subscribe' to checked" />
+				<checkbox id="toggle_quickQuoteSignatureDefault" label="Default 'Show Signature' to checked (for first post in thread only)" />
+				<checkbox id="toggle_quickQuoteDisableSmiliesDefault" label="Default 'Disable Smilies' to checked" />
+				<checkbox id="toggle_quickQuoteSwapPostPreview" label="Swap position of 'Submit Reply' and 'Preview Reply' buttons" />
+				<checkbox id="toggle_quickQuoteLivePreview" label="Enable live preview in quick reply window" />
+			</vbox>
+		</vbox>
+	</groupbox>
 </page>

@@ -57,6 +57,7 @@
 #catImagesButton .button-icon 		{-moz-image-region: rect(0px, 224px, 32px, 192px) !important}
 #catIgnoredButton .button-icon 		{-moz-image-region: rect(0px, 256px, 32px, 224px) !important}
 #catUsersButton .button-icon 		{-moz-image-region: rect(0px, 288px, 32px, 256px) !important}
+#catThreadsButton .button-icon 		{-moz-image-region: rect(0px, 320px, 32px, 288px) !important}
 
 #catDownloadsButton {-moz-image-region: rect(0px, 128px, 32px, 96px)}
 #catThemesButton    {-moz-image-region: rect(0px, 160px, 32px, 128px)}

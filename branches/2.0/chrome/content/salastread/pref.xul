@@ -34,6 +34,10 @@
 					type="radio" group="categories" label="Thread Colors"
 					url="chrome://salastread/content/pref/pref-color.xul"/>
 			
+			<button orient="vertical" class="buttonBoxButton" id="catThreadsButton"
+					type="radio" group="categories" label="Thread Options"
+					url="chrome://salastread/content/pref/pref-threads.xul"/>			
+
 			<!--
 			<button orient="vertical" class="buttonBoxButton" id="catUsersButton"
 					type="radio" group="categories" label="User Colors"

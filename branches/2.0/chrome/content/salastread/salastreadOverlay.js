@@ -1948,7 +1948,8 @@ function handleShowThread(doc) {
 	var inDump = persistObject.inDump(forumid);
 	var inAskTell = persistObject.inAskTell(forumid);
 	var inGasChamber = persistObject.inGasChamber(forumid);
-
+	var userId = persistObject.userId;
+	
 	if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	{
 
@@ -2101,9 +2102,18 @@ function handleShowThread(doc) {
 		persistObject.setLastReadPostCount(threadid, postcount);
 
 		var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId, postbody, f;
-		var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink, quotebutton, editbutton;
+		var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink, quotebutton, editbutton, reportbutton;
 		var userPosterColor, userPosterBG, userPosterNote;
+		
+		//group calls to the prefs up here so we aren't repeating them, should help speed things up a bit
+		var hideEditButtons = persistObject.getPreference('hideEditButtons');
+		var hideReportButtons = persistObject.getPreference('hideReportButtons');
+		var useQuickQuote = persistObject.getPreference('useQuickQuote');
+		var insertPostLastMarkLink = persistObject.getPreference("insertPostLastMarkLink");
+		var insertPostTargetLink = persistObject.getPreference("insertPostTargetLink");
+		
 		doc.postlinks = new Array;
+		
 		// Loop through each post
 		var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
 		for (i in postlist)
@@ -2230,7 +2240,7 @@ function handleShowThread(doc) {
 			colorDark = !colorDark;
 			postIdLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'#post')]");
 			postid = postIdLink.href.match(/#post(\d+)/i)[1];
-			if (persistObject.getPreference("insertPostTargetLink"))
+			if (insertPostTargetLink)
 			{
 				slink = doc.createElement("a");
 				slink.href = "/showthread.php?action=showpost&postid="+postid;
@@ -2239,7 +2249,7 @@ function handleShowThread(doc) {
 				postIdLink.parentNode.insertBefore(slink, postIdLink);
 				postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
 			}
-			if (persistObject.getPreference("insertPostLastMarkLink"))
+			if (insertPostLastMarkLink)
 			{
 				resetLink = doc.createElement("a");
 				resetLink.href = "javascript:void('lr',"+postid+");";
@@ -2254,17 +2264,40 @@ function handleShowThread(doc) {
 				postIdLink.parentNode.insertBefore(resetLink, postIdLink);
 				postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
 			}
-			if (persistObject.getPreference('useQuickQuote') && !threadClosed)
+			
+			//grab this once up here to avoid repetition
+			if(useQuickQuote || hideEditButtons) {
+				editbutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
+			}
+			
+			if(hideEditButtons && editbutton) {
+				if(posterId != userId) {
+					editbutton.parentNode.removeChild(editbutton);
+					//so we don't try to add quickquote to non-existant edit buttons
+					editbutton = null;
+				}
+			}
+			
+			if (useQuickQuote && !threadClosed)
 			{
 				quotebutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
 				if (quotebutton) {
-					attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, quotebutton, forumid),posterName,1,postid);
+					attachQuickQuoteHandler(threadid, doc, persistObject.turnIntoQuickButton(doc, quotebutton, forumid), posterName, 1, postid);
 				}
-				editbutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
 				if (editbutton) {
-					attachQuickQuoteHandler(threadid,doc,persistObject.turnIntoQuickButton(doc, editbutton, forumid),posterName,1,postid,true);
+					attachQuickQuoteHandler(threadid, doc, persistObject.turnIntoQuickButton(doc, editbutton, forumid), posterName, 1, postid, true);
 				}
 			}
+			
+			if(hideReportButtons) {
+				if(posterId == userId) {
+					reportbutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'modalert.php')]");
+					if(reportbutton) {
+						reportbutton.parentNode.removeChild(reportbutton);
+					}
+				}
+			}
+			
 			postbody = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TD[contains(@class,'postbody')]");
 			persistObject.convertSpecialLinks(doc, postbody);
 		}
