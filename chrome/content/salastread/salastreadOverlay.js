@@ -1082,11 +1082,12 @@ function handleSubscriptions(doc) {
 			threadTitleBox = threadTitleBox.parentNode.parentNode;
 		}
 		threadId = parseInt(persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'threadid=')]").href.match(/threadid=(\d+)/)[1]);
+		threadDetails = persistObject.getThreadDetails(threadId);
 		threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'javascript:who(')]").parentNode.parentNode;
 		threadRe = parseInt(persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'javascript:who(')]").innerHTML);
-		threadLRCount = persistObject.getLastReadPostCount(threadId);
+		threadLRCount = threadDetails['lastreplyct'];
 		// If thread is ignored
-		if (ignoredthreads[threadId] != undefined)
+		if (threadDetails['ignore'])
 		{
 			threadlist[i].parentNode.deleteRow(i);
 		}
@@ -1139,7 +1140,7 @@ function handleSubscriptions(doc) {
 				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 			}
 		}
-		if (starredthreads[threadId] != undefined)
+		if (threadDetails['star'])
 		{
 			persistObject.insertStar(doc, threadTitleBox);
 		}
@@ -1221,29 +1222,22 @@ function handleForumDisplay(doc)
 		var threadIconBox, threadTitleBox, threadAuthorBox, threadRepliesBox;
 		var threadTitle, threadId, threadOPId, threadRe, threadDetails;
 		var threadLRCount, posterColor, posterBG, unvistIcon, lpIcon, lastPostID;
-		var userPosterColor, userPosterBG, userPosterNote;
+		var userPosterNote;
 		var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
 		var iconlist = persistObject.iconList;
 		// Here be where we work on the thread rows
 		var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
 		for (i in threadlist)
 		{
-			if (!inDump)
-			{
-				threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
-			}
 			threadTitleBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='title']");
-			threadAuthorBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='author']");
-			threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='replies']");
 			if (threadTitleBox.getElementsByTagName('a')[0].href.search(/announcement/i) > -1)
 			{
 				// It's an announcement so skip the rest
 				continue;
 			}
-			threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
 			threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
 			threadDetails = persistObject.getThreadDetails(threadId);
-			if (threadDetails['ignore'] == '1')
+			if (threadDetails['ignore'])
 			{
 				// If thread is ignored might as well stop now
 				threadlist[i].parentNode.style.display = "none";
@@ -1251,30 +1245,35 @@ function handleForumDisplay(doc)
 				persistObject.setThreadTitle(threadId, threadTitle);
 				continue;
 			}
+			if (!inDump)
+			{
+				threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
+			}
+			threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
+			threadAuthorBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='author']");
+			threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='replies']");
 			threadLRCount = threadDetails['lastreplyct'];
 			threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
 			threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
 			posterColor = false;
 			posterBG = false;
-			if (threadDetails['mod'] == '1')
+			if (threadDetails['mod'])
 			{
 				posterColor = persistObject.getPreference("modColor");
 				posterBG =  persistObject.getPreference("modBackground");
 			}
-			if (threadDetails['admin'] == '1')
+			if (threadDetails['admin'])
 			{
 				posterColor = persistObject.getPreference("adminColor");
 				posterBG =  persistObject.getPreference("adminBackground");
 			}
-			userPosterColor = threadDetails['color'];
-			userPosterBG = threadDetails['background'];
-			if (userPosterColor != false)
+			if (threadDetails['color'])
 			{
-				posterColor = userPosterColor;
+				posterColor = threadDetails['color'];
 			}
-			if (userPosterBG != false)
+			if (threadDetails['background'])
 			{
-				posterBG = userPosterBG;
+				posterBG = threadDetails['background'];
 			}
 			// So right click star/ignore works
 			threadlist[i].className = "salastread_thread_" + threadId;
@@ -1295,11 +1294,11 @@ function handleForumDisplay(doc)
 			// If this thread is in the DB as being read
 			if (threadLRCount > -1)
 			{
-				if (threadDetails['title'] == null)
+				if (!threadDetails['title'])
 				{
 					persistObject.setThreadTitle(threadId, threadTitle);
 				}
-				if (threadDetails['op'] == null)
+				if (!threadDetails['op'])
 				{
 					persistObject.StoreOPData(threadId, threadOPId);
 				}
@@ -1328,7 +1327,7 @@ function handleForumDisplay(doc)
 					{
 						persistObject.addGradient(threadlist[i]);
 					}
-					if (threadDetails['posted'] == '1')
+					if (threadDetails['posted'])
 					{
 						threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
 					}
@@ -1347,7 +1346,7 @@ function handleForumDisplay(doc)
 					persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 				}
 			}
-			if (threadDetails['star'] == '1')
+			if (threadDetails['star'])
 			{
 				persistObject.insertStar(doc, threadTitleBox);
 			}
@@ -1360,7 +1359,10 @@ function handleForumDisplay(doc)
 				if (posterColor != false)
 				{
 					threadAuthorBox.getElementsByTagName("a")[0].style.color = posterColor;
-					threadAuthorBox.getElementsByTagName("a")[0].style.fontWeight = "bold";
+					if (!persistObject.getPreference("dontBoldNames"))
+					{
+						threadAuthorBox.getElementsByTagName("a")[0].style.fontWeight = "bold";
+					}
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-pref('extensions.salastread.currentVersion', '1.99.070419');
+pref('extensions.salastread.currentVersion', '1.99.070420');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
@@ -13,6 +13,7 @@ pref('extensions.salastread.opColor', '#0044bb');
 pref('extensions.salastread.modBackground', '0');
 pref('extensions.salastread.adminBackground', '0');
 pref('extensions.salastread.opBackground', '0');
+pref('extensions.salastread.dontBoldNames', false);
 
 pref('extensions.salastread.postedInThreadRe', '#fcfd99');
 pref('extensions.salastread.readDark', '#bbccdd');

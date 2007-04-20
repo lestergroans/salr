@@ -852,6 +852,14 @@ salrPersistObject.prototype = {
 			for (var i=0;i<statement.numEntries;i++)
 			{
 				results[statement.getColumnName(i)] = statement.getString(i);
+				if (results[statement.getColumnName(i)] == "0" || results[statement.getColumnName(i)] == null)
+				{
+					results[statement.getColumnName(i)] = false;
+				}
+				if (results[statement.getColumnName(i)] == "1")
+				{
+					results[statement.getColumnName(i)] = true;
+				}
 			}
 /*
 			results['lastpostid']
@@ -1752,7 +1760,7 @@ salrPersistObject.prototype = {
 	addPagination: function(doc)
 	{
 		var pageList = this.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
-		pageList = pageList[1];
+		pageList = pageList[pageList.length-1];
 		var numPages = pageList.innerHTML.match(/\((\d+)\)/);
 		var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
 		if (pageList.childNodes.length > 1) // Are there pages
@@ -1895,7 +1903,7 @@ salrPersistObject.prototype = {
 		for (var i in linksInPost)
 		{
 			if (this.getPreference("convertTextToImage") &&
-				linksInPost[i].href.search(/\.(gif|jpg|jpeg|png)(#?.*)$/i) > -1 &&
+				linksInPost[i].href.search(/\.(gif|jpg|jpeg|png)(#.*)?$/i) > -1 &&
 				linksInPost[i].href.search(/paintedover\.com/i) == -1 && // PaintedOver sucks, we can't embed them
 				linksInPost[i].innerHTML != "") // Quotes have fake links for some reason
 			{
