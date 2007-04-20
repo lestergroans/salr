@@ -216,6 +216,9 @@ salrPersistObject.prototype = {
                         "centerscreen,chrome,dialog,modal,titlebar,minimizable=no,resizable=no,close=no", null);
       }
       //this.PerformRemoteSync(false, true, null);
+	  
+	  //remove the user id from the prefs in case they logout or something, it's easy enough to get again
+	  this.setPreference('userId', 0);
    },
 
    SYNC_INTERVAL: (1000*60*30),      // 30 minutes
@@ -2044,6 +2047,34 @@ salrPersistObject.prototype = {
 */
 		button.parentNode.insertBefore(quickbutton, button);
 		return quickbutton;
+	},
+	
+	// Searches the user's cookies for their stored SA userid
+	// @param: 
+	// @return: (int) user id or (null) if not found
+	get userId() {
+		var id = this.getPreference('userId');
+		if(id > 0) {
+			return id;
+		} else {
+			var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"]
+								.getService(Components.interfaces.nsICookieManager);
+			
+			var iter = cookieManager.enumerator;
+			while (iter.hasMoreElements()) {
+				var cookie = iter.getNext();
+				if (cookie instanceof Components.interfaces.nsICookie){
+					if (cookie.host == "forums.somethingawful.com" && cookie.name == 'bbuserid') {
+						if(cookie.value > 0) {
+							this.setPreference('userId', cookie.value);
+							return cookie.value;
+						}
+					}	
+				}
+			}
+		}
+		
+		return null;
 	}
 
 	// Don't forget the trailing comma when adding a new function/property
