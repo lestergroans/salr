@@ -1675,61 +1675,52 @@ function cleanupLostPageTimers() {
    thisWindowPageTimers = newPageTimers;
 }
 
-function quickQuoteButtonClick(evt/*,threadid,postername,isDoubleClick,hasQuote*/) {
-   var doc = evt.originalTarget.ownerDocument;
-   var quotebutton = evt.originalTarget;
-   var threadid = quotebutton.__salastread_threadid;
-   var forumid = quotebutton.SALR_forumid;
-   var postername = quotebutton.__salastread_postername;
-   var hasQuote = quotebutton.__salastread_hasQuote;
-   var is_edit = quotebutton.is_edit;
-   var isDoubleClick = 0;
+function quickQuoteButtonClick(evt) {
+	var doc = evt.originalTarget.ownerDocument;
+	var quotebutton = evt.originalTarget;
+	var threadid = quotebutton.__salastread_threadid;
+	var forumid = quotebutton.SALR_forumid;
+	var postername = quotebutton.__salastread_postername;
+	var hasQuote = quotebutton.__salastread_hasQuote;
+	var is_edit = quotebutton.is_edit;
+	
+	if(persistObject.__QuickQuoteWindowObject && !persistObject.__QuickQuoteWindowObject.closed) {
+		quickquotewin = persistObject.__QuickQuoteWindowObject;
+	}
+	
+	window.__salastread_quotedoc = doc;
+	
+	//button pressed on a post (quote/edit)
+	if(hasQuote) {
+		window.__salastread_quotepostid = quotebutton.__salastread_postid;
+	} else {
+		window.__salastread_quotetext = "";
+		window.__salastread_quotepostid = null;
+	}
+	
+	window.__salastread_quotethreadid = threadid;
 
-   if ( persistObject.__QuickQuoteWindowObject && !persistObject.__QuickQuoteWindowObject.closed ) {
-      quickquotewin = persistObject.__QuickQuoteWindowObject;
-   }
-
-   window.__salastread_needretrieval = false;
-   window.__salastread_quotedoc = doc;
-   if (hasQuote) {
-      // don't deparse anymore since we need the formkey anyway
-      // on second thought, still need to call so quotepostid is set
-      //window.__salastread_quotetext = getQuoteCodeFromButton(doc, quotebutton, postername);
-      window.__salastread_quotepostid = quotebutton.__salastread_postid;
-      //window.__salastread_quotetext = "";
-      if ( window.__salastread_quotetext == "" ) {
-         window.__salastread_needretrieval = true;
-      }
-   } else {
-      window.__salastread_quotetext = "";
-      window.__salastread_quotepostid = null;
-   }
-   if (forumid) window.__salastread_needretrieval = true;
-   window.__salastread_quotethreadid = threadid;
-   //window.__salastread_alreadypostedinthread = GetPostedInThread(threadid);
-   if (!isDoubleClick && quickquotewin && !quickquotewin.closed) {
-      try {
-         //quickquotewin.addQuoteText(window.__salastread_quotetext);
-         if (hasQuote) {
-            quickquotewin.addQuoteFromPost(window.__salastread_quotepostid);
-         }
-         quickquotewin.focus();
-      } catch(ex) {
-         quickquotewin = window.open("chrome://salastread/content/quickquote.xul",
-               "quickquote",
-               "chrome, resizable=yes, width=800, height=400");
-      }
-   } else {
-      quickquotewin = window.open("chrome://salastread/content/quickquote.xul",
-               "quickquote",
-               "chrome, resizable=yes, width=800, height=400");
-   }
-   if (quickquotewin) {
-      persistObject.__QuickQuoteWindowObject = quickquotewin;
-      quickquotewin.__salastread_quickpost_forumid = forumid;
-      quickquotewin.__salastread_is_edit = is_edit;
-   }
-   return false;
+	if(quickquotewin && !quickquotewin.closed) {
+		try {
+			//try to re-add the quote in case the quickquote window's attachment was lost
+			if(hasQuote) {
+				quickquotewin.addQuoteFromPost(window.__salastread_quotepostid);
+			}
+			quickquotewin.focus();
+		} catch(ex) {
+			quickquotewin = window.open("chrome://salastread/content/quickquote.xul", "quickquote", "chrome, resizable=yes, width=800, height=400");
+		}
+	} else {
+		quickquotewin = window.open("chrome://salastread/content/quickquote.xul", "quickquote", "chrome, resizable=yes, width=800, height=400");
+	}
+	
+	if (quickquotewin) {
+		persistObject.__QuickQuoteWindowObject = quickquotewin;
+		quickquotewin.__salastread_quickpost_forumid = forumid;
+		quickquotewin.__salastread_is_edit = is_edit;
+	}
+	
+	return false;
 }
 
 function __unused() {
