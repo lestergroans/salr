@@ -412,9 +412,11 @@ salrPersistObject.prototype = {
       SaveFile(this.storeFileName, xmlstr);
 */
 
-      this.SaveTimerValue();
-
-      this.SaveThreadDataV2();
+	this.SaveTimerValue();
+	
+	/* THIS FUNCTION DOESN'T EXIST ANY MORE
+	this.SaveThreadDataV2();
+	*/
    },
 
    THREADDATA_FILE_HEADER_V2: "SALR Thread Data v2",
@@ -589,7 +591,7 @@ salrPersistObject.prototype = {
       }
 
    },
-
+   
    ProfileInit: function(isWindows)
    {
       if (this._profileInitialized)
@@ -1980,8 +1982,8 @@ salrPersistObject.prototype = {
 	},
 
 	// Takes a button and turns it into a quick button
-	// @param:
-	// @return:
+	// @param: (html element) doc, (html element) button, (int) forumid
+	// @return: (html element) quick button
 	turnIntoQuickButton: function(doc, button, forumid)
 	{
 		var threadid = undefined, postid = undefined, hasQuote = 0;
