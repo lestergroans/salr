@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+      onload="initSettings('Thread Options');">
+
+	<script language="JavaScript" src="chrome://salastread/content/pref/pref-common.js" />
+	<script language="JavaScript" src="chrome://salastread/content/pref/pref-thread.js" />
+	
+	<!-- <description>woof woof</description> -->
+	<groupbox>
+	<caption label="Thread Options"/>
+		<vbox>
+			<checkbox id="toggle_reanchorThreadOnLoad" 	label="Reanchor threads to targetted post after all images have loaded" />
+			<checkbox id="toggle_insertPostLastMarkLink" label="Add a &quot;&lt;&quot; link to reset the last post of each thread" />
+			<checkbox id="toggle_hideEditButtons" 		label="Hide edit buttons for posts from users other than yourself" />
+			<checkbox id="toggle_hideReportButtons" 	label="Hide the report button on your own posts" />
+
+		</vbox>
+	</groupbox>
+
+	<groupbox>
+	<caption label="User Display Options"/>
+		<vbox>
+			<checkbox id="toggle_resizeCustomTitleText"	label="Shrink Large Custom Title Texts" />
+			<checkbox id="toggle_hideSignature"			label="Hide user signatures in posts" />
+			<checkbox id="toggle_hideTitle"				label="Hide custom titles in posts" />		
+		</vbox>
+	</groupbox>
+
+
+</page>
