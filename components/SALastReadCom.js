@@ -216,9 +216,6 @@ salrPersistObject.prototype = {
                         "centerscreen,chrome,dialog,modal,titlebar,minimizable=no,resizable=no,close=no", null);
       }
       //this.PerformRemoteSync(false, true, null);
-	  
-	  //remove the user id from the prefs in case they logout or something, it's easy enough to get again
-	  this.setPreference('userId', 0);
    },
 
    SYNC_INTERVAL: (1000*60*30),      // 30 minutes
@@ -2074,7 +2071,7 @@ salrPersistObject.prototype = {
 			}
 		}
 		
-		return null;
+		return false;
 	}
 
 	// Don't forget the trailing comma when adding a new function/property
