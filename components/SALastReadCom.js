@@ -413,7 +413,7 @@ salrPersistObject.prototype = {
 */
 
 	this.SaveTimerValue();
-	
+
 	/* THIS FUNCTION DOESN'T EXIST ANY MORE
 	this.SaveThreadDataV2();
 	*/
@@ -591,7 +591,7 @@ salrPersistObject.prototype = {
       }
 
    },
-   
+
    ProfileInit: function(isWindows)
    {
       if (this._profileInitialized)
@@ -1907,6 +1907,7 @@ salrPersistObject.prototype = {
 			if (this.getPreference("convertTextToImage") &&
 				linksInPost[i].href.search(/\.(gif|jpg|jpeg|png)(#.*)?$/i) > -1 &&
 				linksInPost[i].href.search(/paintedover\.com/i) == -1 && // PaintedOver sucks, we can't embed them
+				linksInPost[i].href.search(/wiki(.*)Image/i) == -1 && // Wikipedia does funky stuff with their images too
 				linksInPost[i].innerHTML != "") // Quotes have fake links for some reason
 			{
 				if (!this.getPreference("dontTextToImageIfMayBeNws") ||
@@ -2045,9 +2046,9 @@ salrPersistObject.prototype = {
 		button.parentNode.insertBefore(quickbutton, button);
 		return quickbutton;
 	},
-	
+
 	// Searches the user's cookies for their stored SA userid
-	// @param: 
+	// @param:
 	// @return: (int) user id or (null) if not found
 	get userId() {
 		var id = this.getPreference('userId');
@@ -2056,7 +2057,7 @@ salrPersistObject.prototype = {
 		} else {
 			var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"]
 								.getService(Components.interfaces.nsICookieManager);
-			
+
 			var iter = cookieManager.enumerator;
 			while (iter.hasMoreElements()) {
 				var cookie = iter.getNext();
@@ -2066,11 +2067,11 @@ salrPersistObject.prototype = {
 							this.setPreference('userId', cookie.value);
 							return cookie.value;
 						}
-					}	
+					}
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
