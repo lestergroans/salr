@@ -649,18 +649,18 @@ function populateForumMenuFrom(nested_menus, target, src, pinnedForumNumbers, pi
 	var wasutil = 0;
 	for(var i = 0; i < src.childNodes.length; i++) {
 		var thisforum = src.childNodes[i];
-		
+
 		if (thisforum.nodeName=="util") {
 			wasutil = 1;
 		}
-		
+
 		else if (wasutil && thisforum.nodeType == 1) {
 			if(nested_menus) {
 				target.appendChild(document.createElement("menuseparator"));
 			}
 			wasutil = 0;
 		}
-		
+
 		if(thisforum.nodeName == "cat") {
 			if(!nested_menus) {
 				target.appendChild(document.createElement("menuseparator"));
@@ -668,12 +668,12 @@ function populateForumMenuFrom(nested_menus, target, src, pinnedForumNumbers, pi
 			} else {
 				var submenu = document.createElement("menu");
 					submenu.setAttribute("label", thisforum.getAttribute("name"));
-				
+
 				var submenupopup = document.createElement("menupopup");
 				if(persistObject.getPreference('useSAForumMenuBackground')) {
 					submenupopup.setAttribute("class", "lastread_menu");
 				}
-				
+
 				submenu.appendChild(submenupopup);
 				populateForumMenuFrom(nested_menus,submenupopup,thisforum,pinnedForumNumbers,pinnedForumElements);
 				target.appendChild(submenu);
@@ -684,11 +684,11 @@ function populateForumMenuFrom(nested_menus, target, src, pinnedForumNumbers, pi
 				menuel.setAttribute("forumnum", thisforum.getAttribute("id"));
 				menuel.setAttribute("onclick", "SAmenuitemCommand2(event,this,'click');");
 				menuel.setAttribute("oncommand", "SAmenuitemCommand2(event,this,'command');");
-			
+
 			if(thisforum.getAttribute("cat") && thisforum.getAttribute("cat").substring(0, 3) == "sub") {
 				menuel.setAttribute("class", "lastread_menu_" + thisforum.getAttribute("cat"));
 			}
-			
+
 			//TODO: access keys
 			target.appendChild(menuel);
 			if(nested_menus) {
@@ -772,7 +772,7 @@ function buildSAForumMenu() {
 			document.getElementById("main-menubar").insertBefore(menuel, iBefore);
 			menupopup.addEventListener("popupshowing", SALR_SAMenuShowing, false);
 		}
-		
+
 		if ( persistObject.getPreference('useSAForumMenuBackground') ) {
 			menupopup.className = "lastread_menu";
 		} else {
@@ -796,17 +796,17 @@ function buildSAForumMenu() {
 		menuel.setAttribute("class","menuitem-iconic lastread_menu_frontpage");
 		menupopup.appendChild(menuel);
 		menupopup.appendChild(document.createElement("menuseparator"));
-		
+
 		var lmenuel = document.createElement("menuitem");
 			lmenuel.setAttribute("label","Configure SALastRead...");
 			lmenuel.setAttribute("oncommand", "SALR_runConfig('command');");
-		
+
 		menupopup.appendChild(lmenuel);
-		
+
 		menupopup.appendChild(document.createElement("menuseparator"));
-		
+
 		populateForumMenuFrom(nested_menus,menupopup,forumsDoc.documentElement,pinnedForumNumbers,pinnedForumElements);
-		
+
 		if(nested_menus && pinnedForumElements.length > 0) {
 			menupopup.appendChild(document.createElement("menuseparator"));
 			for(var j = 0; j < pinnedForumElements.length || j < pinnedForumNumbers.length; j++) {
@@ -834,7 +834,7 @@ function buildSAForumMenu() {
 							menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,this,'click');");
 							menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,this,'command');");
 							menuel.setAttribute("class", "lastread_menu_sub");
-						
+
 						menupopup.appendChild(menuel);
 					}
 				} else if (pinnedForumNumbers[j]=="starred") {
@@ -842,36 +842,36 @@ function buildSAForumMenu() {
 						menuel.setAttribute("label", "Starred Threads");
 						menuel.setAttribute("image", "chrome://salastread/skin/star.png");
 						menuel.setAttribute("class", "menu-iconic lastread_menu_starred");
-					
+
 					var subpopup = document.createElement("menupopup");
 						subpopup.id = "salr_starredthreadmenupopup";
-					
+
 					menuel.appendChild(subpopup);
 					menupopup.appendChild(menuel);
-					
+
 					subpopup.setAttribute("onpopupshowing", "SALR_StarredThreadMenuShowing();");
 				}
 			}
-			
+
 			if(persistObject.getPreference('showMenuPinHelper')) {
 				var ms = document.createElement("menuseparator");
 					ms.id = "salr_pinhelper_sep";
-				
+
 				menupopup.appendChild(ms);
-				
+
 				var menuel = document.createElement("menuitem");
 					menuel.id = "salr_pinhelper_item";
 					menuel.setAttribute("label", "Learn how to pin forums to this menu...");
 					menuel.setAttribute("image", "chrome://salastread/skin/eng101-16x16.png");
 					menuel.setAttribute("oncommand", "SALR_LaunchPinHelper();");
 					menuel.setAttribute("class", "menuitem-iconic lastread_menu_sub");
-				
+
 				menupopup.appendChild(menuel);
 			}
 		}
-		
+
 		document.getElementById("menu_SAforums").style.display = "-moz-box";
-	} catch(e) { 
+	} catch(e) {
 		alert("menuerr: " + e);
 	}
 }
@@ -1001,7 +1001,8 @@ function handleSubscriptions(doc) {
 		}
 		if (threadDetails['star'])
 		{
-			persistObject.insertStar(doc, threadTitleBox);
+			// This is causing errors, disabled for now
+			//persistObject.insertStar(doc, threadTitleBox);
 		}
 	}
 }
@@ -1309,15 +1310,15 @@ function quickQuoteSubmit(message, parseurl, subscribe, disablesmilies, signatur
 		var newform = doc.createElement("FORM");
 			newform.style.display = "none";
 			newform.action = "http://forums.somethingawful.com/newreply.php";
-		
+
 		if(!window.__salastread_quotethreadid) {
 			newform.action = "http://forums.somethingawful.com/newthread.php";
 		}
-		
+
 		if (quickquotewin.__salastread_is_edit) {
 			newform.action = "http://forums.somethingawful.com/editpost.php";
 		}
-		
+
 		newform.method = "post";
 		newform.enctype = "multipart/form-data";
 		quickQuoteAddHidden(doc,newform,"s","");
@@ -1335,7 +1336,7 @@ function quickQuoteSubmit(message, parseurl, subscribe, disablesmilies, signatur
 			quickQuoteAddHidden(doc, newform, "iconid", quickquotewin.document.getElementById('posticonbutton').iconid);
 			quickQuoteAddHidden(doc, newform, "subject", quickquotewin.document.getElementById('subject').value);
 		}
-		
+
 		quickQuoteAddHidden(doc, newform,"parseurl", parseurl ? "yes" : "");
 		quickQuoteAddHidden(doc, newform,"email", subscribe ? "yes" : "");
 		quickQuoteAddHidden(doc, newform,"disablesmilies", disablesmilies ? "yes" : "");
@@ -1343,12 +1344,12 @@ function quickQuoteSubmit(message, parseurl, subscribe, disablesmilies, signatur
 		quickQuoteAddHidden(doc, newform,"message", message);
 		quickQuoteAddHidden(doc, newform,"MAX_FILE_SIZE", "2097152");
 		quickQuoteAddHidden(doc, newform,"formkey", formkey);
-		
+
 		if (attachfile!="") {
 			quickQuoteAddFile(doc, newform,"attachment", attachfile);
 		}
 		newform.__submit = newform.submit;
-		
+
 		if (window.__salastread_quotethreadid) {
 			if (subtype=="submit") {
 				quickQuoteAddHidden(doc,newform,"submit","Submit Reply");
@@ -1364,8 +1365,8 @@ function quickQuoteSubmit(message, parseurl, subscribe, disablesmilies, signatur
 		quickQuoteSubmitting = true;
 		newform.__submit();
 		quickquotewin.close();
-	} catch(e) { 
-		alert("err: " + e); 
+	} catch(e) {
+		alert("err: " + e);
 	}
 }
 
@@ -1375,7 +1376,7 @@ function salastread_windowOnBeforeUnload(e) {
 		if(quickQuoteSubmitting) {
 			return true;
 		}
-		
+
 		if(quickquotewin && !quickquotewin.closed) {
 			quickquotewin.detachFromDocument();
 		}
@@ -1468,13 +1469,13 @@ function quickQuoteButtonClick(evt) {
 	var postername = quotebutton.__salastread_postername;
 	var hasQuote = quotebutton.__salastread_hasQuote;
 	var is_edit = quotebutton.is_edit;
-	
+
 	if(persistObject.__QuickQuoteWindowObject && !persistObject.__QuickQuoteWindowObject.closed) {
 		quickquotewin = persistObject.__QuickQuoteWindowObject;
 	}
-	
+
 	window.__salastread_quotedoc = doc;
-	
+
 	//button pressed on a post (quote/edit)
 	if(hasQuote) {
 		window.__salastread_quotepostid = quotebutton.__salastread_postid;
@@ -1482,7 +1483,7 @@ function quickQuoteButtonClick(evt) {
 		window.__salastread_quotetext = "";
 		window.__salastread_quotepostid = null;
 	}
-	
+
 	window.__salastread_quotethreadid = threadid;
 
 	if(quickquotewin && !quickquotewin.closed) {
@@ -1498,13 +1499,13 @@ function quickQuoteButtonClick(evt) {
 	} else {
 		quickquotewin = window.open("chrome://salastread/content/quickquote.xul", "quickquote", "chrome, resizable=yes, width=800, height=400");
 	}
-	
+
 	if (quickquotewin) {
 		persistObject.__QuickQuoteWindowObject = quickquotewin;
 		quickquotewin.__salastread_quickpost_forumid = forumid;
 		quickquotewin.__salastread_is_edit = is_edit;
 	}
-	
+
 	return false;
 }
 
@@ -1574,7 +1575,7 @@ function handleShowThread(doc) {
 	var inAskTell = persistObject.inAskTell(forumid);
 	var inGasChamber = persistObject.inGasChamber(forumid);
 	var userId = persistObject.userId;
-	
+
 	if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	{
 
@@ -1729,16 +1730,16 @@ function handleShowThread(doc) {
 		var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId, postbody, f;
 		var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink, quotebutton, editbutton, reportbutton;
 		var userPosterColor, userPosterBG, userPosterNote;
-		
+
 		//group calls to the prefs up here so we aren't repeating them, should help speed things up a bit
 		var hideEditButtons = persistObject.getPreference('hideEditButtons');
 		var hideReportButtons = persistObject.getPreference('hideReportButtons');
 		var useQuickQuote = persistObject.getPreference('useQuickQuote');
 		var insertPostLastMarkLink = persistObject.getPreference("insertPostLastMarkLink");
 		var insertPostTargetLink = persistObject.getPreference("insertPostTargetLink");
-		
+
 		doc.postlinks = new Array;
-		
+
 		// Loop through each post
 		var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
 		for (i in postlist)
@@ -1889,12 +1890,12 @@ function handleShowThread(doc) {
 				postIdLink.parentNode.insertBefore(resetLink, postIdLink);
 				postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
 			}
-			
+
 			//grab this once up here to avoid repetition
 			if(useQuickQuote || hideEditButtons) {
 				editbutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
 			}
-			
+
 			if(hideEditButtons && editbutton) {
 				if(posterId != userId) {
 					editbutton.parentNode.removeChild(editbutton);
@@ -1902,7 +1903,7 @@ function handleShowThread(doc) {
 					editbutton = null;
 				}
 			}
-			
+
 			if (useQuickQuote && !threadClosed)
 			{
 				quotebutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
@@ -1913,7 +1914,7 @@ function handleShowThread(doc) {
 					attachQuickQuoteHandler(threadid, doc, persistObject.turnIntoQuickButton(doc, editbutton, forumid), posterName, 1, postid, true);
 				}
 			}
-			
+
 			if(hideReportButtons) {
 				if(posterId == userId) {
 					reportbutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'modalert.php')]");
@@ -1922,7 +1923,7 @@ function handleShowThread(doc) {
 					}
 				}
 			}
-			
+
 			postbody = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TD[contains(@class,'postbody')]");
 			persistObject.convertSpecialLinks(doc, postbody);
 		}

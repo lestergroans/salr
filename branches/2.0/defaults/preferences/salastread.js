@@ -1,4 +1,4 @@
-pref('extensions.salastread.currentVersion', '1.99.070420');
+pref('extensions.salastread.currentVersion', '1.99.070421');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
@@ -43,7 +43,7 @@ pref('extensions.salastread.dontTextToImageIfMayBeNws', true);
 pref('extensions.salastread.dontTextToImageInSpoilers', true);
 pref('extensions.salastread.maxWidthOfConvertedImages', 800);
 pref('extensions.salastread.maxHeightOfConvertedImages', -1);
-	
+
 
 //IGNORED
 
@@ -87,20 +87,6 @@ pref('extensions.salastread.unseenPostDark', '#dfdfdf');
 pref('extensions.salastread.unseenPostLight', '#f1f1f1');
 pref('extensions.salastread.unseenPostDarkFYAD', '#ffcccc');
 pref('extensions.salastread.unseenPostLightFYAD', '#ffccff');
-pref('extensions.salastread.postedInThreadReHighlight', '#ffffcc');
-pref('extensions.salastread.readDarkHighlight', '#dbe9f8');
-pref('extensions.salastread.readLightHighlight', '#f5faff');
-pref('extensions.salastread.readWithNewDarkHighlight', '#e1efe1');
-pref('extensions.salastread.readWithNewLightHighlight', '#f9fff9');
-pref('extensions.salastread.unreadDarkHighlight', '#dfdfdf');
-pref('extensions.salastread.unreadLightHighlight', '#f1f1f1');
-pref('extensions.salastread.postedInThreadReFYADHighlight', '#ffffcc');
-pref('extensions.salastread.readDarkFYADHighlight', '#dbe9f8');
-pref('extensions.salastread.readLightFYADHighlight', '#f5faff');
-pref('extensions.salastread.readWithNewDarkFYADHighlight', '#e1efe1');
-pref('extensions.salastread.readWithNewLightFYADHighlight', '#f9fff9');
-pref('extensions.salastread.unreadDarkFYADHighlight', '#dfdfdf');
-pref('extensions.salastread.unreadLightFYADHighlight', '#f1f1f1');
 
 //THREAD OPTIONS
 pref('extensions.salastread.reanchorThreadOnLoad', true);
@@ -110,7 +96,7 @@ pref('extensions.salastread.hideEditButtons', false);
 pref('extensions.salastread.hideReportButtons', false);
 
 	//USER DISPLAY OPTIONS
-pref('extensions.salastread.resizeCustomTitleText', true);	
+pref('extensions.salastread.resizeCustomTitleText', true);
 pref('extensions.salastread.hideSignature', false);
 pref('extensions.salastread.hideTitle', false);
 
