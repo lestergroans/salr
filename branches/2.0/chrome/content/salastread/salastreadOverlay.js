@@ -18,84 +18,6 @@ var thisWindowPageTimers = new Array();
 
 var persistObject = null;
 
-/* OK TO REMOVE
-function GetUserProfileDirectory(fn) {
-   const DIR_SERVICE = new Components.Constructor("@mozilla.org/file/directory_service;1", "nsIProperties");
-   var path;
-   try {
-      path = (new DIR_SERVICE()).get("ProfD", Components.interfaces.nsIFile).path;
-   } catch (e) {
-   }
-   if (path) {
-      if (fn) {
-         if (path.search(/\\/) != -1) {
-            path = path + "\\";
-         } else {
-            path = path + "/";
-         }
-         path = path + fn;
-      }
-      return path;
-   } else {
-      return null;
-   }
-}
-*/
-
-/* OK TO REMOVE
-function ReadFile(fn) {
-   try {
-      netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-   } catch (e) {
-      return null;
-   }
-   var file = Components.classes["@mozilla.org/file/local;1"]
-         .createInstance(Components.interfaces.nsILocalFile);
-   file.initWithPath(fn);
-   if (file.exists() == false) {
-      return "";
-   }
-   var is = Components.classes["@mozilla.org/network/file-input-stream;1"]
-         .createInstance(Components.interfaces.nsIFileInputStream);
-   is.init(file, 0x01, 00004, null);
-   var sis = Components.classes["@mozilla.org/scriptableinputstream;1"]
-         .createInstance(Components.interfaces.nsIScriptableInputStream);
-   sis.init(is);
-   return sis.read( sis.available() );
-}
-*/
-
-/* OK TO REMOVE
-function SaveFile(fn, fdata) {
-   try {
-      netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
-   } catch (e) {
-      alert("The SALastRead failed to save settings because permission was denied.");
-      return null;
-   }
-   var file = Components.classes["@mozilla.org/file/local;1"]
-         .createInstance(Components.interfaces.nsILocalFile);
-   file.initWithPath(fn);
-   if ( file.exists() == false ) {
-      file.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 420);
-      alert("The SALastRead extension is initializing a new settings file. You should only see this once, after you first install the extension.");
-   }
-   var outputStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-         .createInstance(Components.interfaces.nsIFileOutputStream);
-   outputStream.init(file, 0x04 | 0x08 | 0x20, 420, 0);
-   var result = outputStream.write( fdata, fdata.length );
-   outputStream.close();
-}
-*/
-
-/* OK TO REMOVE
-function StripSpaces(str) {
-   while (str.substring(0,1) > '~' || str.substring(0,1) < '!') str = str.substring(1);
-   while (str.substring(str.length-1, str.length) == ' ') str = str.substring(0, str.length-1);
-   return str;
-}
-*/
-
 function GetCurrentLPDateTime() {
    var now = new Date();
    var day = "00" + now.getDate();
@@ -723,116 +645,63 @@ function grabForumList(doc, selectnode) {
    }
 }
 
-function populateForumMenuFrom(nested_menus,target,src,pinnedForumNumbers,pinnedForumElements) {
-   var wasutil = 0;
-   for (var i=0; i<src.childNodes.length; i++) {
-      var thisforum = src.childNodes[i];
-      if (thisforum.nodeName=="util") {
-         wasutil = 1;
-      }
-      else if (wasutil && thisforum.nodeType == 1) {
-         if (nested_menus) {
-            target.appendChild(document.createElement("menuseparator"));
-         }
-         wasutil = 0;
-      }
-      if (thisforum.nodeName=="cat") {
-         if (!nested_menus) {
-            target.appendChild(document.createElement("menuseparator"));
-            populateForumMenuFrom(nested_menus,target,thisforum,pinnedForumNumbers,pinnedForumElements);
-         } else {
-            var submenu = document.createElement("menu");
-            submenu.setAttribute("label", thisforum.getAttribute("name"));
-            var submenupopup = document.createElement("menupopup");
-            if ( persistObject.getPreference('useSAForumMenuBackground') ) {
-               submenupopup.setAttribute("class", "lastread_menu");
-            }
-            submenu.appendChild(submenupopup);
-            populateForumMenuFrom(nested_menus,submenupopup,thisforum,pinnedForumNumbers,pinnedForumElements);
-            target.appendChild(submenu);
-         }
-      }
-      else if (thisforum.nodeName=="forum"||thisforum.nodeName=="util") {
-         var menuel = document.createElement("menuitem");
-         menuel.setAttribute("label", thisforum.getAttribute("name"));
-         menuel.setAttribute("forumnum", thisforum.getAttribute("id"));
-         menuel.setAttribute("onclick", "SAmenuitemCommand2(event,this,'click');");
-         menuel.setAttribute("oncommand", "SAmenuitemCommand2(event,this,'command');");
-         if (thisforum.getAttribute("cat") && thisforum.getAttribute("cat").substring(0,3)=="sub") {
-            menuel.setAttribute("class", "lastread_menu_"+ thisforum.getAttribute("cat"));
-         }
-/*
-         if (thisforum.getAttribute("cat")=="sub") {
-            menuel.setAttribute("class", "lastread_menu_sub");
-         }
-         else if (thisforum.getAttribute("cat")=="sub-sub") {
-            menuel.setAttribute("class", "lastread_menu_sub_sub");
-         }
-*/
-         //TODO: access keys
-         target.appendChild(menuel);
-         if (nested_menus) {
-            var thisforumnum = thisforum.getAttribute("id");
-            for (var j=0; j<pinnedForumNumbers.length; j++) {
-               if (pinnedForumNumbers[j]==thisforumnum) {
-                  pinnedForumElements[j] = thisforum;
-               }
-            }
-         }
-      }
-   }
+function populateForumMenuFrom(nested_menus, target, src, pinnedForumNumbers, pinnedForumElements) {
+	var wasutil = 0;
+	for(var i = 0; i < src.childNodes.length; i++) {
+		var thisforum = src.childNodes[i];
+		
+		if (thisforum.nodeName=="util") {
+			wasutil = 1;
+		}
+		
+		else if (wasutil && thisforum.nodeType == 1) {
+			if(nested_menus) {
+				target.appendChild(document.createElement("menuseparator"));
+			}
+			wasutil = 0;
+		}
+		
+		if(thisforum.nodeName == "cat") {
+			if(!nested_menus) {
+				target.appendChild(document.createElement("menuseparator"));
+				populateForumMenuFrom(nested_menus,target,thisforum,pinnedForumNumbers,pinnedForumElements);
+			} else {
+				var submenu = document.createElement("menu");
+					submenu.setAttribute("label", thisforum.getAttribute("name"));
+				
+				var submenupopup = document.createElement("menupopup");
+				if(persistObject.getPreference('useSAForumMenuBackground')) {
+					submenupopup.setAttribute("class", "lastread_menu");
+				}
+				
+				submenu.appendChild(submenupopup);
+				populateForumMenuFrom(nested_menus,submenupopup,thisforum,pinnedForumNumbers,pinnedForumElements);
+				target.appendChild(submenu);
+			}
+		} else if(thisforum.nodeName == "forum" || thisforum.nodeName == "util") {
+			var menuel = document.createElement("menuitem");
+				menuel.setAttribute("label", thisforum.getAttribute("name"));
+				menuel.setAttribute("forumnum", thisforum.getAttribute("id"));
+				menuel.setAttribute("onclick", "SAmenuitemCommand2(event,this,'click');");
+				menuel.setAttribute("oncommand", "SAmenuitemCommand2(event,this,'command');");
+			
+			if(thisforum.getAttribute("cat") && thisforum.getAttribute("cat").substring(0, 3) == "sub") {
+				menuel.setAttribute("class", "lastread_menu_" + thisforum.getAttribute("cat"));
+			}
+			
+			//TODO: access keys
+			target.appendChild(menuel);
+			if(nested_menus) {
+				var thisforumnum = thisforum.getAttribute("id");
+				for (var j = 0; j < pinnedForumNumbers.length; j++) {
+					if (pinnedForumNumbers[j] == thisforumnum) {
+						pinnedForumElements[j] = thisforum;
+					}
+				}
+			}
+		}
+	}
 }
-
-/* OK TO REMOVE
-function SALR_DEBUG_ViewXMLData() {
-   var threads = selectNodes(persistObject.xmlDoc, persistObject.xmlDoc, "/salastread/thread");
-   var nName = persistObject.xmlDoc.documentElement.nodeName;
-   var nmsg;
-   if (nName=="salastread") {
-      nmsg = "This is correct.";
-   } else {
-      nmsg = "THIS IS NOT CORRECT.";
-   }
-   var tclen = persistObject._cachedThreadEntryList.length;
-   alert("There are "+ threads.length + " threads stored.\nThe root is named "+nName+". "+nmsg+"\nThere are "+tclen+" entries in the CTEL.");
-}
-*/
-
-/* OK TO REMOVE
-function SALR_DEBUG_ResetXMLData() {
-   if ( confirm("Are you sure you want to reset the salastread.xml data?\nThis will lose all viewed threads, posted threads, and starred threads.") ) {
-      persistObject._cachedThreadEntryList = new Array();
-
-      persistObject.InitializeEmptySALRXML();
-      persistObject.SaveXML();
-      alert("salastread.xml has been reset.");
-   } else {
-      alert("Operation cancelled.");
-   }
-}
-*/
-
-/* OK TO REMOVE
-function SALR_InsertDebugMenuEntries(targetpopup) {
-    var AME = function(lab, fnc) {
-       var xfoo = document.createElement("menuitem");
-       xfoo.setAttribute("label", lab);
-       xfoo.addEventListener("command", fnc, false);
-       targetpopup.appendChild(xfoo);
-    };
-
-    AME("View salastread.xml Data", function() { SALR_DEBUG_ViewXMLData(); });
-    AME("Reset salastread.xml Data", function() { SALR_DEBUG_ResetXMLData(); });
-    //AME("TEST FTP UPLOAD GOOD", function() { SALR_DEBUG_TestFTPUpload("s"); });
-    //AME("TEST FTP UPLOAD BAD", function() { SALR_DEBUG_TestFTPUpload("b"); });
-    //AME("TEST FTP DOWNLOAD GOOD", function() { SALR_DEBUG_TestFTPDownload("s"); });
-    //AME("TEST FTP DOWNLOAD BAD", function() { SALR_DEBUG_TestFTPDownload("b"); });
-    AME("Syncxx", function() { persistObject.FirefoxShuttingDown(); });
-    AME("Normal Sync Call", function() { SALR_SyncTick(false,false); });
-    AME("Force Sync Call", function() { SALR_SyncTick(true,false); });
-    AME("TRACE CONFIG", function() { SALR_SyncTick(true,true); });
-}
-*/
 
 var SALR_DEBUG_pendingUpload = null;
 var SALR_DEBUG_pendingDownload = null;
@@ -869,150 +738,142 @@ function SALR_DEBUG_TestFTPUploadDone(result) {
 */
 
 function buildSAForumMenu() {
-   try {
-   if ( persistObject.getPreference('hideOtherSAMenus') ) {
-      var mmb = document.getElementById("main-menubar");
-      for (var x=0; x<mmb.childNodes.length; x++) {
-         var thischild = mmb.childNodes[x];
-         if (thischild.nodeName=="menu") {
-            if ( (thischild.getAttribute("label")=="SA" || thischild.label=="SA" || thischild.id=="menu-sa") &&
-                 thischild.id!="menu_SAforums") {
-               mmb.removeChild(thischild);
-               x--;
-            }
-         }
-      }
-   }
-   var menupopup = document.getElementById("menupopup_SAforums");
-   if (menupopup==null) {
-      var iBefore = document.getElementById("bookmarks-menu");
-      if (iBefore) {
-         iBefore = iBefore.nextSibling;
-      }
-      if (!iBefore) {
-         iBefore = document.getElementById("main-menubar").lastChild;
-      }
-      var menuel = document.createElement("menu");
-      menuel.id = "menu_SAforums";
-      menuel.setAttribute("label", "SA");
-      menuel.setAttribute("accesskey","A");
-      menuel.style.display = "none";
-      menupopup = document.createElement("menupopup");
-      menupopup.id = "menupopup_SAforums";
-      menupopup.className = "lastread_menu";
-      menuel.appendChild(menupopup);
-      document.getElementById("main-menubar").insertBefore(menuel, iBefore);
-      menupopup.addEventListener("popupshowing", SALR_SAMenuShowing, false);
-   }
-   if ( persistObject.getPreference('useSAForumMenuBackground') ) {
-      menupopup.className = "lastread_menu";
-   } else {
-      menupopup.className = "";
-   }
-   while (menupopup.firstChild) {
-      menupopup.removeChild(menupopup.firstChild);
-   }
-   var forumsDoc = persistObject.forumListXml;
-   var nested_menus = persistObject.getPreference('nestSAForumMenu');
-   var menuel = document.createElement("menuitem");
-   var pinnedForumNumbers = new Array();
-   var pinnedForumElements = new Array();
-   if (nested_menus && persistObject.getPreference('menuPinnedForums')) {
-      pinnedForumNumbers = persistObject.getPreference('menuPinnedForums').split(",");
-   }
-   menuel.setAttribute("label","Something Awful");
-   menuel.setAttribute("image", "chrome://salastread/skin/sa.png");
-   menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','click');");
-   menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','command');");
-   menuel.setAttribute("class","menuitem-iconic lastread_menu_frontpage");
-   menupopup.appendChild(menuel);
-   menupopup.appendChild(document.createElement("menuseparator"));
-
-   var lmenuel = document.createElement("menuitem");
-   lmenuel.setAttribute("label","Configure SALastRead...");
-   //lmenuel.setAttribute("onclick", "runConfig('click');");
-   lmenuel.setAttribute("oncommand", "SALR_runConfig('command');");
-   menupopup.appendChild(lmenuel);
-
-	/* OK TO REMOVE (old debug menu items don't help much)
-   if ( persistObject.IsDebugEnabled() ) {
-      var dmenuel = document.createElement("menu");
-      dmenuel.setAttribute("label","SALR Debug");
-      var dmenupopup = document.createElement("menupopup");
-
-      SALR_InsertDebugMenuEntries(dmenupopup);
-
-      dmenuel.appendChild(dmenupopup);
-      menupopup.appendChild(dmenuel);
-   }
-	*/
-   menupopup.appendChild(document.createElement("menuseparator"));
-
-   populateForumMenuFrom(nested_menus,menupopup,forumsDoc.documentElement,pinnedForumNumbers,pinnedForumElements);
-
-   if (nested_menus && pinnedForumElements.length > 0) {
-      menupopup.appendChild(document.createElement("menuseparator"));
-      for (var j=0; j<pinnedForumElements.length || j<pinnedForumNumbers.length; j++) {
-         if (pinnedForumElements[j]) {
-            var thisforum = pinnedForumElements[j];
-            var menuel = document.createElement("menuitem");
-            var forumname = thisforum.getAttribute("name");
-            while (forumname.substring(0,1)==" ") {
-               forumname = forumname.substring(1);
-            }
-            menuel.setAttribute("label", forumname);
-            menuel.setAttribute("forumnum", thisforum.getAttribute("id"));
-            menuel.setAttribute("onclick", "SAmenuitemCommand2(event,this,'click');");
-            menuel.setAttribute("oncommand", "SAmenuitemCommand2(event,this,'command');");
-            menuel.setAttribute("class", "lastread_menu_sub");
-            menupopup.appendChild(menuel);
-         }
-         else if (pinnedForumNumbers[j]=="sep") {
-            menupopup.appendChild( document.createElement("menuseparator") );
-         }
-         else if (typeof(pinnedForumNumbers[j])=="string" && pinnedForumNumbers[j].substring(0,3)=="URL") {
-            var umatch = pinnedForumNumbers[j].match(/^URL\[(.*?)\]\[(.*?)\]$/);
-            if (umatch) {
-               var menuel = document.createElement("menuitem");
-               menuel.setAttribute("label", persistObject.UnescapeMenuURL(umatch[1]));
-               menuel.setAttribute("targeturl", persistObject.UnescapeMenuURL(umatch[2]));
-               menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,this,'click');");
-               menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,this,'command');");
-               menuel.setAttribute("class", "lastread_menu_sub");
-               menupopup.appendChild(menuel);
-            }
-         }
-         else if (pinnedForumNumbers[j]=="starred") {
-            var menuel = document.createElement("menu");
-            menuel.setAttribute("label", "Starred Threads");
-            menuel.setAttribute("image", "chrome://salastread/skin/star.png");
-            menuel.setAttribute("class", "menu-iconic lastread_menu_starred");
-
-            var subpopup = document.createElement("menupopup");
-            subpopup.id = "salr_starredthreadmenupopup";
-
-            menuel.appendChild(subpopup);
-            menupopup.appendChild(menuel);
-
-            subpopup.setAttribute("onpopupshowing", "SALR_StarredThreadMenuShowing();");
-         }
-      }
-      if ( persistObject.getPreference('showMenuPinHelper') ) {
-         var ms = document.createElement("menuseparator");
-         ms.id = "salr_pinhelper_sep";
-         menupopup.appendChild(ms);
-         var menuel = document.createElement("menuitem");
-         menuel.id = "salr_pinhelper_item";
-         menuel.setAttribute("label", "Learn how to pin forums to this menu...");
-         menuel.setAttribute("image", "chrome://salastread/skin/eng101-16x16.png");
-         menuel.setAttribute("oncommand", "SALR_LaunchPinHelper();");
-         menuel.setAttribute("class", "menuitem-iconic lastread_menu_sub");
-         menupopup.appendChild(menuel);
-      }
-   }
-
-   document.getElementById("menu_SAforums").style.display = "-moz-box";
-   } catch(exc) { alert("menuerr: "+exc); }
+	try {
+		if ( persistObject.getPreference('hideOtherSAMenus') ) {
+			var mmb = document.getElementById("main-menubar");
+			for (var x=0; x<mmb.childNodes.length; x++) {
+				var thischild = mmb.childNodes[x];
+				if (thischild.nodeName=="menu") {
+					if ( (thischild.getAttribute("label")=="SA" || thischild.label=="SA" || thischild.id=="menu-sa") &&
+					thischild.id!="menu_SAforums") {
+						mmb.removeChild(thischild);
+						x--;
+					}
+				}
+			}
+		}
+		var menupopup = document.getElementById("menupopup_SAforums");
+		if (menupopup==null) {
+			var iBefore = document.getElementById("bookmarks-menu");
+			if (iBefore) {
+				iBefore = iBefore.nextSibling;
+			} else {
+				iBefore = document.getElementById("main-menubar").lastChild;
+			}
+			var menuel = document.createElement("menu");
+				menuel.id = "menu_SAforums";
+				menuel.setAttribute("label", "SA");
+				menuel.setAttribute("accesskey","A");
+				menuel.style.display = "none";
+			menupopup = document.createElement("menupopup");
+			menupopup.id = "menupopup_SAforums";
+			menupopup.className = "lastread_menu";
+			menuel.appendChild(menupopup);
+			document.getElementById("main-menubar").insertBefore(menuel, iBefore);
+			menupopup.addEventListener("popupshowing", SALR_SAMenuShowing, false);
+		}
+		
+		if ( persistObject.getPreference('useSAForumMenuBackground') ) {
+			menupopup.className = "lastread_menu";
+		} else {
+			menupopup.className = "";
+		}
+		while (menupopup.firstChild) {
+			menupopup.removeChild(menupopup.firstChild);
+		}
+		var forumsDoc = persistObject.forumListXml;
+		var nested_menus = persistObject.getPreference('nestSAForumMenu');
+		var menuel = document.createElement("menuitem");
+		var pinnedForumNumbers = new Array();
+		var pinnedForumElements = new Array();
+		if (nested_menus && persistObject.getPreference('menuPinnedForums')) {
+			pinnedForumNumbers = persistObject.getPreference('menuPinnedForums').split(",");
+		}
+		menuel.setAttribute("label","Something Awful");
+		menuel.setAttribute("image", "chrome://salastread/skin/sa.png");
+		menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','click');");
+		menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','command');");
+		menuel.setAttribute("class","menuitem-iconic lastread_menu_frontpage");
+		menupopup.appendChild(menuel);
+		menupopup.appendChild(document.createElement("menuseparator"));
+		
+		var lmenuel = document.createElement("menuitem");
+			lmenuel.setAttribute("label","Configure SALastRead...");
+			lmenuel.setAttribute("oncommand", "SALR_runConfig('command');");
+		
+		menupopup.appendChild(lmenuel);
+		
+		menupopup.appendChild(document.createElement("menuseparator"));
+		
+		populateForumMenuFrom(nested_menus,menupopup,forumsDoc.documentElement,pinnedForumNumbers,pinnedForumElements);
+		
+		if(nested_menus && pinnedForumElements.length > 0) {
+			menupopup.appendChild(document.createElement("menuseparator"));
+			for(var j = 0; j < pinnedForumElements.length || j < pinnedForumNumbers.length; j++) {
+				if(pinnedForumElements[j]) {
+					var thisforum = pinnedForumElements[j];
+					var menuel = document.createElement("menuitem");
+					var forumname = thisforum.getAttribute("name");
+					while (forumname.substring(0,1)==" ") {
+						forumname = forumname.substring(1);
+					}
+					menuel.setAttribute("label", forumname);
+					menuel.setAttribute("forumnum", thisforum.getAttribute("id"));
+					menuel.setAttribute("onclick", "SAmenuitemCommand2(event,this,'click');");
+					menuel.setAttribute("oncommand", "SAmenuitemCommand2(event,this,'command');");
+					menuel.setAttribute("class", "lastread_menu_sub");
+					menupopup.appendChild(menuel);
+				} else if(pinnedForumNumbers[j]=="sep") {
+					menupopup.appendChild(document.createElement("menuseparator"));
+				} else if (typeof(pinnedForumNumbers[j]) == "string" && pinnedForumNumbers[j].substring(0, 3) == "URL") {
+					var umatch = pinnedForumNumbers[j].match(/^URL\[(.*?)\]\[(.*?)\]$/);
+					if(umatch) {
+						var menuel = document.createElement("menuitem");
+							menuel.setAttribute("label", persistObject.UnescapeMenuURL(umatch[1]));
+							menuel.setAttribute("targeturl", persistObject.UnescapeMenuURL(umatch[2]));
+							menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,this,'click');");
+							menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,this,'command');");
+							menuel.setAttribute("class", "lastread_menu_sub");
+						
+						menupopup.appendChild(menuel);
+					}
+				} else if (pinnedForumNumbers[j]=="starred") {
+					var menuel = document.createElement("menu");
+						menuel.setAttribute("label", "Starred Threads");
+						menuel.setAttribute("image", "chrome://salastread/skin/star.png");
+						menuel.setAttribute("class", "menu-iconic lastread_menu_starred");
+					
+					var subpopup = document.createElement("menupopup");
+						subpopup.id = "salr_starredthreadmenupopup";
+					
+					menuel.appendChild(subpopup);
+					menupopup.appendChild(menuel);
+					
+					subpopup.setAttribute("onpopupshowing", "SALR_StarredThreadMenuShowing();");
+				}
+			}
+			
+			if(persistObject.getPreference('showMenuPinHelper')) {
+				var ms = document.createElement("menuseparator");
+					ms.id = "salr_pinhelper_sep";
+				
+				menupopup.appendChild(ms);
+				
+				var menuel = document.createElement("menuitem");
+					menuel.id = "salr_pinhelper_item";
+					menuel.setAttribute("label", "Learn how to pin forums to this menu...");
+					menuel.setAttribute("image", "chrome://salastread/skin/eng101-16x16.png");
+					menuel.setAttribute("oncommand", "SALR_LaunchPinHelper();");
+					menuel.setAttribute("class", "menuitem-iconic lastread_menu_sub");
+				
+				menupopup.appendChild(menuel);
+			}
+		}
+		
+		document.getElementById("menu_SAforums").style.display = "-moz-box";
+	} catch(e) { 
+		alert("menuerr: " + e);
+	}
 }
 
 function SALR_StarredThreadMenuShowing() {
@@ -1021,8 +882,6 @@ function SALR_StarredThreadMenuShowing() {
 		menupopup.removeChild(menupopup.firstChild);
 	}
 	var starred = persistObject.starList;
-	//var starredThreads = selectNodes(persistObject.xmlDoc, persistObject.xmlDoc, "/salastread/thread[@star='1']");
-
 	for(var id in starred) {
 		var title = starred[id];
 		var menuel = document.createElement("menuitem");
@@ -1372,6 +1231,7 @@ function handleForumDisplay(doc)
 		}
   }
 }
+
 function removeThread(evt) {
 	//var doc = evt.originalTarget.ownerDocument;
 	var threadid = this.id.match(/unread_(\d+)/)[1];
@@ -1391,82 +1251,6 @@ function removeThread(evt) {
 	}
 	this.parentNode.removeChild(this);
 }
-
-
-/* OK TO REMOVE
-function SALR_MakeClassSafe(unsafestr) {
-   var result = unsafestr.replace(/[^A-Za-z0-9]/,"_");
-   return result;
-}
-*/
-
-/* OK TO REMOVE
-function unvisitThread(doc, pobj, threadid, topicrow, unvisitDecolors, forumid) {
-   //alert("unvisiting "+threadid);
-   try {
-   var xmlDoc = pobj.xmlDoc;
-   var threads = selectNodes(xmlDoc, xmlDoc, "/salastread/thread[@id='"+threadid+"']");
-   for (var i=0; i<threads.length; i++) {
-      threads[i].parentNode.removeChild(threads[i]);
-   }
-   if ( forumid == 0 ) {
-      resetUnreadColors(unvisitDecolors);
-   } else {
-      if ( !persistObject.getPreference('dontHighlightThreads') ) {
-         var threadrows = selectNodes(doc, topicrow, ".");
-         for (var x=0; x<threadrows.length; x++) {
-            threadrows[x].className = "thread salastread_thread_" + threadid + " salastread_unreadthread";
-         }
-     }
-   }
-
-   var icons = selectNodes(doc, topicrow, ".//A[@class='salastreadicon']");
-   for (var j=0; j<icons.length; j++) {
-      icons[j].parentNode.removeChild(icons[j]);
-   }
-   invalidateThreadCache();
-   //pobj.SaveXML();
-   persistObject.RemovePostDataSQL(threadid);
-   } catch(e) { alert ("SALastRead unvisit fail: "+e); };
-}
-*/
-
-/* OK TO REMOVE
-function replaceEmoticons(rawhtml) {
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/emot-crying.gif" alt="" border="0">/g,":cry:");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/emot-(.*?)\.gif" alt="" border="0">/g,":$1:");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/i\.somethingawful\.com\/forumsystem\/emoticons\/emot-(.*?)\.gif" alt="" border="0">/g,":$1:");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/frown.gif" alt="" border="0">/g,":(");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/smile.gif" alt="" border="0">/g,":)");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/confused.gif" alt="" border="0">/g,":confused:");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/cool.gif" alt="" border="0">/g,":cool:");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/biggrin.gif" alt="" border="0">/g,":D");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/mad.gif" alt="" border="0">/g,":mad:");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/redface.gif" alt="" border="0">/g,":o");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/rolleyes.gif" alt="" border="0">/g,":rolleyes:");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/wink.gif" alt="" border="0">/g,";)");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/forumimages\.somethingawful\.com\/images\/smilies\/wink.gif" alt="" border="0">/g,";)");
-	rawhtml = rawhtml.replace(/<img src="http:\/\/i\.somethingawful\.com\/mjolnir\/images\/livestock~01-14-04-whore.gif" alt="" border="0">/g,";-*");
-	return rawhtml;
-}
-*/
-
-/* OK TO REMOVE
-function getQuoteCodeFromButton(doc,quotebutton,postername) {
-	var thisel = quotebutton;
-	while (thisel && !thisel.className.match(/post\d+/)) {
-		thisel = thisel.parentNode;
-	}
-
-	if (!thisel) return "";
-
-	var tid = thisel.SALR_threadid;
-	if (!tid) return "";
-
-	window.__salastread_quotepostid = tid;
-	return"";
-}
-*/
 
 function convertPLTag(message) {
    return message.replace(/\[PL=(.*?)\](.*?)\[\/PL\]/g,"[URL=http://forums.somethingawful.com/showthread.php?s=&postid=$1#post$1]$2[/URL]");
@@ -1516,88 +1300,87 @@ var salastread_savedQuickReply = "";
 var salastread_savedQuickReplyThreadId = "";
 
 function quickQuoteSubmit(message, parseurl, subscribe, disablesmilies, signature, subtype, formkey, attachfile) {
-   try {
-   message = convertPLTag(message);
-   salastread_savedQuickReply = message;
-   salastread_savedQuickReplyThreadId = window.__salastread_quotethreadid;
-   //alert("here");
-   var doc = window.__salastread_quotedoc;
-   var newform = doc.createElement("FORM");
-   newform.style.display = "none";
-   newform.action = "http://forums.somethingawful.com/newreply.php";
-   if (!window.__salastread_quotethreadid)
-      newform.action = "http://forums.somethingawful.com/newthread.php";
-   if (quickquotewin.__salastread_is_edit)
-      newform.action = "http://forums.somethingawful.com/editpost.php";
-   newform.method = "post";
-   newform.enctype = "multipart/form-data";
-   quickQuoteAddHidden(doc,newform,"s","");
-   if (window.__salastread_quotethreadid) {
-    if (quickquotewin.__salastread_is_edit) {
-      quickQuoteAddHidden(doc,newform,"action","updatepost");
-      quickQuoteAddHidden(doc, newform, "postid", window.__salastread_quotepostid);
-    }
-    else {
-      quickQuoteAddHidden(doc,newform,"action","postreply");
-      quickQuoteAddHidden(doc,newform,"threadid", window.__salastread_quotethreadid);
-    }
-   }
-   else {
-    quickQuoteAddHidden(doc,newform,"action","postthread");
-    quickQuoteAddHidden(doc, newform, "forumid",  quickquotewin.__salastread_quickpost_forumid);
-    quickQuoteAddHidden(doc, newform, "iconid", quickquotewin.document.getElementById('posticonbutton').iconid);
-    quickQuoteAddHidden(doc, newform, "subject", quickquotewin.document.getElementById('subject').value);
-   }
-   quickQuoteAddHidden(doc,newform,"parseurl", parseurl ? "yes" : "");
-   quickQuoteAddHidden(doc,newform,"email", subscribe ? "yes" : "");
-   quickQuoteAddHidden(doc,newform,"disablesmilies", disablesmilies ? "yes" : "");
-   quickQuoteAddHidden(doc,newform,"signature", signature ? "yes" : "");
-   quickQuoteAddHidden(doc,newform,"message", message);
-   quickQuoteAddHidden(doc,newform,"MAX_FILE_SIZE", "2097152");
-   quickQuoteAddHidden(doc,newform,"formkey", formkey);
-   if (attachfile!="") {
-      quickQuoteAddFile(doc,newform,"attachment", attachfile);
-   }
-   newform.__submit = newform.submit;
-   if (window.__salastread_quotethreadid) {
-     if (subtype=="submit") {
-        quickQuoteAddHidden(doc,newform,"submit","Submit Reply");
-        markThreadReplied(window.__salastread_quotethreadid);
-     } else {
-        quickQuoteAddHidden(doc,newform,"preview","Preview Reply");
-     }
-   }
-   else {
-     quickQuoteAddHidden(doc,newform,"preview","Preview Post");
-   }
-   doc.body.appendChild(newform);
-   //alert(newform.innerHTML);
-   quickQuoteSubmitting = true;
-   newform.__submit();
-   quickquotewin.close();
-   } catch(e) { alert("err: "+e); }
+	try {
+		message = convertPLTag(message);
+		salastread_savedQuickReply = message;
+		salastread_savedQuickReplyThreadId = window.__salastread_quotethreadid;
+
+		var doc = window.__salastread_quotedoc;
+		var newform = doc.createElement("FORM");
+			newform.style.display = "none";
+			newform.action = "http://forums.somethingawful.com/newreply.php";
+		
+		if(!window.__salastread_quotethreadid) {
+			newform.action = "http://forums.somethingawful.com/newthread.php";
+		}
+		
+		if (quickquotewin.__salastread_is_edit) {
+			newform.action = "http://forums.somethingawful.com/editpost.php";
+		}
+		
+		newform.method = "post";
+		newform.enctype = "multipart/form-data";
+		quickQuoteAddHidden(doc,newform,"s","");
+		if(window.__salastread_quotethreadid) {
+			if(quickquotewin.__salastread_is_edit) {
+				quickQuoteAddHidden(doc, newform,"action", "updatepost");
+				quickQuoteAddHidden(doc, newform, "postid", window.__salastread_quotepostid);
+			} else {
+				quickQuoteAddHidden(doc, newform,"action", "postreply");
+				quickQuoteAddHidden(doc, newform,"threadid", window.__salastread_quotethreadid);
+			}
+		} else {
+			quickQuoteAddHidden(doc, newform,"action", "postthread");
+			quickQuoteAddHidden(doc, newform, "forumid",  quickquotewin.__salastread_quickpost_forumid);
+			quickQuoteAddHidden(doc, newform, "iconid", quickquotewin.document.getElementById('posticonbutton').iconid);
+			quickQuoteAddHidden(doc, newform, "subject", quickquotewin.document.getElementById('subject').value);
+		}
+		
+		quickQuoteAddHidden(doc, newform,"parseurl", parseurl ? "yes" : "");
+		quickQuoteAddHidden(doc, newform,"email", subscribe ? "yes" : "");
+		quickQuoteAddHidden(doc, newform,"disablesmilies", disablesmilies ? "yes" : "");
+		quickQuoteAddHidden(doc, newform,"signature", signature ? "yes" : "");
+		quickQuoteAddHidden(doc, newform,"message", message);
+		quickQuoteAddHidden(doc, newform,"MAX_FILE_SIZE", "2097152");
+		quickQuoteAddHidden(doc, newform,"formkey", formkey);
+		
+		if (attachfile!="") {
+			quickQuoteAddFile(doc, newform,"attachment", attachfile);
+		}
+		newform.__submit = newform.submit;
+		
+		if (window.__salastread_quotethreadid) {
+			if (subtype=="submit") {
+				quickQuoteAddHidden(doc,newform,"submit","Submit Reply");
+				markThreadReplied(window.__salastread_quotethreadid);
+			} else {
+				quickQuoteAddHidden(doc,newform,"preview","Preview Reply");
+			}
+		}
+		else {
+			quickQuoteAddHidden(doc,newform,"preview","Preview Post");
+		}
+		doc.body.appendChild(newform);
+		quickQuoteSubmitting = true;
+		newform.__submit();
+		quickquotewin.close();
+	} catch(e) { 
+		alert("err: " + e); 
+	}
 }
 
 function salastread_windowOnBeforeUnload(e) {
-   if ( persistObject._killed==true ) { return; }
-   if ( e.originalTarget == window.__salastread_quotedoc ) {
-      if (quickQuoteSubmitting) {
-         return true;
-      }
-/*
-      alert("If you navigate away from this page, the Quick Reply window will close, since it will "+
-            "no longer have a page to target to submit the reply to (this will probably be fixed "+
-            "in a future release).  If you want to cancel this navigation, choose 'Cancel' in the "+
-            "next dialog box that will appear.");
-      e.stopPropagation();
-      e.preventDefault();
-      return false;
-*/
-      if (quickquotewin && !quickquotewin.closed) {
-         quickquotewin.detachFromDocument();
-      }
-      return true;
-   }
+	if(persistObject._killed == true) { return; }
+	if(e.originalTarget == window.__salastread_quotedoc) {
+		if(quickQuoteSubmitting) {
+			return true;
+		}
+		
+		if(quickquotewin && !quickquotewin.closed) {
+			quickquotewin.detachFromDocument();
+		}
+		return true;
+	}
 }
 
 var SALR_PageTimerCount = 0;
@@ -1639,18 +1422,20 @@ function salastread_windowOnUnload(e) {
       SALR_DecTimer();
       persistObject.SaveTimerValue();
    }
-//   var pageTimer = e.originalTarget.__SALASTREAD_PAGETIMER;
-//   if (pageTimer) {
-//      pageTimer.Finalize();
-//      e.originalTarget.__SALASTREAD_PAGETIMER = null;
-//      var newPageTimers = new Array();
-//      for (var i=0; i<thisWindowPageTimers.length; i++) {
-//        if ( thisWindowPageTimers[i] != pageTimer ) {
-//           newPageTimers.push( thisWindowPageTimers[i] );
-//        }
-//      }
-//      thisWindowPageTimers = newPageTimers;
-//   }
+/*
+   var pageTimer = e.originalTarget.__SALASTREAD_PAGETIMER;
+   if (pageTimer) {
+      pageTimer.Finalize();
+      e.originalTarget.__SALASTREAD_PAGETIMER = null;
+      var newPageTimers = new Array();
+      for (var i=0; i<thisWindowPageTimers.length; i++) {
+        if ( thisWindowPageTimers[i] != pageTimer ) {
+           newPageTimers.push( thisWindowPageTimers[i] );
+        }
+      }
+      thisWindowPageTimers = newPageTimers;
+   }
+*/
 }
 
 function cleanupLostPageTimers() {
@@ -1764,166 +1549,6 @@ function addInternalDebugLog(msg) {
       SALR_debugLog.shift();
    }
 }
-
-/* OK TO REMOVE
-function SALR_ProcessPostImages(thisel) {
-	var doc = thisel.ownerDocument;
-	if(persistObject.getPreference('convertTextToImage')) {
-		var mayBeNws = false;
-
-		if(persistObject.getPreference('dontTextToImageIfMayBeNws')) {
-			var ptext = thisel.innerHTML;
-			if (ptext.match(/nsfw/i) || ptext.match(/nws/i) ||
-				ptext.match(/work safe/i) || ptext.match(/safe for work/i) ||
-				ptext.match(/nms/i) ) {
-				mayBeNws = true;
-			}
-		}
-
-		if (!mayBeNws) {
-			SALR_TextToImage(thisel);
-		}
-	}
-
-	// TODO: Convert this over
-	if(persistObject.getPreference('thumbnailAllImages')) {
-		setTimeout(
-		function() {
-			var bodyimagenodes = selectNodes(doc, thisel, "TBODY/TR[1]/TD[2]/descendant::IMG");
-			for (var lnum=0; lnum<bodyimagenodes.length; lnum++) {
-				var thisimage = bodyimagenodes[lnum];
-					thisimage.className += " SALR_need_thumbnailing";
-					thisimage.addEventListener("load", SALR_PostImageResize, false);
-					thisimage.addEventListener("resize", SALR_PostImageResize, false);
-					thisimage.addEventListener("click", SALR_PostImageClick, false);
-					thisimage.addEventListener("mouseout", SALR_PostImageMouseOut, false);
-					thisimage.addEventListener("mouseover", SALR_PostImageMouseOver, false);
-
-				var xx = { target: thisimage };
-				SALR_PostImageResize(xx);
-			}
-		},1);
-	}
-}
-
-// Ensure these correspond to the settings in thumbnail-images.css
-var SALR_THUMBNAIL_MAX_WIDTH = 250;
-var SALR_THUMBNAIL_MAX_HEIGHT = 250;
-
-function SALR_PostImageClick(e) {
-   var image = e.target;
-   if (image.className.indexOf("SALR_thumbnail_fullsize")!=-1) {
-      var cx = image.className.split(" ");
-      var ncx = new Array();
-      for (var i=0; i<cx.length; i++) {
-         if (cx[i]!="SALR_thumbnail_fullsize")
-            ncx.push(cx[i]);
-      }
-      image.className = ncx.join(" ");
-   } else {
-      image.className += " SALR_thumbnail_fullsize";
-   }
-   SALR_PostImageResize(e);
-}
-
-function SALR_PostImageMouseOver(e) {
-   SALR_PostImageResizerShowHide(true, e);
-}
-
-function SALR_PostImageMouseOut(e) {
-   SALR_PostImageResizerShowHide(false, e);
-}
-
-function SALR_PostImageResizerShowHide(show, e) {
-	var image = e.target;
-	var doc = image.ownerDocument;
-	if (!image.__SALR_ThumbnailControl) {
-		SALR_BuildThumbnailControl(doc, image);
-		SALR_ToggleThumbnailControl(image, true)
-	}
-
-	if (image.SALR_imageResizable == undefined && image.className.indexOf("SALR_thumbnail_fullsize") == -1) {
-		if(image.offsetWidth == image.naturalWidth && image.offsetHeight == image.naturalHeight) {
-			image.SALR_imageResizable = false
-		} else {
-			image.SALR_imageResizable = true
-		}
-	}
-
-	if(image.SALR_imageResizable != undefined && !image.SALR_imageResizable) {
-		return;
-	}
-
-	if (image.__SALR_ThumbnailControl) {
-		if (show) {
-			image.__SALR_ThumbnailControl.style.display = "block";
-
-			if (image.__SALR_ThumbnailHideTimer) {
-				clearTimeout(image.__SALR_ThumbnailHideTimer);
-				image.__SALR_ThumbnailHideTimer = null;
-			}
-		} else {
-			image.__SALR_ThumbnailHideTimer =
-			setTimeout(function() {
-				image.__SALR_ThumbnailHideTimer = null;
-				image.__SALR_ThumbnailControl.style.display = "none";
-			}, 1000);
-		}
-	}
-}
-
-
-function SALR_PostImageResize(e) {
-	var image = e.target;
-	var doc = image.ownerDocument;
-
-	if (!image.__SALR_ThumbnailControl) {
-		SALR_BuildThumbnailControl(doc,image);
-	}
-
-	if (image.className.indexOf("SALR_thumbnail_fullsize")!=-1) {
-		SALR_ToggleThumbnailControl(image,true)
-	} else {
-		SALR_ToggleThumbnailControl(image,false)
-	}
-}
-
-function SALR_ToggleThumbnailControl(image,up) {
-	var tc = image.__SALR_ThumbnailControl;
-	var tci = tc.firstChild;
-	if(up) {
-		tci.__up = true;
-		tci.src = "chrome://salastread/skin/scale_image_up.png";
-	} else {
-		tci.__up = false;
-		tci.src = "chrome://salastread/skin/scale_image.png";
-	}
-}
-
-function SALR_BuildThumbnailControl(doc,image) {
-	var outer = doc.createElement("div");
-		outer.style.position = "absolute";
-		outer.style.display = "none";
-
-	var inner = doc.createElement("img");
-		inner.src = "chrome://salastread/skin/scale_image_up.png";
-		inner.style.position = "relative";
-		inner.style.top = "-11px";
-		inner.style.left = "-11px";
-		inner.style.width = "22px";
-		inner.style.height = "22px";
-		inner.style.border = "none";
-		inner.style.cursor = "pointer";
-		inner.onclick = function() { SALR_PostImageClick( {target: image} ); return false; };
-		inner.onmouseover = function() { SALR_PostImageMouseOver( {target: image} ); return false; };
-		inner.onmouseout = function() { SALR_PostImageMouseOut( {target: image} ); return false; };
-
-	outer.appendChild(inner);
-
-	image.parentNode.insertBefore(outer, image);
-	image.__SALR_ThumbnailControl = outer;
-}
-*/
 
 function handleShowThread(doc) {
 
@@ -2511,163 +2136,6 @@ function SALR_PageMouseDown(event) {
    }
 }
 
-/* OK TO REMOVE
-function SALR_SearchForThreadPages(doc, type) {
-   if ((!persistObject.getPreference('enablePageNavigator') && type=="thread") || ((!persistObject.getPreference('enableForumNavigator') && type=="forum")))
-      return { res: false };
-
-   doc.body.addEventListener('mousedown', SALR_PageMouseDown, false);
-   doc.body.addEventListener('mouseup', SALR_PageMouseUp, false);
-   //doc.body.addEventListener('contextmenu', SALR_GestureContextMenu, false);
-
-   var rval = { res: true, num: 1 };
-   //var pel = selectSingleNode(doc, doc.body, "TABLE/TBODY/TR/TD/TABLE[1]/TBODY/TR/TD/DIV[@class='mainbodytext']/B[1]/A[@class='pagenumber']");
-   var pel = selectSingleNode(doc, doc.getElementById("container"), "DIV[@class='pages bottom']/B/A[@class='pagenumber']");
-   if (pel) {
-      //alert("found pel");
-      var turl = pel.href;
-      var boldel = pel.parentNode;
-      pel = pel.parentNode.parentNode;
-      var peltext = pel.innerHTML;
-      var pcountmatch = peltext.match(/\((\d+)\):/);
-      if (pcountmatch) {
-         var maxPages = Number(pcountmatch[1]);
-         //alert("I found "+maxPages+" pages.");
-
-         for (var i=0; i<boldel.childNodes.length; i++) {
-            var thisChild = boldel.childNodes[i];
-            if (thisChild.nodeName=="#text") {
-               var nmatch = thisChild.nodeValue.match(/(\d+)/);
-               if (nmatch) {
-                  var curPage = Number(nmatch[1]);
-                  //alert("current page is "+nmatch[1]);
-
-                  var navDiv = doc.createElement("DIV");
-                  navDiv.className = "salastread_pagenavigator";
-                  //navDiv.style.position = "fixed";
-                  //navDiv.style.right = "0px";
-                  //navDiv.style.bottom = "0px";
-                  //navDiv.style.backgroundColor = "#ddd";
-                  //navDiv.style.padding = "4px 4px 4px 4px";
-
-                  var firstBtn = doc.createElement("IMG");
-                  firstBtn.src = "chrome://salastread/skin/nav-firstpage.png";
-                  firstBtn.title = "Go to First Page";
-                  //firstBtn.appendChild(doc.createTextNode("<<"));
-                  //firstBtn.appendChild(firstPageImg);
-                  if (curPage==1) {
-                     //firstBtn.disabled = true;
-                     firstBtn.className = "disab";
-                  } else {
-                     firstBtn.onclick = function() { doc.location = turl.replace(/pagenumber=(\d+)/, "pagenumber=1"); };
-                  }
-
-                  var prevBtn = doc.createElement("IMG");
-                  prevBtn.src = "chrome://salastread/skin/nav-prevpage.png";
-                  prevBtn.title = "Go to Previous Page";
-                  if (curPage==1) {
-                     //prevBtn.disabled = true;
-                     prevBtn.className = "disab";
-                  } else {
-                     prevBtn.onclick = function() { doc.location = turl.replace(/pagenumber=(\d+)/, "pagenumber="+(curPage-1)); };
-                  }
-
-                  doc.__SALR_curPage = curPage;
-                  doc.__SALR_maxPage = maxPages;
-
-                  var pageSel = doc.createElement("SELECT");
-                  pageSel.size = 1;
-                  for (var pp=1; pp<=maxPages; pp++)
-                  {
-                     var topt = doc.createElement("OPTION");
-                     topt.appendChild(doc.createTextNode(pp));
-                     if (pp==curPage) topt.selected = true;
-                     pageSel.appendChild(topt);
-                  }
-                  pageSel.onchange = function() { doc.location = turl.replace(/pagenumber=(\d+)/, "pagenumber="+(Number(pageSel.selectedIndex)+1)); };
-
-                  var nextBtn = doc.createElement("IMG");
-                  nextBtn.src = "chrome://salastread/skin/nav-nextpage.png";
-                  nextBtn.title = "Go to Next Page";
-                  if (curPage==maxPages) {
-                     //nextBtn.disabled = true;
-                     nextBtn.className = "disab";
-                     rval.res = true;
-                     rval.num = curPage;
-                  } else {
-                     nextBtn.onclick = function() { doc.location = turl.replace(/pagenumber=(\d+)/, "pagenumber="+(curPage+1)); };
-                  }
-
-                  var lastBtn = doc.createElement("IMG");
-                  lastBtn.src = "chrome://salastread/skin/nav-lastpage.png";
-                  lastBtn.title = "Go to Last Page";
-                  if (curPage==maxPages) {
-                     //lastBtn.disabled = true;
-                     lastBtn.className = "disab";
-                  } else {
-                     lastBtn.onclick = function() { doc.location = turl.replace(/pagenumber=(\d+)/, "pagenumber="+maxPages); };
-                  }
-
-                  navDiv.appendChild(firstBtn);
-                  navDiv.appendChild(prevBtn);
-                  navDiv.appendChild(pageSel);
-                  navDiv.appendChild(nextBtn);
-                  navDiv.appendChild(lastBtn);
-                  doc.body.appendChild(navDiv);
-
-                  var ss = doc.createElement("link");
-                  ss.rel = "stylesheet";
-                  ss.href = "chrome://salastread/content/pagenavigator-content.css";
-                  doc.getElementsByTagName('head')[0].appendChild(ss);
-
-                  doc._SALR_curPage = curPage;
-                  doc._SALR_maxPages = maxPages;
-
-                  break;
-               }
-            }
-         }
-      }
-   }
-   return rval;
-}
-*/
-
-/* OK TO REMOVE
-var modCheckCache = null;
-
-function SALR_IsModerator(userid, forumid) {
-   if ( persistObject.forumListXml ) {
-      var mList = null;
-      if ( modCheckCache && modCheckCache[0]==forumid ) {
-         mList = modCheckCache[1];
-      } else {
-         var forumNode = selectSingleNode( persistObject.forumListXml, persistObject.forumListXml, "//forum[@id='"+forumid+"']");
-         if ( forumNode && forumNode.hasAttribute("mods") ) {
-            mList = forumNode.getAttribute("mods").split(",");
-         }
-         if ( forumNode && forumNode.hasAttribute("modnames") ) {
-            var mnList = forumNode.getAttribute("modnames").split(",");
-            for (var i=0; i<mnList.length; i++) {
-               mList.push(mnList[i]);
-            }
-         }
-         modCheckCache = new Array(2);
-         modCheckCache[0] = forumid;
-         modCheckCache[1] = mList;
-      }
-      if ( mList ) {
-         for (var i=0; i<mList.length; i++) {
-            if (mList[i]==userid) {
-               return true;
-            }
-         }
-      }
-   }
-   return false;
-}
-*/
-
 //handle setting the last read post to a user-defined post
 function SALR_ChangeLastReadOnThread(e) {
 	try {
@@ -2720,147 +2188,6 @@ function SALR_NoteFade(targetEl) {
 		targetEl.parentNode.removeChild(targetEl);
 	}
 }
-
-/* Can delete this? duz 4/13
-function makeQuickReplyButton(threadid,doc,replybutton, inBYOB) {
-
-
-   replybutton.style.width = "12px !important";
-   replybutton.style.height = "20px !important";
-   if(inBYOB){
-   	replybutton.src = "chrome://salastread/skin/byobarrow.gif";
-   }else{
-   	replybutton.src = "chrome://salastread/skin/button-normalreply.gif";
-   }
-   replybutton.alt = "Normal Reply";
-
-   var newreply = doc.createElement("IMG");
-   if(inBYOB){
-   	newreply.src = "chrome://salastread/skin/byob-qreply.gif";
-   }else{
-   	newreply.src = "chrome://salastread/skin/button-quickreply.gif";
-   }
-   newreply.alt = "Quick Reply";
-   newreply.border = "0"
-   newreply.style.cursor = "pointer";
-   newreply.SALR_threadid = threadid;
-   attachQuickQuoteHandler(threadid,doc,newreply,"",0);
-   replybutton.parentNode.parentNode.insertBefore(newreply, replybutton.parentNode);
-}
-*/
-/* Can delete this? duz 4/13
-function makeQuickPostButton(threadid,doc,replybutton) {
-   var forumid = replybutton.parentNode.href.match(/forumid=[0-9]+/);
-   if (forumid.length) forumid = forumid[0].split(/=/);
-   if (forumid.length) forumid = forumid[1];
-   else return;
-
-   replybutton.style.width = "12px !important";
-   replybutton.style.height = "20px !important";
-   if(forumid== 174){
-   	replybutton.src = "chrome://salastread/skin/byobarrow.gif";
-   }else{
-   	replybutton.src = "chrome://salastread/skin/button-normalpost.gif";
-   }
-   replybutton.alt = "Normal Post";
-
-   var newreply = doc.createElement("IMG");
-   if(forumid== 174){
-      	newreply.src = "chrome://salastread/skin/byob-qpost.gif";
-   }else{
-   	newreply.src = "chrome://salastread/skin/button-quickpost.gif";
-   }
-   newreply.alt = "Quick Post";
-   newreply.border = "0"
-   newreply.style.cursor = "pointer";
-   newreply.SALR_threadid = undefined;
-   newreply.SALR_forumid = forumid;
-   attachQuickQuoteHandler(undefined,doc,newreply,"",0);
-   replybutton.parentNode.parentNode.insertBefore(newreply, replybutton.parentNode);
-}
-*/
-
-// TODO: Convert this function
-/* OK TO REMOVE
-function setupThumbnailImage(img, isquoted, istti) {
-	img.__fullsize = false;
-	img.__salastread_isquoted = isquoted;
-	img.__salastread_texttoimage = istti;
-	setImageThumbnailSize(img,false);
-	if ( !img.__salastread_resizeattached==true ) {
-		img.addEventListener("resize", setImageThumbnailSizeNonToggle, true);
-		img.addEventListener("load", setImageThumbnailSizeNonToggleL, true);
-		img.addEventListener("click", setImageThumbnailSizeToggle, true);
-		//img.addEventListener("resize", function() { setImageThumbnailSize(img,false); }, true);
-		//img.addEventListener("load", function() { setImageThumbnailSize(img,false); }, true);
-		//img.addEventListener("click", function() { setImageThumbnailSize(img,true); }, true);
-		img.__salastread_resizeattached = true;
-	}
-}
-*/
-
-var imgresize_recurseprotect = 0;
-
-/* OK TO REMOVE
-function setImageThumbnailSizeNonToggleL(evt) {
-	var img = evt.currentTarget;
-	//alert("load "+img);
-	setImageThumbnailSize(img, false);
-}
-*/
-
-/* OK TO REMOVE
-function setImageThumbnailSizeNonToggle(evt) {
-	var img = evt.originalTarget;
-	setImageThumbnailSize(img, false);
-}
-*/
-
-/* OK TO REMOVE
-function setImageThumbnailSizeToggle(evt) {
-	var img = evt.originalTarget;
-	setImageThumbnailSize(img, true);
-}
-*/
-
-/* OK TO REMOVE
-function setImageThumbnailSize(img, fullsizetoggle) {
-	if (imgresize_recurseprotect == 0) {
-		imgresize_recurseprotect = 1;
-
-		if (fullsizetoggle) {
-			img.__fullsize = !img.__fullsize;
-		}
-
-		Components.utils.reportError(window.innerWidth);
-
-		var maxwidth = 150;
-		var widthonly = 0;
-
-		if(img.__salastread_texttoimage == true && img.__salastread_isquoted == false) {
-			maxwidth = 600;
-			widthonly = 1;
-		}
-
-		var scalepct = maxwidth/img.naturalWidth;
-
-		if(widthonly!=1 && maxwidth/img.naturalHeight < scalepct ) {
-			scalepct = maxwidth/img.naturalHeight;
-		}
-
-		if (scalepct < 1) {
-			if (img.__fullsize==true) {
-				scalepct = 1;
-			}
-
-			img.style.width = Math.floor( img.naturalWidth * scalepct ) + "px";
-			img.style.height = Math.floor( img.naturalHeight * scalepct ) + "px";
-		}
-
-		imgresize_recurseprotect = 0;
-	}
-}
-*/
 
 function reanchorThreadToLink(doc) {
 	if(persistObject.getPreference('reanchorThreadOnLoad')){
@@ -3007,60 +2334,6 @@ function handleBodyClassing(e) {
    }
    docbody.className += addclass;
 }
-
-/* OK TO REMOVE
-function __TEST__hookupTitleChanged() {
-   document.getElementById("content").addEventListener("DOMTitleChanged", __TEST__salastread_titleChanged, false);
-}
-
-var checkForCopyrightFailCount = 0;
-
-function __TEST__salastread_titleChanged(event) {
-   var loc = event.target.location;
-   if ( loc.href.match(/^http:\/\/forums\.somethingawful\.com\//i) ) {
-      var fakee = {
-         originalTarget: event.target
-      };
-      //setTimeout( function() { salastread_windowOnLoad(fakee); }, 50 );
-      checkForCopyrightFailCount = 0;
-      setTimeout( function() { __TEST__docloaded(fakee); }, 50 );
-   }
-}
-
-function __TEST__docloaded(e) {
-   var doc = e.originalTarget;
-   try {
-      // copyright notice at bottom of page is the only <p> in the main body of a forum page
-      //var copyrightnotice = selectNodes(doc, doc.body, "P/FONT")[0];
-
-      var commentnodes = selectNodes(doc, doc.body, "child::comment()");
-      var count=0;
-      for (var i=0; i<commentnodes.length; i++) {
-         var cn = commentnodes[i];
-         if (cn.nodeValue.match(/End ad\-free/)) {
-            count++;
-         }
-      }
-      //if (count>0) { alert("count = "+count); return; }
-      if (count==2) {
-         salastread_windowOnLoad(e);
-         return;
-      }
-   }
-   catch (err) {
-   }
-   checkForCopyrightFailCount++;
-   if (checkForCopyrightFailCount < 5) {
-      setTimeout( function() { __TEST__docloaded(e); }, 50 );
-   }
-   else if (checkForCopyrightFailCount < 10) {
-      setTimeout( function() { __TEST__docloaded(e); }, 250 );
-   }
-   else {
-      //alert("salastread: t-t-t-t-t-t-TOTAL FAILURE!");
-   }
-}
-*/
 
 function salastread_hidePageHeader(doc) {
    var hiddenElements = new Array();
@@ -3435,35 +2708,6 @@ function salastread_windowOnLoad(e) {
 	}
 }
 
-/* OK TO REMOVE
-function SALR_PageUnloadHandler() {
-   alert("a");
-}
-*/
-
-/* OK TO REMOVE
-function SALR_ContentUpdateCurrentBrowser() {
-   //window.setTimeout( function() { SALR_UpdateStatusBarIcon(); }, 10 );
-}
-*/
-
-/* OK TO REMOVE
-function SALR_UpdateStatusBarIcon() {
-   var cont = document.getElementById("content");
-   try {
-      var doc = cont.mCurrentBrowser.contentDocument;
-      if ( doc && doc.location && doc.location.hostname && doc.location.hostname.match(/somethingawful\.com$/i) ) {
-         document.getElementById("somethingawful-button").style.display = "-moz-box";
-      } else {
-         document.getElementById("somethingawful-button").style.display = "none";
-      }
-   }
-   catch (ex) {
-      document.getElementById("somethingawful-button").style.display = "none";
-   }
-}
-*/
-
 function SALR_ShowContextMenuItem(id) {
 	var cacm = document.getElementById("contentAreaContextMenu");
 	var mopt = document.getElementById("salastread-context-menu");
@@ -3548,20 +2792,6 @@ function SALR_ContextVis_StarThisThread(doc) {
 		target = target.parentNode;
 	}
 }
-
-/* OK TO REMOVE
-function SALR_ContextVis_ThreadWatch(doc) {
-	if ( doc.location.href.indexOf("showthread.php")!=-1 ) {
-		var tidmatch = doc.location.href.match(/threadid=(\d+)/);
-		if (tidmatch) {
-			var threadid = tidmatch[1];
-			SALR_ShowContextMenuItem("salastread-context-threadwatch");
-			document.getElementById("salastread-context-threadwatch").data = threadid;
-			document.getElementById("salastread-context-threadwatch").label = "ThreadWatch (" + threadid + ")";
-		}
-	}
-}
-*/
 
 function SALR_StarThread()
 {
