@@ -1,0 +1,4 @@
+<RDF:Description about="urn:mozilla:extension:{fc6339b8-9581-4fc7-b824-dffcb091fcb7}">
+	<em:version>1.99.070422</em:version>
+	<em:updateLink>http://salr.googlecode.com/svn/branches/2.0/salastread.xpi</em:updateLink>
+</RDF:Description>
