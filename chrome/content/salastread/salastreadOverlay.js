@@ -57,233 +57,10 @@ function ConvertLPDateTimeToNum(lpdate, lptime) {
    return year + month + day + hour + minute;
 }
 
-/* OK TO REMOVE
-function SALRCachedThreadEntry(threadid) {
-   this._xmlnode = selectSingleNode(persistObject.xmlDoc, persistObject.xmlDoc, "/salastread/thread[@id='"+threadid+"']");
-   if ( !this._xmlnode ) {
-      var newel = persistObject.xmlDoc.createElement("thread");
-      newel.setAttribute("id", threadid);
-      newel.setAttribute("lastpostdt", "0");
-      newel.setAttribute("lastpostid", "0");
-      this._needadd = true;
-      //persistObject.xmlDoc.documentElement.insertBefore(newel, persistObject.xmlDoc.documentElement.firstChild);
-      this._xmlnode = newel;
-   }
-   this._expireage = (new Date()).getTime();
-}
-
-SALRCachedThreadEntry.prototype = {
-   _needadd: false,
-   _xmlnode: null,
-   _expireage: null,
-
-   _frozen: false,
-   _frozendt: false,
-   _frozenid: false,
-   _lastpostdt: null,
-   _lastpostid: null,
-
-   IsAged: function() {
-      var now = (new Date()).getTime();
-      return ( now >= this._expireage );
-   },
-
-   _setDelay: function() {
-      this._expireage = (new Date()).getTime() + 5000;
-   },
-
-   renewDelay: function() {
-      if ( this._frozen && !this.IsAged() ) {
-         this._setDelay();
-      }
-   },
-
-   getBypassAttribute: function(name) {
-      return this._xmlnode.getAttribute(name);
-   },
-
-   getAttribute: function(name) {
-      if ( this._frozen && name=="lastpostdt" && !this.IsAged() ) {
-         return this._lastpostdt;
-      }
-      else if ( this._frozen && name=="lastpostid" && !this.IsAged() ) {
-         return this._lastpostid;
-      }
-      else {
-         return this._xmlnode.getAttribute(name);
-      }
-   },
-
-   removeAttribute: function(name) {
-      return this._xmlnode.removeAttribute(name);
-   },
-
-   setAttribute: function(name, value) {
-      if ( !this._frozen ) {
-         if ( name=="lastpostdt" && !this._frozendt ) {
-            this._lastpostdt = this._xmlnode.getAttribute(name);
-            this._frozendt = true;
-         }
-         if ( name=="lastpostid" && !this._frozenid ) {
-            this._lastpostid = this._xmlnode.getAttribute(name);
-            this._frozenid = true;
-         }
-         if ( this._frozendt && this._frozenid ) {
-            this._frozen = true;
-            this._setDelay();
-            if (this._needadd) {
-               persistObject.xmlDoc.documentElement.insertBefore(this._xmlnode, persistObject.xmlDoc.documentElement.firstChild);
-               persistObject.xmlDoc.documentElement.insertBefore(persistObject.xmlDoc.createTextNode("\n"), persistObject.xmlDoc.documentElement.firstChild);
-               this._needadd = false;
-            }
-         }
-      }
-      return this._xmlnode.setAttribute(name, value);
-   },
-};
-*/
-
-//var cachedThreadEntryList = new Array();
-
-/* OK TO REMOVE
-function invalidateAgedCachedEntries() {
-   var newList = new Array();
-   for (var i=0; i<persistObject._cachedThreadEntryList.length; i++) {
-      var thisEntry = persistObject._cachedThreadEntryList[i];
-      if ( !thisEntry.IsAged() ) {
-         newList.push(thisEntry);
-      }
-   }
-   persistObject._cachedThreadEntryList = newList;
-}
-*/
-
-var cachedThreadEntry = null;
-
-/* OK TO REMOVE
-function slurpIntoThreadCache(threadid) {
-   var needRead = false;
-   if ( cachedThreadEntry ) {
-      if ( cachedThreadEntry.getAttribute("id") != threadid ) {
-         needRead = true;
-      }
-   } else {
-      needRead = true;
-   }
-   if (needRead) {
-      invalidateAgedCachedEntries();
-      cachedThreadEntry = null;
-      for (var i=0; i<persistObject._cachedThreadEntryList.length; i++) {
-         if ( persistObject._cachedThreadEntryList[i].getAttribute("id")==threadid ) {
-            cachedThreadEntry = persistObject._cachedThreadEntryList[i];
-            cachedThreadEntry.setAttribute("lastviewdt", SALR_GetCurrentDT());
-            return;
-         }
-      }
-      if (!cachedThreadEntry) {
-         cachedThreadEntry = new SALRCachedThreadEntry(threadid);
-         persistObject._cachedThreadEntryList.push(cachedThreadEntry);
-         //cachedThreadEntry = selectSingleNode(persistObject.xmlDoc, persistObject.xmlDoc, "/salastread/thread[@id='"+threadid+"']");
-      }
-   }
-   cachedThreadEntry.setAttribute("lastviewdt", SALR_GetCurrentDT());
-}
-*/
-
 function SALR_GetCurrentDT() {
    return GetCurrentLPDateTime();
 }
 
-/* OK TO REMOVE
-function invalidateThreadCache() {
-   cachedThreadEntry = null;
-}
-*/
-
-/* OK TO REMOVE
-function IsThreadIgnored(threadid) {
-   slurpIntoThreadCache(threadid);
-   if (cachedThreadEntry) {
-      return (cachedThreadEntry.getAttribute("ignore")=="1");
-   } else {
-      return false;
-   }
-}
-*/
-
-/* OK TO REMOVE
-function IsLPDateTimeNew(bypassdelay, lpdtvalue, threadid, postid) {
-   var lpidok = false;
-   if (cachedThreadEntry) {
-      if (bypassdelay) {
-         lpidok = cachedThreadEntry.getBypassAttribute("lastpostid")>0;
-      } else {
-         lpidok = cachedThreadEntry.getAttribute("lastpostid")>0;
-      }
-   }
-   //if (cachedThreadEntry && cachedThreadEntry.getAttribute("lastpostid")>0) {
-   if (lpidok) {
-      var lastdtval;
-      var lpid;
-      if ( bypassdelay ) {
-         lastdtval = cachedThreadEntry.getBypassAttribute("lastpostdt");
-         lpid = cachedThreadEntry.getBypassAttribute("lastpostid");
-      } else {
-         cachedThreadEntry.renewDelay();
-         lastdtval = cachedThreadEntry.getAttribute("lastpostdt");
-         lpid = cachedThreadEntry.getAttribute("lastpostid");
-      }
-      if ( lastdtval < lpdtvalue ) {
-         return "readwithnew";
-      } else {
-         if ( !postid || postid <= lpid ) {
-            return false;
-         } else {
-            return "readwithnew";
-         }
-      }
-   } else {
-      return "unread";
-   }
-}
-*/
-
-/* OK TO REMOVE
-function GetLastPostID(threadid) {
-   slurpIntoThreadCache(threadid);
-   return cachedThreadEntry.getAttribute("lastpostid");
-}
-*/
-
-/* OK TO REMOVE
-function GetPostedInThread(threadid) {
-   slurpIntoThreadCache(threadid);
-   return cachedThreadEntry.getAttribute("posted");
-}
-*/
-
-/* Think we can delete this ~ duz
-function UpdateLPDateTime(updateTo, threadid, lastpostid) {
-   slurpIntoThreadCache(threadid);
-   if ( cachedThreadEntry ) {
-      cachedThreadEntry.setAttribute("lastpostdt", updateTo);
-      cachedThreadEntry.setAttribute("lastpostid", lastpostid);
-   } else {
-      alert("SALastRead: should never get here");
-      var newel = persistObject.xmlDoc.createElement("thread");
-      newel.setAttribute("id", threadid);
-      newel.setAttribute("lastpostdt", updateTo);
-      newel.setAttribute("lastpostid", lastpostid);
-      persistObject.xmlDoc.documentElement.insertBefore(newel, persistObject.xmlDoc.documentElement.firstChild);
-   }
-   //persistObject.SaveXML();
-   var threaddetails = new Array();
-   threaddetails['id'] = threadid;
-   threaddetails['lastpostdt'] = updateTo;
-   threaddetails['lastpostid'] = lastpostid;
-   persistObject.SavePostDataSQL(threaddetails);
-}
-*/
 function SALRHexToNumber(hex) {
    var res = 0;
    for (var i=0; i<hex.length; i++) {
@@ -400,117 +177,6 @@ function changeBGColorsFromTo(doc, context, xpathbase, bgfrom, bgto, bgtohighlig
    return xarray;
 }
 
-/* OK TO REMOVE
-function setSeenPostFYADColors(doc, context, xpathbase) {
-   if ( persistObject.getPreference('dontHighlightPosts') ) { return; }
-   changeBGColorsFromTo(doc, context, xpathbase, "#ffccff", persistObject.getPreference('seenPostLightFYAD'));
-   changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc", persistObject.getPreference('seenPostDarkFYAD'));
-}
-*/
-
-/* OK TO REMOVE
-function setSeenPostColors(doc, context, xpathbase) {
-   if ( persistObject.getPreference('dontHighlightPosts') ) { return; }
-   //changeBGColorsFromTo(doc, context, xpathbase, "#f1f1f1", persistObject.getPreference('seenPostLight'));
-   //changeBGColorsFromTo(doc, context, xpathbase, "#dfdfdf", persistObject.getPreference('seenPostDark'));
-   context.className += " salastread_seenpost";
-   context.nextSibling.className += " salastread_seenpostbar";
-}
-*/
-
-/* OK TO REMOVE
-function setUnseenPostFYADColors(doc, context, xpathbase) {
-   if ( persistObject.getPreference('dontHighlightPosts') ) { return; }
-   changeBGColorsFromTo(doc, context, xpathbase, "#ffccff", persistObject.getPreference('unseenPostLightFYAD'));
-   changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc", persistObject.getPreference('unseenPostDarkFYAD'));
-}
-*/
-
-
-/* OK TO REMOVE
-function setUnseenPostColors(doc, context, xpathbase) {
-   if ( persistObject.getPreference('dontHighlightPosts') ) { return; }
-   //changeBGColorsFromTo(doc, context, xpathbase, "#f1f1f1", persistObject.getPreference('unseenPostLight'));
-   //changeBGColorsFromTo(doc, context, xpathbase, "#dfdfdf", persistObject.getPreference('unseenPostDark'));
-   context.className += " salastread_unseenpost";
-   context.nextSibling.className += " salastread_unseenpostbar";
-}
-*/
-
-/* OK TO REMOVE
-function setReadColors(doc, context, xpathbase) {
-   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
-   var res = new Array(2);
-   var r0 = changeBGColorsFromTo(doc, context, xpathbase, "#ffccff",
-      persistObject.getPreference('readLight'), persistObject.getPreference('readLightHighlight'));
-   var r1 = changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc",
-      persistObject.getPreference('readDark'), persistObject.getPreference('readDarkHighlight'));
-   res[0] = changeBGColorsFromTo(doc, context, xpathbase, "#f4f4f4",
-      persistObject.getPreference('readLight'), persistObject.getPreference('readLightHighlight'));
-   res[1] = changeBGColorsFromTo(doc, context, xpathbase, "#e8e8e8",
-      persistObject.getPreference('readDark'), persistObject.getPreference('readDarkHighlight'));
-   for (var x=0; x<r0.length; x++) { res[0].push(r0[x]); }
-   for (var y=0; y<r1.length; y++) { res[1].push(r1[y]); }
-   return res;
-}
-*/
-
-/* OK TO REMOVE
-function setReadWithNewColors(doc, context, xpathbase) {
-   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
-   var res = new Array(2);
-   var r0 = changeBGColorsFromTo(doc, context, xpathbase, "#ffccff",
-      persistObject.getPreference('readWithNewLight'), persistObject.getPreference('readWithNewLightHighlight'));
-   var r1 = changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc",
-      persistObject.getPreference('readWithNewDark'), persistObject.getPreference('readWithNewDarkHighlight'));
-   res[0] = changeBGColorsFromTo(doc, context, xpathbase, "#f4f4f4",
-      persistObject.getPreference('readWithNewLight'), persistObject.getPreference('readWithNewLightHighlight'));
-   res[1] = changeBGColorsFromTo(doc, context, xpathbase, "#e8e8e8",
-      persistObject.getPreference('readWithNewDark'), persistObject.getPreference('readWithNewDarkHighlight'));
-   for (var x=0; x<r0.length; x++) { res[0].push(r0[x]); }
-   for (var y=0; y<r1.length; y++) { res[1].push(r1[y]); }
-   return res;
-}
-*/
-
-/* OK TO REMOVE
-function setUnreadColors(doc, context, xpathbase) {
-   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
-   var res = new Array(2);
-   res[0] = changeBGColorsFromTo(doc, context, xpathbase, "#f4f4f4",
-      persistObject.getPreference('unreadLight'), persistObject.getPreference('unreadLightHighlight'));
-   res[1] = changeBGColorsFromTo(doc, context, xpathbase, "#e8e8e8",
-      persistObject.getPreference('unreadDark'), persistObject.getPreference('unreadDarkHighlight'));
-   return res;
-}
-*/
-
-/* OK TO REMOVE
-function setUnreadFYADColors(doc, context, xpathbase) {
-   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
-   var res = new Array(2);
-   res[0] = changeBGColorsFromTo(doc, context, xpathbase, "#ffccff",
-      persistObject.getPreference('unreadLightFYAD'), persistObject.getPreference('unreadLightFYADHighlight'));
-   res[1] = changeBGColorsFromTo(doc, context, xpathbase, "#ffcccc",
-      persistObject.getPreference('unreadDarkFYAD'), persistObject.getPreference('unreadDarkFYADHighlight'));
-   return res;
-}
-*/
-
-/* OK TO REMOVE
-function resetUnreadColors(unvisitDecolors) {
-   if ( persistObject.getPreference('dontHighlightThreads') ) { return; }
-   for (var i=0; i<unvisitDecolors[0].length; i++) {
-      unvisitDecolors[0][i].style.backgroundColor = persistObject.getPreference('unreadLight');
-      unvisitDecolors[0][i].style.backgroundImage = "";
-   }
-   for (var j=0; j<unvisitDecolors[1].length; j++) {
-      unvisitDecolors[1][j].style.backgroundColor = persistObject.getPreference('unreadDark');
-      unvisitDecolors[1][j].style.backgroundImage = "";
-   }
-}
-*/
-
 function SAmenuitemCommand2(event,el,etype) {
    var target = "none";
    if ( etype=="command" ) {
@@ -610,15 +276,6 @@ function grabForumList(doc, selectnode) {
          fel.setAttribute("name", xtext);
          fel.setAttribute("cat", catname);
 
-/*
-         if (thisopttext.substring(0,5)=="---- " && thisopt.getAttribute("value")!="-1" ) {
-            fel.setAttribute("name", "     " + thisopttext.substring(5));
-            fel.setAttribute("cat","sub-sub");
-         } else {
-            fel.setAttribute("name", thisopttext.substring(3));
-            fel.setAttribute("cat","sub");
-         }
-*/
          targetEl.appendChild(fel);
          targetEl.insertBefore(forumsDoc.createTextNode("\n"), fel);
       } else if (thisopt.getAttribute("value")!="-1" ) {
@@ -705,37 +362,6 @@ function populateForumMenuFrom(nested_menus, target, src, pinnedForumNumbers, pi
 
 var SALR_DEBUG_pendingUpload = null;
 var SALR_DEBUG_pendingDownload = null;
-
-/* OK TO REMOVE (do we really need ftp testing functions in here?)
-function SALR_DEBUG_TestFTPDownload(xx) {
-   var url = "ftp://admin:"+ "x" +"@evercrest.com/test.txt";
-   var localfile = "c:\\documents and settings\\tim fries\\testin.txt"
-   alert("before download");
-   SALR_DEBUG_pendingDownload = new SALR_FTPTransferObject();
-   SALR_DEBUG_pendingDownload.getFile(url, localfile, SALR_DEBUG_TestFTPDownloadDone);
-}
-
-function SALR_DEBUG_TestFTPDownloadDone(status) {
-   alert("status = "+status);
-   SALR_DEBUG_pendingDownload = null;
-}
-
-function SALR_DEBUG_TestFTPUpload(xx) {
-   var url = "ftp://admin:"+ "x" +"@evercrest.com/test.txt";
-   var localfile = "c:\\documents and settings\\tim fries\\test.txt"
-
-   alert("before upload");
-   SALR_DEBUG_pendingUpload = new SALR_FTPTransferObject();
-   SALR_DEBUG_pendingUpload.sendFile(url, localfile, SALR_DEBUG_TestFTPUploadDone);
-}
-function SALR_DEBUG_TestFTPUploadDone(result) {
-   if (result==0)
-      alert("upload succeeded");
-   else
-      alert("upload failed");
-   SALR_DEBUG_pendingUpload = null;
-}
-*/
 
 function buildSAForumMenu() {
 	try {
@@ -1085,33 +711,38 @@ function handleForumDisplay(doc)
 		var userPosterNote;
 		var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
 		var iconlist = persistObject.iconList;
+		var table = document.getElementById('forum');
 		// Here be where we work on the thread rows
 		var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
-		for (i in threadlist)
+		for (var i in threadlist)
 		{
-			threadTitleBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='title']");
+
+			var thread = threadlist[i];
+			
+			threadTitleBox = persistObject.selectSingleNode(doc, thread, "TD[@class='title']");
 			if (threadTitleBox.getElementsByTagName('a')[0].href.search(/announcement/i) > -1)
 			{
 				// It's an announcement so skip the rest
 				continue;
 			}
+			
 			threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
+			threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
 			threadDetails = persistObject.getThreadDetails(threadId);
 			if (threadDetails['ignore'])
 			{
-				// If thread is ignored might as well stop now
-				threadlist[i].parentNode.style.display = "none";
+				// If thread is ignored might as well remove it and stop now
+				thread.parentNode.removeChild(thread);
 				// Update the title just incase it doesn't know what it is
 				persistObject.setThreadTitle(threadId, threadTitle);
 				continue;
 			}
 			if (!inDump)
 			{
-				threadIconBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='icon']");
+				threadIconBox = persistObject.selectSingleNode(doc, thread, "TD[@class='icon']");
 			}
-			threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
-			threadAuthorBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='author']");
-			threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD[@class='replies']");
+			threadAuthorBox = persistObject.selectSingleNode(doc, thread, "TD[@class='author']");
+			threadRepliesBox = persistObject.selectSingleNode(doc, thread, "TD[@class='replies']");
 			threadLRCount = threadDetails['lastreplyct'];
 			threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
 			threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
@@ -1136,7 +767,7 @@ function handleForumDisplay(doc)
 				posterBG = threadDetails['background'];
 			}
 			// So right click star/ignore works
-			threadlist[i].className = "salastread_thread_" + threadId;
+			thread.className += " salastread_thread_" + threadId;
 			// Replace the thread icon with a linked thread icon
 			if (!inDump && threadIconBox.firstChild.src.search(/posticons\/(.*)/i) > -1)
 			{
@@ -1177,15 +808,15 @@ function handleForumDisplay(doc)
 								threadRepliesBox.innerHTML += ' (' + ((threadRe+1) - threadLRCount) + ')';
 							}
 						}
-						persistObject.colorThread(doc, threadlist[i], forumid, persistObject.getPreference("readWithNewLight"), persistObject.getPreference("readWithNewDark"));
+						persistObject.colorThread(doc, thread, forumid, persistObject.getPreference("readWithNewLight"), persistObject.getPreference("readWithNewDark"));
 					}
 					else
 					{
-						persistObject.colorThread(doc, threadlist[i], forumid, persistObject.getPreference("readLight"), persistObject.getPreference("readDark"));
+						persistObject.colorThread(doc, thread, forumid, persistObject.getPreference("readLight"), persistObject.getPreference("readDark"));
 					}
 					if (!persistObject.getPreference("disableGradients"))
 					{
-						persistObject.addGradient(threadlist[i]);
+						persistObject.addGradient(thread);
 					}
 					if (threadDetails['posted'])
 					{
@@ -1423,20 +1054,6 @@ function salastread_windowOnUnload(e) {
       SALR_DecTimer();
       persistObject.SaveTimerValue();
    }
-/*
-   var pageTimer = e.originalTarget.__SALASTREAD_PAGETIMER;
-   if (pageTimer) {
-      pageTimer.Finalize();
-      e.originalTarget.__SALASTREAD_PAGETIMER = null;
-      var newPageTimers = new Array();
-      for (var i=0; i<thisWindowPageTimers.length; i++) {
-        if ( thisWindowPageTimers[i] != pageTimer ) {
-           newPageTimers.push( thisWindowPageTimers[i] );
-        }
-      }
-      thisWindowPageTimers = newPageTimers;
-   }
-*/
 }
 
 function cleanupLostPageTimers() {
