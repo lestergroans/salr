@@ -433,7 +433,7 @@ function buildSAForumMenu() {
 
 		populateForumMenuFrom(nested_menus,menupopup,forumsDoc.documentElement,pinnedForumNumbers,pinnedForumElements);
 
-		if(nested_menus && pinnedForumElements.length > 0) {
+		if(nested_menus && (pinnedForumElements.length > 0 || pinnedForumNumbers.length > 0)) {
 			menupopup.appendChild(document.createElement("menuseparator"));
 			for(var j = 0; j < pinnedForumElements.length || j < pinnedForumNumbers.length; j++) {
 				if(pinnedForumElements[j]) {
