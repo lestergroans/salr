@@ -2420,13 +2420,14 @@ function SALR_StarThread()
 	{
 		var starStatus = persistObject.isThreadStarred(threadid);
 		persistObject.toggleThreadStar(threadid);
+		
 		if (target.ownerDocument.location.href.search(/showthread.php/i) == -1)
 		{
 			target.ownerDocument.location = target.ownerDocument.location;
 		}
 		else
 		{
-			var startext = starStatus ? "starred" : "unstarred";
+			var startext = starStatus ? "unstarred" : "starred";
 			alert("This thread is now " + startext + ".");
 		}
 	}
@@ -2445,7 +2446,7 @@ function SALR_IgnoreThread()
 			persistObject.toggleThreadIgnore(threadid);
 			if (target.ownerDocument.location.href.search(/showthread.php/i) == -1)
 			{
-				target.style.display = "none";
+				target.parentNode.removeChild(target);
 			}
 		}
 	}
