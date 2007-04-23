@@ -1457,10 +1457,16 @@ salrPersistObject.prototype = {
 		var lastviewdt = this.currentTimeStamp;
 		if (this.threadIsInDB(threadid))
 		{
-			var statement = this.database.createStatement("UPDATE `threaddata` SET `ignore` = not(`ignore`) WHERE `id` = ?1");
-			statement.bindInt32Parameter(0,threadid);
-			statement.execute();
-			statement.reset();
+			if(this.getLastReadPostCount(threadid)) {
+				var statement = this.database.createStatement("UPDATE `threaddata` SET `ignore` = not(`ignore`) WHERE `id` = ?1");
+					statement.bindInt32Parameter(0,threadid);
+					statement.execute();
+					statement.reset();
+			}
+			else
+			{
+				this.removeThread(threadid);
+			}
 		}
 		else
 		{
@@ -1477,6 +1483,8 @@ salrPersistObject.prototype = {
 	// @return: (booler) true on success, false on failure
 	removeThread: function(threadId)
 	{
+		Components.utils.reportError("thread id: " + threadId);
+		
 		var statement = this.database.createStatement("DELETE FROM `threaddata` WHERE `id` = ?1");
 		statement.bindInt32Parameter(0,threadId);
 		if (statement.executeStep())
