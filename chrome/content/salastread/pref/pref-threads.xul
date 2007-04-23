@@ -15,7 +15,7 @@
 			<checkbox id="toggle_insertPostLastMarkLink" label="Add a &quot;&lt;&quot; link to reset the last post of each thread" />
 			<checkbox id="toggle_hideEditButtons" 		label="Hide edit buttons for posts from users other than yourself" />
 			<checkbox id="toggle_hideReportButtons" 	label="Hide the report button on your own posts" />
-
+			<checkbox id="toggle_enableVideoEmbedder" 	label="Enable converting of video links to embedded video (experimental)" />
 		</vbox>
 	</groupbox>
 

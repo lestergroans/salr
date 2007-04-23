@@ -1,15 +1,43 @@
 // <script> This line added because my IDE has problems detecting JS ~ 0330 ~ duz
 
-function SALR_vidClick(e, videoId, vidSrc)
+function SALR_vidClick(e)
 {
-	var linkNode = e.target;
+	e.preventDefault();
+	e.stopPropagation();
+	
+	var link = e.target;
+	
+	//if they click again hide the video
+	var video = link.parentNode.getElementsByTagName('embed')[0];
+	if(video && video.className == 'salr_video') {
+			link.parentNode.removeChild(link.nextSibling);
+			return;
+	}
+	
+	//figure out the video type
+	var videoId, videoSrc;
+	var videoIdSearch = link.href.match(/^http\:\/\/(www\.)?youtube\.com\/watch\?v=([-_0-9a-zA-Z]+)/);
+	if (videoIdSearch)
+	{
+		videoId = videoIdSearch[2];
+		videoSrc = "youtube";
+	}
+	else
+	{
+		videoIdSearch = link.href.match(/^http\:\/\/video\.google\.com\/videoplay\?docid=([-0-9]+)/);
+		videoId = videoIdSearch[2];
+		videoSrc = "google";
+	}
+	
+	//create the embedded elements (p containing video for linebreaky goodness)
 	var doc = e.originalTarget.ownerDocument;
-	//var videoId = e.vidid, vidSrc = e.vidsrc;
+	var pEl = doc.createElement("p");
 	var embedEl = doc.createElement("EMBED");
-	embedEl.setAttribute('width', 450);
-	embedEl.setAttribute('height', 370);
-	embedEl.setAttribute('type', "application/x-shockwave-flash");
-	switch (vidSrc)
+		embedEl.setAttribute('width', 450);
+		embedEl.setAttribute('height', 370);
+		embedEl.setAttribute('type', "application/x-shockwave-flash");
+		embedEl.setAttribute('class', 'salr_video');
+	switch (videoSrc)
 	{
 		case "google":
 			embedEl.setAttribute('flashvars', '');
@@ -22,10 +50,13 @@ function SALR_vidClick(e, videoId, vidSrc)
 			embedEl.setAttribute('src', "http://www.youtube.com/v/" + videoId);
 			break;
 	}
-	linkNode.parentNode.insertBefore(embedEl, linkNode);
-	//this.insertRemoveLink(linkNode, embedEl);
-	linkNode.parentNode.removeChild(linkNode);
-	e.preventDefault();
+	pEl.appendChild(embedEl);
+	
+	//inserts video after the link
+	link.parentNode.insertBefore(pEl, link.nextSibling);
+	
+	//this.insertRemoveLink(link, embedEl);
+	//link.parentNode.removeChild(link);
 }
 
 const SALR_CONTRACTID = "@evercrest.com/salastread/persist-object;1";
@@ -1910,30 +1941,31 @@ salrPersistObject.prototype = {
 		var linksInPost = this.selectNodes(doc, postbody, "descendant::A");
 		for (var i in linksInPost)
 		{
+			var link = linksInPost[i];
 			if (this.getPreference("convertTextToImage") &&
-				linksInPost[i].href.search(/\.(gif|jpg|jpeg|png)(#.*)?$/i) > -1 &&
-				linksInPost[i].href.search(/paintedover\.com/i) == -1 && // PaintedOver sucks, we can't embed them
-				linksInPost[i].href.search(/wiki(.*)Image/i) == -1 && // Wikipedia does funky stuff with their images too
-				linksInPost[i].innerHTML != "") // Quotes have fake links for some reason
+				link.href.search(/\.(gif|jpg|jpeg|png)(#.*)?$/i) > -1 &&
+				link.href.search(/paintedover\.com/i) == -1 && // PaintedOver sucks, we can't embed them
+				link.href.search(/wiki(.*)Image/i) == -1 && // Wikipedia does funky stuff with their images too
+				link.innerHTML != "") // Quotes have fake links for some reason
 			{
 				if (!this.getPreference("dontTextToImageIfMayBeNws") ||
-					linksInPost[i].parentNode.innerHTML.search(/(nsfw|nws|nms|t work safe|t safe for work)/i) == -1)
+					link.parentNode.innerHTML.search(/(nsfw|nws|nms|t work safe|t safe for work)/i) == -1)
 				{
 					if (!this.getPreference("dontTextToImageInSpoilers") ||
-						(linksInPost[i].parentNode.className.search(/spoiler/i) == -1 &&
-						linksInPost[i].textContent.search(/spoiler/i) == -1))
+						(link.parentNode.className.search(/spoiler/i) == -1 &&
+						link.textContent.search(/spoiler/i) == -1))
 					{
 						if (this.getPreference("dontConvertQuotedImages"))
 						{
 							// Check if it's in a blockquote
-							if (linksInPost[i].parentNode.parentNode.className.search(/qb2/i) > -1 ||
-								linksInPost[i].parentNode.parentNode.parentNode.className.search(/qb2/i) > -1)
+							if (link.parentNode.parentNode.className.search(/qb2/i) > -1 ||
+								link.parentNode.parentNode.parentNode.className.search(/qb2/i) > -1)
 							{
 								continue;
 							}
 						}
 						newImg = doc.createElement("img");
-						newImg.src = linksInPost[i].href;
+						newImg.src = link.href;
 						newImg.title = "Link converted by SALR";
 						newImg.style.border = "1px dashed #f00";
 						if (this.getPreference("shrinkTextToImages"))
@@ -1950,40 +1982,28 @@ salrPersistObject.prototype = {
 							},false);
 							newImg.title += " - Click to enlarge";
 						}
-						if ((linksInPost[i].firstChild == linksInPost[i].lastChild && (linksInPost[i].firstChild.tagName && linksInPost[i].firstChild.tagName.search(/img/i) > -1)) ||
-							linksInPost[i].textContent.search(/http:/i) == 0)
+						if ((link.firstChild == link.lastChild && (link.firstChild.tagName && link.firstChild.tagName.search(/img/i) > -1)) ||
+							link.textContent.search(/http:/i) == 0)
 						{
-							linksInPost[i].textContent = '';
-							linksInPost[i].parentNode.replaceChild(newImg, linksInPost[i]);
+							link.textContent = '';
+							link.parentNode.replaceChild(newImg, link);
 						}
 						else
 						{
-							linksInPost[i].previousSibling.textContent += linksInPost[i].textContent;
-							linksInPost[i].textContent = '';
-							linksInPost[i].parentNode.replaceChild(newImg, linksInPost[i]);
-							//linksInPost[i].appendChild(newImg);
+							link.previousSibling.textContent += link.textContent;
+							link.textContent = '';
+							link.parentNode.replaceChild(newImg, link);
+							//link.appendChild(newImg);
 						}
 					}
 				}
 			}
 			if (this.getPreference("enableVideoEmbedder") &&
-				(linksInPost[i].href.search(/^http\:\/\/(www\.)?youtube\.com\/watch\?v=([-_0-9a-zA-Z]+)/i) > -1 ||
-				linksInPost[i].href.search(/^http\:\/\/video\.google\.com\/videoplay\?docid=([-0-9]+)/i) > -1))
+				(link.href.search(/^http\:\/\/(www\.)?youtube\.com\/watch\?v=([-_0-9a-zA-Z]+)/i) > -1 ||
+				 link.href.search(/^http\:\/\/video\.google\.com\/videoplay\?docid=([-0-9]+)/i) > -1))
 			{
-				linksInPost[i].style.backgroundColor = this.getPreference("videoEmbedderBG");
-				vidIdSearch = linksInPost[i].href.match(/^http\:\/\/(www\.)?youtube\.com\/watch\?v=([-_0-9a-zA-Z]+)/);
-				if (vidIdSearch)
-				{
-					vidid = vidIdSearch[2];
-					vidsrc = "youtube";
-				}
-				else
-				{
-					vidIdSearch = linksInPost[i].href.match(/^http\:\/\/video\.google\.com\/videoplay\?docid=([-0-9]+)/);
-					vidid = vidIdSearch[2];
-					vidsrc = "google";
-				}
-				linksInPost[i].addEventListener('click', function(e) { SALR_vidClick(e, vidid, vidsrc); }, false);
+				link.style.backgroundColor = this.getPreference("videoEmbedderBG");
+				link.addEventListener('click', SALR_vidClick, false);
 			}
 		}
 	},
