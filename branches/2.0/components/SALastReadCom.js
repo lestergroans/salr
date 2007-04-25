@@ -4,16 +4,16 @@ function SALR_vidClick(e)
 {
 	e.preventDefault();
 	e.stopPropagation();
-	
+
 	var link = e.target;
-	
+
 	//if they click again hide the video
 	var video = link.parentNode.getElementsByTagName('embed')[0];
 	if(video && video.className == 'salr_video') {
 			link.parentNode.removeChild(link.nextSibling);
 			return;
 	}
-	
+
 	//figure out the video type
 	var videoId, videoSrc;
 	var videoIdSearch = link.href.match(/^http\:\/\/(www\.)?youtube\.com\/watch\?v=([-_0-9a-zA-Z]+)/);
@@ -28,7 +28,7 @@ function SALR_vidClick(e)
 		videoId = videoIdSearch[2];
 		videoSrc = "google";
 	}
-	
+
 	//create the embedded elements (p containing video for linebreaky goodness)
 	var doc = e.originalTarget.ownerDocument;
 	var pEl = doc.createElement("p");
@@ -51,10 +51,10 @@ function SALR_vidClick(e)
 			break;
 	}
 	pEl.appendChild(embedEl);
-	
+
 	//inserts video after the link
 	link.parentNode.insertBefore(pEl, link.nextSibling);
-	
+
 	//this.insertRemoveLink(link, embedEl);
 	//link.parentNode.removeChild(link);
 }
@@ -1945,6 +1945,7 @@ salrPersistObject.prototype = {
 			if (this.getPreference("convertTextToImage") &&
 				link.href.search(/\.(gif|jpg|jpeg|png)(#.*)?$/i) > -1 &&
 				link.href.search(/paintedover\.com/i) == -1 && // PaintedOver sucks, we can't embed them
+				link.href.search(/xs\.to/i) == -1 && // xs.to sucks, we can't embed them
 				link.href.search(/wiki(.*)Image/i) == -1 && // Wikipedia does funky stuff with their images too
 				link.innerHTML != "") // Quotes have fake links for some reason
 			{
