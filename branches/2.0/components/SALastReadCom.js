@@ -1946,6 +1946,7 @@ salrPersistObject.prototype = {
 				link.href.search(/\.(gif|jpg|jpeg|png)(#.*)?$/i) > -1 &&
 				link.href.search(/paintedover\.com/i) == -1 && // PaintedOver sucks, we can't embed them
 				link.href.search(/xs\.to/i) == -1 && // xs.to sucks, we can't embed them
+				link.href.search(/imagesocket\.com/i) == -1 && // ImageSocket sucks, we can't embed them
 				link.href.search(/wiki(.*)Image/i) == -1 && // Wikipedia does funky stuff with their images too
 				link.innerHTML != "") // Quotes have fake links for some reason
 			{
