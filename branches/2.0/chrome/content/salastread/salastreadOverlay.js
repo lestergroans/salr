@@ -713,13 +713,13 @@ function handleForumDisplay(doc)
 		var iconlist = persistObject.iconList;
 		var table = document.getElementById('forum');
 		// Here be where we work on the thread rows
-		var threadlist = persistObject.selectNodes(doc, doc, "//TR[@class='thread']");
+		var threadlist = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'thread')]");
 		for (var i in threadlist)
 		{
 
 			var thread = threadlist[i];
 			
-			threadTitleBox = persistObject.selectSingleNode(doc, thread, "TD[@class='title']");
+			threadTitleBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class,'title')]");
 			if (threadTitleBox.getElementsByTagName('a')[0].href.search(/announcement/i) > -1)
 			{
 				// It's an announcement so skip the rest
@@ -739,10 +739,10 @@ function handleForumDisplay(doc)
 			}
 			if (!inDump)
 			{
-				threadIconBox = persistObject.selectSingleNode(doc, thread, "TD[@class='icon']");
+				threadIconBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class,'icon')]");
 			}
-			threadAuthorBox = persistObject.selectSingleNode(doc, thread, "TD[@class='author']");
-			threadRepliesBox = persistObject.selectSingleNode(doc, thread, "TD[@class='replies']");
+			threadAuthorBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class, 'author')]");
+			threadRepliesBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class, 'replies')]");
 			threadLRCount = threadDetails['lastreplyct'];
 			threadRe = parseInt(threadRepliesBox.getElementsByTagName('a')[0].innerHTML);
 			threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
