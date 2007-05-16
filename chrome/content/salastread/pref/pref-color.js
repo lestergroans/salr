@@ -68,7 +68,7 @@ function loadColors(isfyad) {
 					var bcolor = parent.prefobj.Preferences[prefname].value;
 					mobj.style.backgroundColor = bcolor;
 					
-					if(gradientsOn && parent.prefobj.Preferences[prefname + "Highlight"].value) {
+					if(gradientsOn && parent.prefobj.Preferences[prefname + "Highlight"]) {
 						var hlcolor = parent.prefobj.Preferences[prefname + "Highlight"].value;
 						mobj.style.backgroundRepeat = "repeat-x";
 						mobj.style.backgroundImage = GradientURLFromColor(hlcolor, mobj.offsetHeight);
