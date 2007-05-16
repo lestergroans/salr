@@ -1667,25 +1667,25 @@ salrPersistObject.prototype = {
 		if (this.inDump(forumID))
 		{
 			threadRatingBox = thread.getElementsByTagName('td')[0];
-			threadVoteBox = this.selectSingleNode(doc, thread, "TD[@class='votes']");
+			threadVoteBox = this.selectSingleNode(doc, thread, "TD[contains(@class,'votes')]");
 		}
 		else
 		{
-			threadIconBox = this.selectSingleNode(doc, thread, "TD[@class='icon']");
+			threadIconBox = this.selectSingleNode(doc, thread, "TD[contains(@class,'icon')]");
 		}
 		if (!this.inDump(forumID) && !this.hasNoRatingBox(forumID))
 		{
-			threadRatingBox = this.selectSingleNode(doc, thread, "TD[@class='rating']");
+			threadRatingBox = this.selectSingleNode(doc, thread, "TD[contains(@class,'rating')]");
 		}
 		if (this.inAskTell(forumID))
 		{
-			threadIcon2Box = this.selectSingleNode(doc, thread, "TD[@class='icon2']");
+			threadIcon2Box = this.selectSingleNode(doc, thread, "TD[contains(@class,'icon2')]");
 		}
-		threadTitleBox = this.selectSingleNode(doc, thread, "TD[@class='title']");
-		threadAuthorBox = this.selectSingleNode(doc, thread, "TD[@class='author']");
-		threadRepliesBox = this.selectSingleNode(doc, thread, "TD[@class='replies']");
-		threadViewsBox = this.selectSingleNode(doc, thread, "TD[@class='views']");
-		threadLastpostBox = this.selectSingleNode(doc, thread, "TD[@class='lastpost']");
+		threadTitleBox = this.selectSingleNode(doc, thread, "TD[contains(@class,'title')]");
+		threadAuthorBox = this.selectSingleNode(doc, thread, "TD[contains(@class,'author')]");
+		threadRepliesBox = this.selectSingleNode(doc, thread, "TD[contains(@class,'replies')]");
+		threadViewsBox = this.selectSingleNode(doc, thread, "TD[contains(@class,'views')]");
+		threadLastpostBox = this.selectSingleNode(doc, thread, "TD[contains(@class,'lastpost')]");
 		threadTitleBox.style.backgroundColor = lightColorToUse;
 		threadAuthorBox.style.backgroundColor = darkColorToUse;
 		threadRepliesBox.style.backgroundColor = lightColorToUse;
