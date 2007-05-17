@@ -1171,7 +1171,7 @@ salrPersistObject.prototype = {
 		}
 		else
 		{
-			var postbutton = this.selectSingleNode(doc, doc, "//UL[@class='postbuttons']//A[contains(@href,'forumid=')]");
+			var postbutton = this.selectSingleNode(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'forumid=')]");
 			var inpostbutton = postbutton.href.match(/forumid=(\d+)/i);
 			fid = inpostbutton[1];
 		}
@@ -1637,10 +1637,10 @@ salrPersistObject.prototype = {
 	// @return:
 	colorPost: function(doc, post, colorToUse)
 	{
-		var userInfoBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='userinfo']");
-		var postBodyBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postbody']");
-		var postDateBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postdate']");
-		var postLinksBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[@class='postlinks']");
+		var userInfoBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[contains(@class,'userinfo')]");
+		var postBodyBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[contains(@class,'postbody')]");
+		var postDateBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[contains(@class,'postdate')]");
+		var postLinksBox = this.selectSingleNode(doc, post, "TBODY/TR/TD[contains(@class,'postlinks')]");
 		if (userInfoBox)
 		{
 			userInfoBox.style.backgroundColor = colorToUse;
