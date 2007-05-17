@@ -1195,7 +1195,6 @@ function handleShowThread(doc) {
 
 	if (!inFYAD || persistObject.getPreference("enableFYAD"))
 	{
-
 		// Insert the forums paginator & mouse gestures
 		if (persistObject.getPreference("enablePageNavigator"))
 		{
@@ -1291,19 +1290,7 @@ function handleShowThread(doc) {
 		}
 
 		// Grab the thread title
-		var threadtitle = '';
-		var titlematch = doc.title.match(/(.*) \- (.*)/);
-		if (titlematch) {
-			if (titlematch[1].search(/Something/i) > -1)
-			{
-				threadtitle = titlematch[2];
-			}
-			else
-			{
-				threadtitle = titlematch[1];
-			}
-			persistObject.setThreadTitle(threadid, threadtitle);
-		}
+		persistObject.setThreadTitle(threadid, SALR_getPageTitle(doc));
 
 		// Check if the thread is closed
 		if (persistObject.selectSingleNode(doc, doc, "//A[contains(@href,'action=newreply&threadid')]//IMG[contains(@src,'closed')]") == null)
@@ -1605,7 +1592,6 @@ function SALR_GetVerticalPos(element) {
 
 	return y;
 }
-
 
 function SALR_InsertThreadKeyboardNavigation(doc) {
 	// XXX: temporarily disabled
@@ -2113,6 +2099,10 @@ function SALR_windowOnLoadMini(e) {
    catch (ex) { }
 }
 
+function SALR_getPageTitle(doc) {
+	return doc.title.replace(/( \- )?The Something ?Awful Forums( \- )?/i, '');
+}
+
 var SALR_SilenceLoadErrors = false;
 var firstLoad = true;
 var loadCount = 0;
@@ -2271,16 +2261,7 @@ function salastread_windowOnLoad(e) {
 					}
 
 					if (persistObject.getPreference("removePageTitlePrefix")) {
-						var threadtitle = doc.title;
-						var titlematch = doc.title.match(/(.*) \- (.*)/);
-						if (titlematch) {
-							if(titlematch[1].search(/Something/i) > -1) {
-								threadtitle = titlematch[2];
-							} else {
-								threadtitle = titlematch[1];
-							}
-							doc.title = threadtitle;
-						}
+						doc.title = SALR_getPageTitle(doc);
 					}
 
 					if (persistObject.getPreference('removeHeaderAndFooter')) {

@@ -12,7 +12,7 @@
 	<caption label="General Options" />
 	<vbox>
 		<checkbox id="toggle_removeHeaderAndFooter" label="Hide Forum Header and Footer" />
-		<checkbox id="toggle_removePageTitlePrefix" label="Move 'The Awful Forums' prefix to end of page titles" />
+		<checkbox id="toggle_removePageTitlePrefix" label="Remove 'The Something Awful Forums' from page titles" />
 		<checkbox id="toggle_enablePageNavigator" 	label="Add a page navigator to the lower-right corner of the browser" />
 		<checkbox id="toggle_enableForumNavigator" 	label="Add a forum navigator to the lower-right corner of the browser" />
 		<checkbox id="toggle_gestureEnable" 		label="Allow mouse gestures to navigate around threads and forums" />
