@@ -1635,10 +1635,14 @@ function SALR_CheckForSpaceScroll(doc, oldTop) {
 function SALR_DirectionalNavigate(doc, dir) {
 	var urlbase = doc.location.href.match(/.*\.somethingawful\.com/);
 	var curPage = doc.__SALR_curPage;
-	var perPage = persistObject.getPreference("postsPerPage");
+	var perpage = "&perpage=" + persistObject.getPreference("postsPerPage");
 	var forumid = doc.location.href.match(/forumid=[0-9]+/);
 	var posticon = doc.location.href.match(/posticon=[0-9]+/);
-	if (!posticon) posticon = "posticon=0";
+	if (!posticon) posticon = "&posticon=0";
+	var sortfield = doc.location.href.match(/&sortfield=[a-zA-Z0-9]+/);
+	if (!sortfield) sortfield = "&sortfield=lastpost";
+	var sortorder = doc.location.href.match(/&sortorder=[a-z]+/);
+	if (!sortorder) sortorder = "&sortorder=desc";
 	
 	if (dir == "top") {
 		if(curPage == 1) {
@@ -1655,9 +1659,9 @@ function SALR_DirectionalNavigate(doc, dir) {
 		if (curPage > 1) {
 			var threadid = doc.__SALR_threadid;
 			if (threadid) {
-				doc.location = urlbase + "/showthread.php?s=&threadid=" + threadid+"&perpage=" + perPage + "&pagenumber=" + (curPage - 1);
+				doc.location = urlbase + "/showthread.php?s=&threadid=" + threadid + perpage + "&pagenumber=" + (curPage - 1);
 			} else {
-				doc.location = urlbase + "/forumdisplay.php?" + forumid + "&daysprune=30&sortorder=desc&sortfield=lastpost&perpage=" + perPage + "&" + posticon + "&pagenumber=" + (curPage - 1);
+				doc.location = urlbase + "/forumdisplay.php?" + forumid + "&daysprune=30" + sortorder + sortfield + perpage + posticon + "&pagenumber=" + (curPage - 1);
 			}
 		}
 	} else if (dir == "right") {
@@ -1666,9 +1670,9 @@ function SALR_DirectionalNavigate(doc, dir) {
 		if (maxPage > curPage) {
 			var threadid = doc.__SALR_threadid;
 			if (threadid) {
-				doc.location = urlbase + "/showthread.php?s=&threadid="+threadid+"&perpage=" + perPage + "&pagenumber=" + (curPage + 1);
+				doc.location = urlbase + "/showthread.php?s=&threadid=" + threadid + perPage + "&pagenumber=" + (curPage + 1);
 			} else {
-				doc.location = urlbase + "/forumdisplay.php?"+forumid+"&daysprune=30&sortorder=desc&sortfield=lastpost&perpage=" + perPage + "&" + posticon + "&pagenumber=" + (curPage + 1);
+				doc.location = urlbase + "/forumdisplay.php?"+forumid+"&daysprune=30" + sortorder + sortfield + perpage + posticon + "&pagenumber=" + (curPage + 1);
 			}
 		}
 	}
