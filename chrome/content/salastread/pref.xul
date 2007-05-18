@@ -2,69 +2,56 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://salastread/content/pref.css" type="text/css"?>
 
-<dialog id="salastreadpref"
-        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        onload="onLoad();"
-        ondialogaccept="saveChanges();"
-        title="SALastRead Configuration">
+<prefwindow id="salastreadpref" 
+			title="SALR Preferences" 
+			type="prefwindow"
+			xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<script language="JavaScript" src="chrome://salastread/content/pref.js" />
+	<script type="application/x-javascript" src="chrome://salastread/content/pref.js"/>
 
-	<hbox flex="1">
+	<prefpane 	id="general" 
+				label="General" 
+				image="chrome://salastread/content/pref/images/general.png" 
+				src="chrome://salastread/content/pref/pref-general.xul"/>
 
-		<vbox class="listBox buttonBox" orient="vertical" oncommand="switchPage(event.target.id)">
+	<prefpane 	id="images" 
+				label="Images" 
+				image="chrome://salastread/content/pref/images/images.png"
+				src="chrome://salastread/content/pref/pref-images.xul"/>
 
-			<button orient="vertical" class="buttonBoxButton" id="catGeneralButton"
-					type="radio" group="categories" label="General"
-					url="chrome://salastread/content/pref/pref-general.xul"/>
+	<prefpane 	id="ignored" 
+				label="Ignored" 
+				image="chrome://salastread/content/pref/images/ignored.png"
+				src="chrome://salastread/content/pref/pref-ignored.xul"/>
 
-			<button orient="vertical" class="buttonBoxButton" id="catImagesButton"
-					type="radio" group="categories" label="Image Handling"
-					url="chrome://salastread/content/pref/pref-images.xul"/>
+	<prefpane 	id="quickreply" 
+				label="Quick Reply" 
+				image="chrome://salastread/content/pref/images/quickreply.png"
+				src="chrome://salastread/content/pref/pref-quickreply.xul"/>
 
-			<button orient="vertical" class="buttonBoxButton" id="catIgnoredButton"
-					type="radio" group="categories" label="Ignored"
-					url="chrome://salastread/content/pref/pref-ignored.xul"/>
+	<prefpane 	id="colors" 
+				label="Thread Colors" 
+				image="chrome://salastread/content/pref/images/colors.png"
+				src="chrome://salastread/content/pref/pref-color.xul"/>
 
-			<button orient="vertical" class="buttonBoxButton" id="catQuickReplyButton"
-					type="radio" group="categories" label="Quick Reply"
-					url="chrome://salastread/content/pref/pref-quickreply.xul"/>
+	<prefpane 	id="threads" 
+				label="Threads" 
+				image="chrome://salastread/content/pref/images/threads.png"
+				src="chrome://salastread/content/pref/pref-threads.xul"/>
 
-			<button orient="vertical" class="buttonBoxButton" id="catColorButton"
-					type="radio" group="categories" label="Thread Colors"
-					url="chrome://salastread/content/pref/pref-color.xul"/>
+	<prefpane 	id="menu" 
+				label="SA Menu" 
+				image="chrome://salastread/content/pref/images/samenu.png"
+				src="chrome://salastread/content/pref/pref-menu.xul"/>
 
-			<button orient="vertical" class="buttonBoxButton" id="catThreadsButton"
-					type="radio" group="categories" label="Thread Options"
-					url="chrome://salastread/content/pref/pref-threads.xul"/>
-<!--
-			<button orient="vertical" class="buttonBoxButton" id="catUsersButton"
-					type="radio" group="categories" label="User Colors"
-					url="chrome://salastread/content/pref/pref-users.xul"/>
--->
-			<button orient="vertical" class="buttonBoxButton" id="catMenuButton"
-					type="radio" group="categories" label="SA Menus"
-					url="chrome://salastread/content/pref/pref-menu.xul"/>
+	<prefpane 	id="files" 
+				label="Files" 
+				image="chrome://salastread/content/pref/images/files.png"
+				src="chrome://salastread/content/pref/pref-files.xul"/>
 
-			<button orient="vertical" class="buttonBoxButton" id="catFilesButton"
-					type="radio" group="categories" label="File Settings"
-					url="chrome://salastread/content/pref/pref-files.xul"/>
+	<prefpane 	id="about" 
+				label="About" 
+				image="chrome://salastread/content/pref/images/about.png"
+				src="chrome://salastread/content/pref/pref-about.xul"/>
 
-			<button orient="vertical" class="buttonBoxButton" id="catAboutButton"
-					type="radio" group="categories" label="About"
-					url="chrome://salastread/content/pref/pref-about.xul"/>
-
-			<spacer />
-
-		</vbox>
-
-		<vbox flex="1">
-			<dialogheader id="header"/>
-			<iframe id="panelFrame" name="panelFrame" flex="1" src="chrome://salastread/content/pref/pref-general.xul" />
-		</vbox>
-
-	</hbox>
-
-	<separator/>
-
-</dialog>
+</prefwindow>
