@@ -1,22 +1,32 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
-<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-      onload="initSettings('Image Handling Settings');">
-
-	<script language="JavaScript" src="chrome://salastread/content/pref/pref-common.js" />
-	<script language="JavaScript" src="chrome://salastread/content/pref/pref-images.js" />
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<prefpane id="images">
+	<preferences>
+		<preference id="convertTextToImage" 		name="extensions.salastread.convertTextToImage" 		type="bool"/>
+		
+		<preference id="shrinkTextToImages" 		name="extensions.salastread.shrinkTextToImages" 		type="bool"/>
+		<preference id="dontTextToImageIfMayBeNws" 	name="extensions.salastread.dontTextToImageIfMayBeNws" 	type="bool"/>
+		<preference id="dontTextToImageInSpoilers" 	name="extensions.salastread.dontTextToImageInSpoilers" 	type="bool"/>
+		
+		<preference id="maxWidthOfConvertedImages" 	name="extensions.salastread.maxWidthOfConvertedImages" 	type="int"/>
+		<preference id="maxHeightOfConvertedImages" name="extensions.salastread.maxHeightOfConvertedImages" type="int"/>
+		
+		<preference id="thumbnailAllImages" 		name="extensions.salastread.thumbnailAllImages" 		type="bool"/>
+	</preferences>
 	
 	<groupbox>
 		<caption label="Text-to-Image Options"/>
 		
 		<vbox>
-			<checkbox id="toggle_convertTextToImage" label="Convert links to images to inline images in posts" />
+			<checkbox preference="convertTextToImage" label="Convert links to images to inline images in posts" />
 			
 			<vbox style="margin-left: 20px">
-				<checkbox id="toggle_shrinkTextToImages" label="Scale converted images to max width of 600 pixels" />
-				<checkbox id="toggle_dontTextToImageIfMayBeNws" label="Don't convert if post contains an NWS/NMS warning" />
-				<checkbox id="toggle_dontTextToImageInSpoilers" label="Don't convert links inside [spoiler] tags" />
+				<checkbox preference="shrinkTextToImages" 		 label="Scale converted images to max width of 600 pixels" />
+				<checkbox preference="dontTextToImageIfMayBeNws" label="Don't convert if post contains an NWS/NMS warning" />
+				<checkbox preference="dontTextToImageInSpoilers" label="Don't convert links inside [spoiler] tags" />
 				
 				
 				<grid>
@@ -27,23 +37,22 @@
 					
 					<rows>
 						<row align="center">
-							<label value="Max Width of Converted Images:" control="string_maxWidthOfConvertedImages"/>
-							<textbox id="int_maxWidthOfConvertedImages" size="3" />
-							<label value="px" control=""/>
+							<label value="Max Width of Converted Images (px):" control="maxWidth"/>
+							<textbox id="maxWidth" preference="maxWidthOfConvertedImages" size="3" />
 						</row>
 						
 						<row align="center">
-							<label value="Max Height of Converted Images:" control="string_maxHeightOfConvertedImages"/>
-							<textbox id="int_maxHeightOfConvertedImages" size="3" />
-							<label value="px" control=""/>
+							<label value="Max Height of Converted Images (px):" control="maxHeight"/>
+							<textbox id="maxHeight" preference="maxHeightOfConvertedImages" size="3" />
 						</row>
 					</rows>
 				</grid>
 			
 			</vbox>
 			
-			<checkbox id="toggle_thumbnailAllImages" label="Thumbnail all forum images until clicked"/>
+			<checkbox preference="thumbnailAllImages" label="Thumbnail all forum images until clicked"/>
 		</vbox>
 	</groupbox>
+	</prefpane>
 
-</page>
+</overlay>

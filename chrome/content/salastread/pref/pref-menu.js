@@ -118,8 +118,8 @@ function cbSet() {
 
 function pinnedSelect() {
 	try {
-		if (!document.getElementById("toggle_showSAForumMenu").getAttribute("checked") || 
-			!document.getElementById("toggle_nestSAForumMenu").getAttribute("checked")) {
+		if (!document.getElementById("showSAForumMenu").getAttribute("checked") || 
+			!document.getElementById("nestSAForumMenu").getAttribute("checked")) {
 			
 			document.getElementById("moveUpButton").setAttribute("disabled",true);
 			document.getElementById("moveDownButton").setAttribute("disabled",true);

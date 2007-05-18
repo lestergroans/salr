@@ -1,6 +1,5 @@
 
 function initColors() {
-	initSettings('Color Settings');
 	loadColors(isDropDownFYAD());
 }
 
@@ -46,7 +45,7 @@ function loadColors(isfyad) {
 		if(isfyad) { document.getElementById("sampletableholder").style.backgroundColor = "#f99"; } 
 		else { document.getElementById("sampletableholder").style.backgroundColor = "#fff"; }
 		
-		var gradientsOn = !document.getElementById("toggle_disableGradients").checked;
+		var gradientsOn = !document.getElementById("disableGradients").checked;
 		var ctypes = new Array("readWithNew", "read", "unread");
 		
 		for(var cn = 0; cn < ctypes.length; cn++) {
