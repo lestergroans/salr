@@ -1002,7 +1002,6 @@ function quickQuoteSubmit(message, parseurl, subscribe, disablesmilies, signatur
 }
 
 function salastread_windowOnBeforeUnload(e) {
-	if(persistObject._killed == true) { return; }
 	if(e.originalTarget == window.__salastread_quotedoc) {
 		if(quickQuoteSubmitting) {
 			return true;
@@ -1045,7 +1044,6 @@ function SALR_SyncTick(force,trace) {
 }
 
 function salastread_windowOnUnload(e) {
-   if ( persistObject._killed==true ) { return; }
    if ( e.originalTarget == window.__salastread_quotedoc ) {
       //releaseQuickQuoteVarsWithClose();
       releaseQuickQuoteVars();
@@ -1635,38 +1633,45 @@ function SALR_CheckForSpaceScroll(doc, oldTop) {
 }
 
 function SALR_DirectionalNavigate(doc, dir) {
+	var urlbase = doc.location.href.match(/.*\.somethingawful\.com/);
+	var curPage = doc.__SALR_curPage;
+	var perPage = persistObject.getPreference("postsPerPage");
 	var forumid = doc.location.href.match(/forumid=[0-9]+/);
 	var posticon = doc.location.href.match(/posticon=[0-9]+/);
 	if (!posticon) posticon = "posticon=0";
-
-   if (dir == "top") {
-      var tforum = doc.__SALR_forumid;
-	  if (tforum)
-		  doc.location = "http://forums.somethingawful.com/forumdisplay.php?s=&forumid="+tforum;
-	  else
-		  doc.location = "http://forums.somethingawful.com/forumdisplay.php?s=&"+forumid+"&"+posticon;
-   }
-   else if (dir == "left") {
-      var curPage = doc.__SALR_curPage;
-      if (curPage > 1) {
-         var threadid = doc.__SALR_threadid;
-		 if (threadid)
-			 doc.location = "http://forums.somethingawful.com/showthread.php?s=&threadid="+threadid+"&perpage=40&pagenumber="+(curPage-1);
-		 else
-			 doc.location = "http://forums.somethingawful.com/forumdisplay.php?"+forumid+"&daysprune=30&sortorder=desc&sortfield=lastpost&perpage=40&"+posticon+"&pagenumber="+(curPage-1);
-      }
-   }
-   else if (dir == "right") {
-      var curPage = doc.__SALR_curPage;
-      var maxPage = doc.__SALR_maxPage;
-      if (maxPage > curPage) {
-         var threadid = doc.__SALR_threadid;
-		 if (threadid)
-			 doc.location = "http://forums.somethingawful.com/showthread.php?s=&threadid="+threadid+"&perpage=40&pagenumber="+(curPage+1);
-		 else
-			 doc.location = "http://forums.somethingawful.com/forumdisplay.php?"+forumid+"&daysprune=30&sortorder=desc&sortfield=lastpost&perpage=40&"+posticon+"&pagenumber="+(curPage+1);
-      }
-   }
+	
+	if (dir == "top") {
+		if(curPage == 1) {
+			doc.location = urlbase + "/index.php";
+		} else {
+			var threadForum = doc.__SALR_forumid;
+			if (threadForum) {
+				doc.location = urlbase + "/forumdisplay.php?s=&forumid=" + threadForum;
+			} else {
+				doc.location = urlbase + "/forumdisplay.php?s=&" + forumid + "&" + posticon;
+			}
+		}
+	} else if (dir == "left") {
+		if (curPage > 1) {
+			var threadid = doc.__SALR_threadid;
+			if (threadid) {
+				doc.location = urlbase + "/showthread.php?s=&threadid=" + threadid+"&perpage=" + perPage + "&pagenumber=" + (curPage - 1);
+			} else {
+				doc.location = urlbase + "/forumdisplay.php?" + forumid + "&daysprune=30&sortorder=desc&sortfield=lastpost&perpage=" + perPage + "&" + posticon + "&pagenumber=" + (curPage - 1);
+			}
+		}
+	} else if (dir == "right") {
+		var curPage = doc.__SALR_curPage;
+		var maxPage = doc.__SALR_maxPage;
+		if (maxPage > curPage) {
+			var threadid = doc.__SALR_threadid;
+			if (threadid) {
+				doc.location = urlbase + "/showthread.php?s=&threadid="+threadid+"&perpage=" + perPage + "&pagenumber=" + (curPage + 1);
+			} else {
+				doc.location = urlbase + "/forumdisplay.php?"+forumid+"&daysprune=30&sortorder=desc&sortfield=lastpost&perpage=" + perPage + "&" + posticon + "&pagenumber=" + (curPage + 1);
+			}
+		}
+	}
 }
 
 function SALR_PageMouseUp(event) {
@@ -1904,30 +1909,6 @@ function handleConfigLinkInsertion(e) {
 	}
 }
 
-function salastread_addUpdateIcon(doc) {
-   if ( persistObject._updateURL != "" ) {
-      var updlink = doc.createElement("A");
-      var updicon = doc.createElement("IMG");
-      updlink.href = persistObject._updateURL;
-      if ( persistObject._killed==true ) {
-         updicon.src = "chrome://salastread/skin/killedicon.png";
-         updicon.title = "SA Last Read Update REQUIRED";
-      } else {
-         updicon.src = "chrome://salastread/skin/updateicon.png";
-         updicon.title = "SA Last Read Update Available";
-      }
-      updicon.style.width = "35px";
-      updicon.style.height = "33px";
-      updicon.style.border = "none";
-      updlink.appendChild(updicon);
-      updlink.style.display = "block";
-      updlink.style.position = "fixed";
-      updlink.style.right = "5px";
-      updlink.style.bottom = "5px";
-      doc.body.appendChild(updlink);
-   }
-}
-
 function handleBodyClassing(e) {
    var doc = e.originalTarget;
    var docbody = doc.body;
@@ -2010,6 +1991,7 @@ function SALR_ParamsToUrl(params) {
    return res;
 }
 
+/* BETTING THIS IS UNUSED
 var SALR_ProfileUserName;
 
 function SALR_HandleProfileInsertion(e) {
@@ -2079,6 +2061,8 @@ function SALR_HandleProfileInsertion(e) {
    } catch (err) { }
 }
 
+*/
+
 function SALR_windowOnLoadMini(e) {
    var doc = e.originalTarget;
    var location = doc.location;
@@ -2134,7 +2118,6 @@ function salastread_windowOnLoad(e) {
 				var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
 					samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
 				if (samatch) {
-					salastread_addUpdateIcon(doc);
 					/*
 					Moved below, where it should be
 					if (persistObject.getPreference('removeHeaderAndFooter')) {
@@ -2144,15 +2127,6 @@ function salastread_windowOnLoad(e) {
 				}
 			}
 		} catch(ex) { }
-
-		if(persistObject._killed == true) {
-			if(persistObject._killMessage != "") {
-				alert("SA Last Read Message:\n\n" + persistObject._killMessage);
-			}
-
-			persistObject._killMessage = "";
-			return;
-		}
 
 		try {
 			loadCount++;
@@ -2229,13 +2203,12 @@ function salastread_windowOnLoad(e) {
 					} else if ( location.href.indexOf("member2.php") != -1 ||
 								location.href.indexOf("usercp.php") != -1) {
 						handleSubscriptions(doc);
-					} else if ( location.href.indexOf("member.php") != -1 &&
+					}/* else if ( location.href.indexOf("member.php") != -1 &&
 								location.href.indexOf("salr_") != -1) {
 						SALR_HandleProfileInsertion(e);
-					}
+					} */
 					var hcliresult = handleConfigLinkInsertion(e);
 					handleBodyClassing(e);
-					//salastread_addUpdateIcon(doc);
 
 					doc.__salastread_processed = true;
 
@@ -2442,63 +2415,6 @@ function showChangelogWindow() {
 	openDialog("chrome://salastread/content/newfeatures/newfeatures.xul", "SALR_newfeatures", "chrome,centerscreen,dialog=no");
 }
 
-var killcheckxmlhttp;
-
-function saLastReadKillCheck() {
-   persistObject._killChecked = true;
-   if ( persistObject.getPreference('dontCheckKillSwitch') ) {
-      return;
-   }
-   killcheckxmlhttp = new XMLHttpRequest();
-   killcheckxmlhttp.open("GET","http://static.evercrest.com/www/images2/ext/sa/salastread-kill.xml",true);
-   killcheckxmlhttp.onreadystatechange = function() {
-      try {
-         if (killcheckxmlhttp.readyState==2) {
-            if (killcheckxmlhttp.status != 200) {
-               //alert("aborting ks xml");
-               killcheckxmlhttp.abort();
-            }
-         }
-         else if (killcheckxmlhttp.readyState==4) {
-            //alert("processing ks xml ("+killcheckxmlhttp.responseText+")...");
-            var xdoc = killcheckxmlhttp.responseXML;
-            if ( xdoc!=null ) {
-               var xel = xdoc.documentElement;
-               if ( xel!=null ) {
-                  var before = xel.getAttribute("before");
-                  if ( Number(before) > 1912 ) {
-                     persistObject._killed = true;
-                     persistObject._killMessage = "Please upgrade to a newer version of the SA Last Read extension.\n"+
-                                                  "The version you have installed is "+
-                                                  "out of date and has been disabled for this browser session.";
-                  }
-                  for (var x=0; x<xel.childNodes.length; x++) {
-                     var thischild = xel.childNodes[x];
-                     if (thischild.nodeName == "dev" ) {
-                        var currentver = thischild.getAttribute("current");
-                        var updateurl = thischild.getAttribute("url");
-                        if ( Number(currentver) > 1912 ) {
-                           persistObject._updateURL = updateurl;
-                        }
-                     }
-                  }
-                  //DELETEME -- Uncomment this to force a killed version
-                  //persistObject._killed = true;
-                  //persistObject._killMessage = "This should never be released.";
-                  return;
-               }
-            }
-            //persistObject._killed = true;
-            //persistObject._killMessage = "Failed to get kill switch XML.";
-         }
-      }
-      catch (e) {
-         //alert("SALastRead Kill Switch Check Error: "+e);
-      }
-   };
-   killcheckxmlhttp.send(null);
-}
-
 try {
 	persistObject = Components.classes["@evercrest.com/salastread/persist-object;1"]
 					.createInstance(Components.interfaces.nsISupports);
@@ -2506,11 +2422,13 @@ try {
 	if(!persistObject) {
 		throw "Failed to create persistObject.";
 	}
-
+	
+	/*
 	if(!persistObject._syncTransferObject) {
 		persistObject.SetSyncTransferObject(new SALR_FTPTransferObject());
 	}
-
+	*/
+	
 	var isWindows = (navigator.platform.indexOf("Win")!=-1);
 	persistObject.ProfileInit(isWindows);
 
@@ -2522,10 +2440,6 @@ try {
 	setInterval(function(){SALR_SyncTick(false, false);}, 60 * 1000);
 	setTimeout(function(){SALR_SyncTick(false, false);}, 10);
 	persistObject._PNGCreator = new PNGMaker();
-
-	if(persistObject._killChecked == false) {
-		saLastReadKillCheck();
-	}
 
 	if(persistObject && persistObject.LastRunVersion != persistObject.SALRversion) {
 		needToShowChangeLog = !persistObject.IsDevelopmentRelease;
