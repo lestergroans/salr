@@ -1,46 +1,57 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
-<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-      onload="generalInit();">
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<script language="JavaScript" src="chrome://salastread/content/pref/pref-common.js" />
-	<script language="JavaScript" src="chrome://salastread/content/pref/pref-general.js" />
-	
-	<!-- <description>woof woof</description> -->
+	<prefpane id="general">
+	<preferences>
+		<preference id="removeHeaderAndFooter" 	name="extensions.salastread.removeHeaderAndFooter" 	type="bool"/>
+		<preference id="removePageTitlePrefix" 	name="extensions.salastread.removePageTitlePrefix" 	type="bool"/>
+		<preference id="enablePageNavigator"	name="extensions.salastread.enablePageNavigator" 	type="bool"/>
+		<preference id="enableForumNavigator"	name="extensions.salastread.enableForumNavigator" 	type="bool"/>
+		<preference id="gestureEnable" 			name="extensions.salastread.gestureEnable" 			type="bool"/>
+		<preference id="suppressErrors"			name="extensions.salastread.suppressErrors" 		type="bool"/>
+		
+		<preference id="showGoToLastIcon"			name="extensions.salastread.showGoToLastIcon" 		type="bool"/>
+		<preference id="gotoLastReadPost"			name="extensions.salastread.gotoLastReadPost" 		type="string"/>
+		<preference id="alwaysShowGoToLastIcon"		name="extensions.salastread.alwaysShowGoToLastIcon" type="bool"/>
+		<preference id="showUnvisitIcon"			name="extensions.salastread.showUnvisitIcon" 		type="bool"/>
+		<preference id="unvisitThreadIcon"			name="extensions.salastread.unvisitThreadIcon" 		type="string"/>
+    </preferences>
+
 	<groupbox>
 	<caption label="General Options" />
 	<vbox>
-		<checkbox id="toggle_removeHeaderAndFooter" label="Hide Forum Header and Footer" />
-		<checkbox id="toggle_removePageTitlePrefix" label="Remove 'The Something Awful Forums' from page titles" />
-		<checkbox id="toggle_enablePageNavigator" 	label="Add a page navigator to the lower-right corner of the browser" />
-		<checkbox id="toggle_enableForumNavigator" 	label="Add a forum navigator to the lower-right corner of the browser" />
-		<checkbox id="toggle_gestureEnable" 		label="Allow mouse gestures to navigate around threads and forums" />
-		<checkbox id="toggle_suppressErrors"		label="Don't display error popup messages" />
+		<checkbox preference="removeHeaderAndFooter" label="Hide Forum Header and Footer" />
+		<checkbox preference="removePageTitlePrefix" label="Remove 'The Something Awful Forums' from page titles" />
+		<checkbox preference="enablePageNavigator" 	 label="Add a page navigator to the lower-right corner of the browser" />
+		<checkbox preference="enableForumNavigator"  label="Add a forum navigator to the lower-right corner of the browser" />
+		<checkbox preference="gestureEnable" 		 label="Allow mouse gestures to navigate around threads and forums" />
+		<checkbox preference="suppressErrors"		 label="Don't display error popup messages" />
 	</vbox>
 	</groupbox>
-
+	
 	<groupbox>
 		<caption label="Thread Command Icons"/>
 		
 		<vbox>
-			<checkbox id="toggle_showGoToLastIcon" label="Show 'Go To Last Post' icon" oncommand="cbSet()"/>
+			<checkbox preference="showGoToLastIcon" label="Show 'Go To Last Post' icon" oncommand="cbSet()"/>
 			<vbox style="margin-left: 20px">
 				<hbox align="center" flex="1">
-					<label value="Icon URL:" control="xxx"/>
-					<textbox id="string_goToLastReadPost" flex="1"/>
+					<label value="Icon URL:" control="lastReadPostImage"/>
+					<textbox id="lastReadPostImage" preference="goToLastReadPost" flex="1"/>
 					<button id="defaultstring_goToLastReadPost" label="Default" />
 				</hbox>
-				<checkbox id="toggle_alwaysShowGoToLastIcon" label="Always show 'Go To Last Post' icon, even if no new posts in thread"/>
+				<checkbox perference="alwaysShowGoToLastIcon" label="Always show 'Go To Last Post' icon, even if no new posts in thread"/>
 			</vbox>
 			
-			<checkbox id="toggle_showUnvisitIcon" label="Show 'Mark Thread Unvisited' icon" oncommand="cbSet()" />
+			<checkbox preference="showUnvisitIcon" label="Show 'Mark Thread Unvisited' icon" oncommand="cbSet()" />
 			
 			<vbox style="margin-left: 20px">
 				
 				<hbox align="center" flex="1">
-					<label value="Icon URL:" control="yyy"/>
-					<textbox id="string_markThreadUnvisited" flex="1"/>
+					<label value="Icon URL:" control="unvisitThreadIcon"/>
+					<textbox id="unvisitThreadIcon" preference="markThreadUnvisited" flex="1"/>
 					<button id="defaultstring_markThreadUnvisited" label="Default" />
 				</hbox>
 				
@@ -48,4 +59,5 @@
 			
 		</vbox>
 	</groupbox>
-</page>
+	</prefpane>
+</overlay>
