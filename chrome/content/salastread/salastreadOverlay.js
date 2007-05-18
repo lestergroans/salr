@@ -1811,7 +1811,7 @@ function SALR_runConfig(page) {
 		data = page;
 	}
 
-	openDialog("chrome://salastread/content/pref.xul","_blank", "chrome,titlebar,modal,resizable", data);
+	openDialog("chrome://salastread/content/pref.xul", "Preferences", "chrome,titlebar,toolbar,centerscreen,modal", "");
 }
 
 function handleEditPost(e) {
