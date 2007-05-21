@@ -3,7 +3,9 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<prefpane id="general">
+	<script type="application/x-javascript" src="chrome://salastread/content/pref/pref-general.js"/>
+
+	<prefpane id="general" onpaneload="initGeneral()">
 	<preferences>
 		<preference id="removeHeaderAndFooter" 	name="extensions.salastread.removeHeaderAndFooter" 	type="bool"/>
 		<preference id="removePageTitlePrefix" 	name="extensions.salastread.removePageTitlePrefix" 	type="bool"/>
@@ -13,10 +15,10 @@
 		<preference id="suppressErrors"			name="extensions.salastread.suppressErrors" 		type="bool"/>
 		
 		<preference id="showGoToLastIcon"			name="extensions.salastread.showGoToLastIcon" 		type="bool"/>
-		<preference id="gotoLastReadPost"			name="extensions.salastread.gotoLastReadPost" 		type="string"/>
+		<preference id="goToLastReadPost"			name="extensions.salastread.goToLastReadPost" 		type="string"/>
 		<preference id="alwaysShowGoToLastIcon"		name="extensions.salastread.alwaysShowGoToLastIcon" type="bool"/>
 		<preference id="showUnvisitIcon"			name="extensions.salastread.showUnvisitIcon" 		type="bool"/>
-		<preference id="unvisitThreadIcon"			name="extensions.salastread.unvisitThreadIcon" 		type="string"/>
+		<preference id="markThreadUnvisited"		name="extensions.salastread.markThreadUnvisited" 	type="string"/>
     </preferences>
 
 	<groupbox>
@@ -35,24 +37,24 @@
 		<caption label="Thread Command Icons"/>
 		
 		<vbox>
-			<checkbox preference="showGoToLastIcon" label="Show 'Go To Last Post' icon" oncommand="cbSet()"/>
+			<checkbox id="toggleLastReadIcon" preference="showGoToLastIcon" label="Show 'Go To Last Post' icon" oncommand="toggleLastReadIcon()"/>
 			<vbox style="margin-left: 20px">
 				<hbox align="center" flex="1">
-					<label value="Icon URL:" control="lastReadPostImage"/>
-					<textbox id="lastReadPostImage" preference="goToLastReadPost" flex="1"/>
-					<button id="defaultstring_goToLastReadPost" label="Default" />
+					<label value="Icon URL:" control="lastReadPostIcon"/>
+					<textbox id="lastReadIcon" preference="goToLastReadPost" flex="1"/>
+					<button id="lastReadIconDefault" label="Default"  onclick="lastReadIconDefault()"/>
 				</hbox>
-				<checkbox perference="alwaysShowGoToLastIcon" label="Always show 'Go To Last Post' icon, even if no new posts in thread"/>
+				<checkbox id="alwayShowLastReadIcon" preference="alwaysShowGoToLastIcon" label="Always show 'Go To Last Post' icon, even if no new posts in thread"/>
 			</vbox>
 			
-			<checkbox preference="showUnvisitIcon" label="Show 'Mark Thread Unvisited' icon" oncommand="cbSet()" />
+			<checkbox id="toggleUnvisitIcon" preference="showUnvisitIcon" label="Show 'Mark Thread Unvisited' icon" oncommand="toggleUnvisitIcon()" />
 			
 			<vbox style="margin-left: 20px">
 				
 				<hbox align="center" flex="1">
 					<label value="Icon URL:" control="unvisitThreadIcon"/>
-					<textbox id="unvisitThreadIcon" preference="markThreadUnvisited" flex="1"/>
-					<button id="defaultstring_markThreadUnvisited" label="Default" />
+					<textbox id="unvisitIcon" preference="markThreadUnvisited" flex="1"/>
+					<button id="unvisitIconDefault" label="Default" onclick="unvisitIconDefault()"/>
 				</hbox>
 				
 			</vbox>
