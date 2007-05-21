@@ -14,7 +14,7 @@
 			<grid>
 				<columns>
 					<column/>
-					<column/>
+					<column flex="1"/>
 					<column/>
 				</columns>
 				<rows>
@@ -37,13 +37,11 @@
 			<description>
 				This value specifies how long, in days, the extension should remember
 				last read information about a thread since the last time you've read
-				it. Threads older than this interval will automatically be cleaned out
-				of the extension's data file and will appear unread if you see them
-				again afterward.
+				it. Threads older than this will automatically be forgotten about by the extension.
 			</description>
 			<hbox align="center">
 				<label value="Thread Persistance Age (in days):" control="minAge"/>
-				<textbox id="minAge" preference="expireMinAge"/>
+				<textbox id="minAge" preference="expireMinAge" size="3"/>
 			</hbox>
 		</groupbox>
 		
@@ -59,12 +57,14 @@
 			<grid>
 				<columns>
 					<column/>
+					<column flex="1"/>
 					<column/>
 				</columns>
 				<rows>
 					<row align="center">
 						<label value="FTP server name:"/>
 						<textbox id="yyy" value="ftp.example.com" disabled="true"/>
+						<button id="qqq" label="Test These Settings" />
 					</row>
 					<row align="center">
 						<label value="Data file path/name:"/>
@@ -80,9 +80,6 @@
 					</row>
 				</rows>
 			</grid>
-			<hbox>
-				<button id="qqq" label="Test These Settings" />
-			</hbox>
 		</groupbox>
 	</prefpane>
 </overlay>
