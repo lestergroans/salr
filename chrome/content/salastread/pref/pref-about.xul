@@ -3,8 +3,14 @@
 <?xml-stylesheet href="chrome://salastread/content/pref/pref-about.css" type="text/css"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-
-	<prefpane id="about">
+	
+	<script type="application/x-javascript" src="chrome://salastread/content/pref/pref-about.js"/>
+	
+	<prefpane id="about" onpaneload="aboutInit()">
+		<preferences>
+			<preference id="timeSpentOnForums" name="extensions.salastread.timeSpentOnForums" type="int"/>
+		</preferences>
+		
 		<vbox id="mainabout" flex="1">
 			<hbox>
 				<spacer flex="1"/>
@@ -20,11 +26,15 @@
 						<text value="Tim Fries (biznatchio)"/>
 					</hbox>
 					<hbox>
+						<text value="Current Developers: " style="font-weight: bold"/>
+						<text value="duz, Tivac"/>
+					</hbox>
+					<hbox>
 						<text value="Contributors: " style="font-weight: bold"/>
 						<vbox>
 							<text value="uncut product, 8ender, LonelyKing,"/>
 							<text value="Sebbe, Pahalial, ctz, Defiler, Shii,"/>
-							<text value="cheesypeanut, duz, Tivac"/>
+							<text value="cheesypeanut"/>
 						</vbox>
 					</hbox>
 					<spacer flex="1"/>
