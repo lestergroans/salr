@@ -83,8 +83,6 @@
 				</vbox>
 			</hbox>
 			
-			<separator />
-			
 			<hbox>
 				<spacer flex="1"/>
 				<button label="Load Default Colors" oncommand="loadDefaultColors()"/>
