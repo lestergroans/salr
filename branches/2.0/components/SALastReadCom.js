@@ -182,8 +182,6 @@ salrPersistObject.prototype = {
       }
    },
 
-   //get expireMinAge() { return 7; },
-
    get storeFileName() { return this._fn; },
 
    get storedbFileName() { return this._dbfn; },
@@ -663,10 +661,6 @@ salrPersistObject.prototype = {
       }
    },
 
-   _killed: false,
-   _killChecked: false,
-   _killMessage: "",
-   _updateURL: "",
    _profileInitialized: false,
    _gotForumList: false,
    _forumListXml: null,
@@ -747,6 +741,8 @@ salrPersistObject.prototype = {
 	//
 	// Here begins new functions for the 2.0 rewrite
 	//
+
+	_needToExpireThreads: true,
 
 	// Return a resource pointing to the proper preferences branch
 	get preferences()
@@ -1088,6 +1084,32 @@ salrPersistObject.prototype = {
 			var build = "0";
 		}
 		return build;
+	},
+
+	// Searches the user's cookies for their stored SA userid
+	// @param:
+	// @return: (int) user id or (null) if not found
+	get userId() {
+		var id = this.getPreference('userId');
+		if(id > 0) {
+			return id;
+		} else {
+			var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"]
+								.getService(Components.interfaces.nsICookieManager);
+			var iter = cookieManager.enumerator;
+			while (iter.hasMoreElements()) {
+				var cookie = iter.getNext();
+				if (cookie instanceof Components.interfaces.nsICookie){
+					if (cookie.host == "forums.somethingawful.com" && cookie.name == 'bbuserid') {
+						if(cookie.value > 0) {
+							this.setPreference('userId', cookie.value);
+							return cookie.value;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	},
 
 	// Adds/updates a user as a mod
@@ -2075,32 +2097,15 @@ salrPersistObject.prototype = {
 		return quickbutton;
 	},
 
-	// Searches the user's cookies for their stored SA userid
-	// @param:
-	// @return: (int) user id or (null) if not found
-	get userId() {
-		var id = this.getPreference('userId');
-		if(id > 0) {
-			return id;
-		} else {
-			var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"]
-								.getService(Components.interfaces.nsICookieManager);
-
-			var iter = cookieManager.enumerator;
-			while (iter.hasMoreElements()) {
-				var cookie = iter.getNext();
-				if (cookie instanceof Components.interfaces.nsICookie){
-					if (cookie.host == "forums.somethingawful.com" && cookie.name == 'bbuserid') {
-						if(cookie.value > 0) {
-							this.setPreference('userId', cookie.value);
-							return cookie.value;
-						}
-					}
-				}
-			}
-		}
-
-		return false;
+	expireThreads: function()
+	{
+		var expireLength = this.getPreference("expireMinAge") * 86400; // days * 24 * 60 * 60
+		var rightNow = this.currentTimeStamp;
+		var expireWhen = rightNow - expireLength;
+		dump (expireWhen);
+		var statement = this.database.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` < ?1 AND `star` != 1");
+		statement.bindStringParameter(0,expireWhen);
+		statement.execute();
 	}
 
 	// Don't forget the trailing comma when adding a new function/property

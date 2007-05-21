@@ -2,10 +2,6 @@
 
 var needToShowChangeLog = false;
 
-var THREAD_ICON_COUNT = 2;
-
-//var expireMinAge = 7;  // how many days old must a thread entry be before it's deleted?
-
 // WARNING WARNING WARNING WARNING
 // Changing the following value, or any of the code that enforces the delay,
 // you may get banned from the forums. This delay is here at radium's command!
@@ -718,14 +714,14 @@ function handleForumDisplay(doc)
 		{
 
 			var thread = threadlist[i];
-			
+
 			threadTitleBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class,'title')]");
 			if (threadTitleBox.getElementsByTagName('a')[0].href.search(/announcement/i) > -1)
 			{
 				// It's an announcement so skip the rest
 				continue;
 			}
-			
+
 			threadId = parseInt(threadTitleBox.getElementsByTagName('a')[0].href.match(/threadid=(\d+)/i)[1]);
 			threadTitle = threadTitleBox.getElementsByTagName('a')[0].innerHTML;
 			threadDetails = persistObject.getThreadDetails(threadId);
@@ -1643,7 +1639,7 @@ function SALR_DirectionalNavigate(doc, dir) {
 	if (!sortfield) sortfield = "&sortfield=lastpost";
 	var sortorder = doc.location.href.match(/&sortorder=[a-z]+/);
 	if (!sortorder) sortorder = "&sortorder=desc";
-	
+
 	if (dir == "top") {
 		if(curPage == 1) {
 			doc.location = urlbase + "/index.php";
@@ -2378,7 +2374,7 @@ function SALR_StarThread()
 	{
 		var starStatus = persistObject.isThreadStarred(threadid);
 		persistObject.toggleThreadStar(threadid);
-		
+
 		if (target.ownerDocument.location.href.search(/showthread.php/i) == -1)
 		{
 			target.ownerDocument.location = target.ownerDocument.location;
@@ -2419,33 +2415,33 @@ function showChangelogWindow() {
 	openDialog("chrome://salastread/content/newfeatures/newfeatures.xul", "SALR_newfeatures", "chrome,centerscreen,dialog=no");
 }
 
-try {
+
+// This code gets called every page load as part of Firefox's extension process
+try
+{
 	persistObject = Components.classes["@evercrest.com/salastread/persist-object;1"]
-					.createInstance(Components.interfaces.nsISupports);
+		.createInstance(Components.interfaces.nsISupports);
 	persistObject = persistObject.wrappedJSObject;
-	if(!persistObject) {
+	if (!persistObject)
+	{
 		throw "Failed to create persistObject.";
 	}
-	
-	/*
-	if(!persistObject._syncTransferObject) {
-		persistObject.SetSyncTransferObject(new SALR_FTPTransferObject());
-	}
-	*/
-	
+
+	// This should get changed to something better eventually
 	var isWindows = (navigator.platform.indexOf("Win")!=-1);
 	persistObject.ProfileInit(isWindows);
 
-	if(persistObject._starterr) {
-		alert( "SALR Startup Error:\n\n"+persistObject._starterr );
+	if (persistObject._starterr)
+	{
+		throw "SALR Startup Error";
 	}
 
 	setInterval(SALR_TimerTick, 1000);
 	setInterval(function(){SALR_SyncTick(false, false);}, 60 * 1000);
 	setTimeout(function(){SALR_SyncTick(false, false);}, 10);
-	persistObject._PNGCreator = new PNGMaker();
 
-	if(persistObject && persistObject.LastRunVersion != persistObject.SALRversion) {
+	if (persistObject && persistObject.LastRunVersion != persistObject.SALRversion)
+	{
 		needToShowChangeLog = !persistObject.IsDevelopmentRelease;
 		// Here we have to put special cases for specific dev build numbers that require the changelog dialog to appear
 		var buildNum = parseInt(persistObject.LastRunVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3], 10);
@@ -2454,17 +2450,28 @@ try {
 		}
 	}
 
-	if(typeof(persistObject.xmlDoc) != "undefined") {
+	if (persistObject && persistObject._needToExpireThreads)
+	{
+		persistObject.expireThreads();
+		persistObject._needToExpireThreads = false;
+	}
+
+	if (typeof(persistObject.xmlDoc) != "undefined")
+	{
 		window.addEventListener('load', salastread_windowOnLoad, true);
 		window.addEventListener('beforeunload', salastread_windowOnBeforeUnload, true);
 		window.addEventListener('unload', salastread_windowOnUnload, true);
-	} else {
-		alert("persistObject._starterr =\n" + persistObject._starterr);
 	}
-} catch (e) {
+	else
+	{
+		throw "SALR Startup Error";
+	}
+}
+catch (e)
+{
 	alert("SALastRead init error: "+e);
-
-	if(persistObject) {
+	if (persistObject)
+	{
 		alert("persistObject._starterr =\n" + persistObject._starterr);
 	}
 }
