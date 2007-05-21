@@ -1,45 +1,48 @@
-function generalInit() {
-   initSettings('General Settings');
-   cbSet();
+function initGeneral() {
+	toggleLastReadIcon();
+	toggleUnvisitIcon();
 }
 
-function cbSet() {
-	try {
-		if ( !document.getElementById("toggle_showGoToLastIcon").getAttribute("checked") ) {
-			document.getElementById("string_goToLastReadPost").setAttribute("disabled",true);
-			document.getElementById("defaultstring_goToLastReadPost").setAttribute("disabled",true);
-			document.getElementById("toggle_alwaysShowGoToLastIcon").setAttribute("disabled",true);
-		} else {
-			document.getElementById("string_goToLastReadPost").removeAttribute("disabled");
-			document.getElementById("defaultstring_goToLastReadPost").removeAttribute("disabled");
-			document.getElementById("toggle_alwaysShowGoToLastIcon").removeAttribute("disabled");
-		}
-		
-		if ( !document.getElementById("toggle_showUnvisitIcon").getAttribute("checked") ) {
-			document.getElementById("string_markThreadUnvisited").setAttribute("disabled",true);
-			document.getElementById("defaultstring_markThreadUnvisited").setAttribute("disabled",true);
-		} else {
-			document.getElementById("string_markThreadUnvisited").removeAttribute("disabled");
-			document.getElementById("defaultstring_markThreadUnvisited").removeAttribute("disabled");
-		}
-	} catch(e) {
-		alert("err: "+e);
-	}
-}
-
-function __dead_code() {
-	var qqt = document.getElementById("qqtoggles");
-	if ( !document.getElementById("toggle_useQuickQuote").getAttribute("checked") ) {
-		var child = qqt.firstChild;
-		while (child) {
-			child.setAttribute("disabled",true);
-			child = child.nextSibling;
-		}
+function toggleLastReadIcon() {
+	if(document.getElementById("toggleLastReadIcon").checked) {
+		//enable the others
+		document.getElementById("lastReadIcon").disabled = false;
+		document.getElementById("lastReadIconDefault").disabled = false;
+		document.getElementById("alwayShowLastReadIcon").disabled = false;
 	} else {
-		var child = qqt.firstChild;
-		while (child) {
-			child.removeAttribute("disabled");
-			child = child.nextSibling;
-		}
+		//disable
+		document.getElementById("lastReadIcon").disabled = true;
+		document.getElementById("lastReadIconDefault").disabled = true;
+		document.getElementById("alwayShowLastReadIcon").disabled = true;
 	}
+}
+
+function toggleUnvisitIcon() {
+	if(document.getElementById("toggleUnvisitIcon").checked) {
+		//enable
+		document.getElementById("unvisitIcon").disabled = false;
+		document.getElementById("unvisitIconDefault").disabled = false;
+	} else {
+		//disable
+		document.getElementById("unvisitIcon").disabled = true;
+		document.getElementById("unvisitIconDefault").disabled = true;
+	}
+}
+
+function lastReadIconDefault() {
+	try {
+		var pref = document.getElementById("goToLastReadPost");
+			pref.reset();
+	} catch(e) {}
+	
+	pref.value = pref.valueFromPreferences;
+}
+
+function unvisitIconDefault() {
+	try {
+		var pref = document.getElementById("markThreadUnvisited");
+			pref.reset();
+	} catch(e) {}
+	
+	pref.value = pref.valueFromPreferences;
 }
