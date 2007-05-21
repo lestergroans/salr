@@ -30,7 +30,7 @@
 				src="chrome://salastread/content/pref/pref-quickreply.xul"/>
 
 	<prefpane 	id="colors" 
-				label="Thread Colors" 
+				label="Colors" 
 				image="chrome://salastread/content/pref/images/colors.png"
 				src="chrome://salastread/content/pref/pref-color.xul"/>
 
@@ -40,7 +40,7 @@
 				src="chrome://salastread/content/pref/pref-threads.xul"/>
 
 	<prefpane 	id="menu" 
-				label="SA Menu" 
+				label="Menus" 
 				image="chrome://salastread/content/pref/images/samenu.png"
 				src="chrome://salastread/content/pref/pref-menu.xul"/>
 
