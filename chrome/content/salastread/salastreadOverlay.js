@@ -1639,16 +1639,17 @@ function SALR_DirectionalNavigate(doc, dir) {
 	if (!sortfield) sortfield = "&sortfield=lastpost";
 	var sortorder = doc.location.href.match(/&sortorder=[a-z]+/);
 	if (!sortorder) sortorder = "&sortorder=desc";
-
+	
 	if (dir == "top") {
-		if(curPage == 1) {
+		var threadForum = doc.__SALR_forumid;
+		
+		if(curPage == 1 && !threadForum) {
 			doc.location = urlbase + "/index.php";
 		} else {
-			var threadForum = doc.__SALR_forumid;
 			if (threadForum) {
 				doc.location = urlbase + "/forumdisplay.php?s=&forumid=" + threadForum;
 			} else {
-				doc.location = urlbase + "/forumdisplay.php?s=&" + forumid + "&" + posticon;
+				doc.location = urlbase + "/forumdisplay.php?s=&" + forumid + posticon;
 			}
 		}
 	} else if (dir == "left") {
@@ -1666,7 +1667,7 @@ function SALR_DirectionalNavigate(doc, dir) {
 		if (maxPage > curPage) {
 			var threadid = doc.__SALR_threadid;
 			if (threadid) {
-				doc.location = urlbase + "/showthread.php?s=&threadid=" + threadid + perPage + "&pagenumber=" + (curPage + 1);
+				doc.location = urlbase + "/showthread.php?s=&threadid=" + threadid + perpage + "&pagenumber=" + (curPage + 1);
 			} else {
 				doc.location = urlbase + "/forumdisplay.php?"+forumid+"&daysprune=30" + sortorder + sortfield + perpage + posticon + "&pagenumber=" + (curPage + 1);
 			}
