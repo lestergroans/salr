@@ -1,52 +1,43 @@
 .sampletableholder {
- background-color: #fff;
+	background-color: #fff;
 }
 
-.sampletable,
-.postsampletable {
- width: 95%;
- border-collapse: collapse;
- border: 1px solid #ddd;
- margin-left: auto;
- margin-right: auto;
- margin-top: 4px;
- margin-bottom: 4px;
+.sampletable, .postsampletable {
+	width: 92%;
+	border-collapse: collapse;
+	border: 1px solid #ddd;
+	margin: 4px 1px;
 }
 
 .sampletable img {
- display: block;
+	display: block;
 }
 
-.sampletable td,
+.sampletable td, .postsampletable td {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: small;
+	padding: 4px 4px 4px 4px;
+	border: 1px solid #ddd;
+	background: #fff;
+	color: #000;
+}
+
 .postsampletable td {
- font-family: Verdana, Arial, Helvetica, sans-serif;
- font-size: small;
- padding: 4px 4px 4px 4px;
- border: 1px solid #ddd;
- background: #fff;
- color: #000;
+	text-align: center;
+	vertical-align: middle;
+	height: 60px;
+
+	text-decoration: underline;
+	cursor: pointer;
 }
 
-.postsampletable td {
- text-align: center;
- vertical-align: middle;
- height: 60px;
-
- text-decoration: underline;
- cursor: pointer;
+.nonewpost-tag, .newpost-tag, .unread-tag {
+	width: 1px;
 }
 
-.nonewpost-tag,
-.newpost-tag,
-.unread-tag {
- width: 1px;
-}
-
-.nonewpost-tag,
-.newpost-tag,
-.unread-tag {
- text-align: center;
- vertical-align: middle;
+.nonewpost-tag, .newpost-tag, .unread-tag {
+	text-align: center;
+	vertical-align: middle;
 }
 
 .nonewpost-light,
@@ -56,7 +47,7 @@
 .newpost-dark,
 .unread-dark,
 .nonewpost-reply {
- text-align: center;
- text-decoration: underline;
- cursor: pointer;
+	text-align: center;
+	text-decoration: underline;
+	cursor: pointer;
 }
