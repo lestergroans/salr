@@ -1251,7 +1251,7 @@ function handleShowThread(doc) {
 			}
 		}
 		doc.__SALR_forumid = forumid;
-		doc.body.className += " salastread_forum"+forumid;
+		doc.body.className += " salastread_forum" + forumid;
 
 		// Figure out the current threadid
 		var replybutton = persistObject.selectSingleNode(doc, doc, "//UL[contains(@class,'postbuttons')]//A[contains(@href,'action=newreply&threadid=')]");
@@ -1342,24 +1342,26 @@ function handleShowThread(doc) {
 		var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
 		for (i in postlist)
 		{
-			if (postlist[i].className.search(/ignored/i) > -1)
+			var post = postlist[i];
+			
+			if (post.className.indexOf("ignored") > -1)
 			{
 				// User is ignored by the system so skip doing anything else
 				continue;
 			}
-			curPostId = postlist[i].id.match(/post(\d+)/)[1];
-			postcount = (perpage * (curPage-1)) + parseInt(i) + 1;
-			profileLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'userid=')]");
+			curPostId = post.id.match(/post(\d+)/)[1];
+			postcount = (perpage * (curPage - 1)) + parseInt(i) + 1;
+			profileLink = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'userid=')]");
 			posterId = profileLink.href.match(/userid=(\d+)/i)[1];
 			if (!inFYAD)
 			{
-				userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR/TD//DL//DT[contains(@class,'author')]");
+				userNameBox = persistObject.selectSingleNode(doc, post, "TBODY//TR/TD//DL//DT[contains(@class,'author')]");
 			}
 			else
 			{
-				userNameBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//DIV[contains(@class,'title')]//following-sibling::B");
+				userNameBox = persistObject.selectSingleNode(doc, post, "TBODY//DIV[contains(@class,'title')]//following-sibling::B");
 			}
-			titleBox = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR//TD//DL//DD[contains(@class,'title')]");
+			titleBox = persistObject.selectSingleNode(doc, post, "TBODY//TR//TD//DL//DD[contains(@class,'title')]");
 			if (titleBox && persistObject.getPreference("resizeCustomTitleText"))
 			{
 				// Adds a scrollbar if they have a really wide custom title
@@ -1368,7 +1370,7 @@ function handleShowThread(doc) {
 				if (titleBox.getElementsByTagName('font').length > 0)
 				{
 					// They likely have a large, red custom title
-					for(f=0;f<titleBox.getElementsByTagName('font').length;f++)
+					for(f = 0; f < titleBox.getElementsByTagName('font').length; f++)
 					{
 						titleBox.getElementsByTagName('font')[f].style.fontSize = "10px";
 					}
@@ -1446,7 +1448,7 @@ function handleShowThread(doc) {
 			{
 				if (posterBG != false)
 				{
-					persistObject.colorPost(doc, postlist[i], posterBG, forumid);
+					persistObject.colorPost(doc, post, posterBG, forumid);
 				}
 				else if (postcount <= lastReadPostCount)
 				{
@@ -1458,11 +1460,11 @@ function handleShowThread(doc) {
 					{
 						posterBG = persistObject.getPreference("seenPostLight");
 					}
-					persistObject.colorPost(doc, postlist[i], posterBG, forumid);
+					persistObject.colorPost(doc, post, posterBG, forumid);
 				}
 			}
 			colorDark = !colorDark;
-			postIdLink = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'#post')]");
+			postIdLink = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'#post')]");
 			postid = postIdLink.href.match(/#post(\d+)/i)[1];
 			if (insertPostTargetLink)
 			{
@@ -1481,7 +1483,7 @@ function handleShowThread(doc) {
 				resetLink.threadid = threadid;
 				resetLink.postid = postid;
 				resetLink.postcount = postcount;
-				resetLink.parentpost = postlist[i];
+				resetLink.parentpost = post;
 				resetLink.onclick = SALR_ChangeLastReadOnThread;
 				resetLink.innerHTML = "<";
 				doc.postlinks[doc.postlinks.length] = resetLink;
@@ -1491,7 +1493,7 @@ function handleShowThread(doc) {
 
 			//grab this once up here to avoid repetition
 			if(useQuickQuote || hideEditButtons) {
-				editbutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
+				editbutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
 			}
 
 			if(hideEditButtons && editbutton) {
@@ -1504,7 +1506,7 @@ function handleShowThread(doc) {
 
 			if (useQuickQuote && !threadClosed)
 			{
-				quotebutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
+				quotebutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
 				if (quotebutton) {
 					attachQuickQuoteHandler(threadid, doc, persistObject.turnIntoQuickButton(doc, quotebutton, forumid), posterName, 1, postid);
 				}
@@ -1515,14 +1517,14 @@ function handleShowThread(doc) {
 
 			if(hideReportButtons) {
 				if(posterId == userId) {
-					reportbutton = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'modalert.php')]");
+					reportbutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'modalert.php')]");
 					if(reportbutton) {
 						reportbutton.parentNode.removeChild(reportbutton);
 					}
 				}
 			}
 
-			postbody = persistObject.selectSingleNode(doc, postlist[i], "TBODY//TD[contains(@class,'postbody')]");
+			postbody = persistObject.selectSingleNode(doc, post, "TBODY//TD[contains(@class,'postbody')]");
 			persistObject.convertSpecialLinks(doc, postbody);
 		}
 
@@ -1802,14 +1804,18 @@ function SALR_NoteFade(targetEl) {
 function reanchorThreadToLink(doc) {
 	if(persistObject.getPreference('reanchorThreadOnLoad')){
 		if (doc.location.href.match(/\#(.*)$/)) {
-			var anchorNode = persistObject.selectNodes(doc, doc.body, "//table[@id='"+doc.location.href.match(/\#(.*)$/)[1]+"']")[0];
-
-			if (anchorNode) {
-				if(anchorNode.nextSibling.id.match(/post\d+/)) {
-					anchorNode.nextSibling.scrollIntoView(true);
-				} else {
-					anchorNode.scrollIntoView(true);
+			var post = doc.getElementById(doc.location.href.match(/\#(.*)$/)[1]);
+			
+			if (post) {
+				var next = post.nextSibling;
+				if(next.id.match(/post\d+/)) {
+					if((post.className.indexOf("colored") > 0) && (next.className.indexOf("colored") < 0)) {
+						next.scrollIntoView(true);
+						return;
+					}
 				}
+				
+				post.scrollIntoView(true);
 			}
 		}
 	}
@@ -2078,7 +2084,7 @@ function SALR_windowOnLoadMini(e) {
             samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
             if (samatch) {
                if ( location.href.indexOf("showthread.php?") != -1 ) {
-                  reanchorThreadToLink(doc);
+				  reanchorThreadToLink(doc);
                }
             }
          }
@@ -2118,17 +2124,13 @@ function salastread_windowOnLoad(e) {
 
 		var doc = e.originalTarget;
 		var location = doc.location;
+		var isSa = false;
 		try {
 			if ( location && location.href && !doc.__salastread_processed ) {
 				var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i );
 					samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i );
 				if (samatch) {
-					/*
-					Moved below, where it should be
-					if (persistObject.getPreference('removeHeaderAndFooter')) {
-					   salastread_hidePageHeader(doc);
-					}
-					*/
+					isSa = true;
 				}
 			}
 		} catch(ex) { }
@@ -2173,9 +2175,7 @@ function salastread_windowOnLoad(e) {
 
 			if (doc.__salastread_processed) {
 				if(persistObject.getPreference('reanchorThreadOnLoad') ) {
-					var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i);
-						samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i);
-					if (samatch) {
+					if (isSa) {
 						if ( location.href.indexOf("showthread.php?") != -1 ) {
 							reanchorThreadToLink(doc);
 						}
@@ -2185,9 +2185,7 @@ function salastread_windowOnLoad(e) {
 			}
 
 			if ( location && location.href && !doc.__salastread_processed ) {
-				var samatch = location.href.match( /^http:\/\/forums?\.somethingawful\.com\//i);
-					samatch = samatch || location.href.match( /^http:\/\/archives?\.somethingawful\.com\//i);
-				if (samatch) {
+				if (isSa) {
 					//            var newPageTimer = persistObject.TimeManager.GetStart();
 					//            doc.__SALASTREAD_PAGETIMER = newPageTimer;
 					//            thisWindowPageTimers.push(newPageTimer);
