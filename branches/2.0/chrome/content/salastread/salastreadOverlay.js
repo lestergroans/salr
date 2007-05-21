@@ -1804,7 +1804,11 @@ function reanchorThreadToLink(doc) {
 			var anchorNode = persistObject.selectNodes(doc, doc.body, "//table[@id='"+doc.location.href.match(/\#(.*)$/)[1]+"']")[0];
 
 			if (anchorNode) {
-				anchorNode.scrollIntoView(true);
+				if(anchorNode.nextSibling.id.match(/post\d+/)) {
+					anchorNode.nextSibling.scrollIntoView(true);
+				} else {
+					anchorNode.scrollIntoView(true);
+				}
 			}
 		}
 	}
