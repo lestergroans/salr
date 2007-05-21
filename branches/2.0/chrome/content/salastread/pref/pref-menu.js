@@ -1,11 +1,9 @@
 function menuInit() {
-	initSettings('SA Forum Menu Settings');
-	
 	try {
 		pinnedListInit();
 		cbSet();
 	} catch(e) {
-		alert("Err: "+e);
+		alert("init error: "+e);
 	}
 }
 
@@ -26,11 +24,11 @@ function pinnedListInit() {
 		pobj = pobj.wrappedJSObject;
 	
 	var flxml = pobj.forumListXml;
-	var pinnedstr = parent.prefobj.Preferences.menuPinnedForums.value;
+	var pinnedstr = document.getElementById("menuPinnedForums").value;
 	var pinnedForumNumbers;
 	
 	if (pinnedstr!=",") {
-		pinnedForumNumbers = parent.prefobj.Preferences.menuPinnedForums.value.split(",");
+		pinnedForumNumbers = document.getElementById("menuPinnedForums").value.split(",");
 	} else {
 		pinnedForumNumbers = new Array();
 	}
@@ -64,7 +62,7 @@ function pinnedListInit() {
 	}
 	
 	if (flxml) {
-		var forumList = selectNodes(flxml, flxml.documentElement, "//forum");
+		var forumList = pobj.selectNodes(flxml, flxml.documentElement, "//forum");
 		for (var i = 0; i < forumList.length; i++) {
 			var thisForum = forumList[i];
 			var thisId = thisForum.getAttribute("id");
@@ -93,14 +91,14 @@ function pinnedListInit() {
 
 function cbSet() {
 	var dis = false;
-	if ( document.getElementById("toggle_showSAForumMenu").getAttribute("checked") ) {
-		document.getElementById("toggle_nestSAForumMenu").setAttribute("disabled",false);
+	if ( document.getElementById("showSaMenu").getAttribute("checked") ) {
+		document.getElementById("nestSaMenu").setAttribute("disabled",false);
 	} else {
-		document.getElementById("toggle_nestSAForumMenu").setAttribute("disabled",true);
+		document.getElementById("nestSaMenu").setAttribute("disabled",true);
 		dis = true;
 	}
 	
-	if ( !dis && document.getElementById("toggle_nestSAForumMenu").getAttribute("checked") ) {
+	if ( !dis && document.getElementById("nestSaMenu").getAttribute("checked") ) {
 		document.getElementById("pinned_forums").removeAttribute("disabled");
 		document.getElementById("unpinned_forums").removeAttribute("disabled");
 		document.getElementById("pinButton").setAttribute("disabled",false);
@@ -118,8 +116,8 @@ function cbSet() {
 
 function pinnedSelect() {
 	try {
-		if (!document.getElementById("showSAForumMenu").getAttribute("checked") || 
-			!document.getElementById("nestSAForumMenu").getAttribute("checked")) {
+		if (!document.getElementById("showSaMenu").getAttribute("checked") || 
+			!document.getElementById("nestSaMenu").getAttribute("checked")) {
 			
 			document.getElementById("moveUpButton").setAttribute("disabled",true);
 			document.getElementById("moveDownButton").setAttribute("disabled",true);
@@ -136,7 +134,7 @@ function pinnedSelect() {
 			document.getElementById("moveDownButton").setAttribute("disabled", sellist.nextSibling ? false : true);
 		}
 	} catch(e) { 
-		alert("err: " + e); 
+		alert("pinned select error: " + e); 
 	}
 }
 
@@ -244,15 +242,11 @@ function pinnedListChanged() {
 	}
 	
 	var menustr = pflist.join(",");
-	var oldmenustr = parent.prefobj.Preferences.menuPinnedForums.value;
+	var oldmenustr = document.getElementById("menuPinnedForums").value;
 	
 	if (menustr != "") {
-		parent.prefobj.Preferences.menuPinnedForums.value = menustr;
+		document.getElementById("menuPinnedForums").value = menustr;
 	} else {
-		parent.prefobj.Preferences.menuPinnedForums.value = ",";
-	}
-	
-	if (menustr != oldmenustr) {
-		parent.prefobj.NeedMenuRebuild = true;
+		document.getElementById("menuPinnedForums").value = ",";
 	}
 }
