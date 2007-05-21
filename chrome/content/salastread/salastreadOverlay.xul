@@ -8,9 +8,10 @@
     src="chrome://salastread/content/utilfunctions.js"/>
   <script type="application/x-javascript"
     src="chrome://salastread/content/pngmaker.js"/>
+<!--
   <script type="application/x-javascript"
     src="chrome://salastread/content/FTPSendReceive.js"/>
-<!--
+
   <script type="application/x-javascript"
     src="chrome://salastread/content/timemanager.js"/>
 -->
@@ -36,8 +37,7 @@
 
   <statusbar id="status-bar">
    <statusbarpanel insertafter="security-button" id="somethingawful-button" style="display: none;">
-    <image src="chrome://salastread/skin/sa.png" width="16" height="16"
-           title="Something Awful"/>
+    <image src="chrome://salastread/skin/sa.png" width="16" height="16" title="Something Awful"/>
    </statusbarpanel>
   </statusbar>
 
