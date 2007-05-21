@@ -1,8 +1,6 @@
 function aboutInit() {
-	initSettings('About the SALastRead Extension');
-	
 	//get total # of seconds from prefs and give string a default value
-	var timeSpent = parent.prefobj.Preferences.timeSpentOnForums.value;
+	var timeSpent = document.getElementById("timeSpentOnForums").value;
 	var tsstr = "none";
 	
 	if(timeSpent) {
