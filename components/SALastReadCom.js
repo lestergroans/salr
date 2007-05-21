@@ -1679,6 +1679,8 @@ salrPersistObject.prototype = {
 		{
 			postLinksBox.style.backgroundColor = colorToUse;
 		}
+		
+		post.className += " colored";
 	},
 
 	// Color a thread entry passed to it
