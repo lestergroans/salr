@@ -1790,7 +1790,7 @@ function reanchorThreadToLink(doc) {
 			
 			if (post) {
 				var next = post.nextSibling;
-				if(next.id.match(/post\d+/)) {
+				if(next.id && next.id.match(/post\d+/)) {
 					if((post.className.indexOf("colored") > 0) && (next.className.indexOf("colored") < 0)) {
 						next.scrollIntoView(true);
 						return;
