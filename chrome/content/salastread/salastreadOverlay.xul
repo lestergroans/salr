@@ -6,12 +6,11 @@
   
   <script type="application/x-javascript"
     src="chrome://salastread/content/utilfunctions.js"/>
-  <script type="application/x-javascript"
-    src="chrome://salastread/content/pngmaker.js"/>
 <!--
   <script type="application/x-javascript"
+    src="chrome://salastread/content/pngmaker.js"/>
+  <script type="application/x-javascript"
     src="chrome://salastread/content/FTPSendReceive.js"/>
-
   <script type="application/x-javascript"
     src="chrome://salastread/content/timemanager.js"/>
 -->
