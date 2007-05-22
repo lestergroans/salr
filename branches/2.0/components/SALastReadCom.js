@@ -10,7 +10,7 @@ function SALR_vidClick(e)
 	//if they click again hide the video
 	var video = link.parentNode.getElementsByTagName('embed')[0];
 	if(video && video.className == 'salr_video') {
-			link.parentNode.removeChild(link.nextSibling);
+			link.parentNode.Child(link.nextSibling);
 			return;
 	}
 
@@ -162,6 +162,7 @@ salrPersistObject.prototype = {
    get pref() { return Components.classes["@mozilla.org/preferences-service;1"].
                    getService(Components.interfaces.nsIPrefBranch); },
 
+   /*
    SET_toggle_thumbnailAllImages: function(value) {
       if(!("@mozilla.org/content/style-sheet-service;1" in Components.classes))
          return;
@@ -181,6 +182,7 @@ salrPersistObject.prototype = {
          }
       }
    },
+   */
 
    get storeFileName() { return this._fn; },
 
@@ -1133,6 +1135,20 @@ salrPersistObject.prototype = {
 			statement.reset();
 		}
 	},
+	
+	// Remove a user as a mod
+	// @param: (int) User ID
+	// @return: nothing
+	removeMod: function(userid)
+	{
+		if(this.isMod(userid))
+		{
+			var statement = this.database.createStatement("UPDATE `userdata` SET `mod` = 0 WHERE `userid` = ?1");
+				statement.bindInt32Parameter(0, userid);
+				statement.executeStep();
+				statement.reset();
+		}
+	},
 
 	// Adds/updates a user as an admin
 	// @param: (int) User ID, (string) Username
@@ -1153,6 +1169,20 @@ salrPersistObject.prototype = {
 				statement.executeStep();
 			}
 			statement.reset();
+		}
+	},
+	
+	// Removed a user as a admin
+	// @param: (int) User ID
+	// @return: nothing
+	removeAdmin: function(userid)
+	{
+		if(this.isAdmin(userid))
+		{
+			var statement = this.database.createStatement("UPDATE `userdata` SET `admin` = 0 WHERE `userid` = ?1");
+				statement.bindInt32Parameter(0, userid);
+				statement.executeStep();
+				statement.reset();
 		}
 	},
 
