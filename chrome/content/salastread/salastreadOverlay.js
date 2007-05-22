@@ -1120,28 +1120,6 @@ function quickQuoteButtonClick(evt) {
 	return false;
 }
 
-function __unused() {
-   try {
-      var newdiv = doc.createElement("DIV");
-      //newdiv.message = "woo woo woo";
-      newdiv.style.position = "fixed";
-      newdiv.style.top = "2%";
-      newdiv.style.left = "2%";
-      newdiv.style.width = "96%";
-      newdiv.style.height = "50%";
-      newdiv.style.zIndex = "13294945";
-      newdiv.style.border = "1px solid #c1c1c1";
-      newdiv.style.MozBinding = "url('chrome://salastread/content/quickquote.xml#quickquote')";
-      doc.body.appendChild(newdiv);
-      //newdiv.setAttribute("message", getQuoteCodeFromButton(doc,quotebutton) );
-      //newdiv.message = getQuoteCodeFromButton(doc,quotebutton,postername);
-   }
-   catch (e) {
-      alert("err: "+e);
-   }
-   return false;
-}
-
 function attachQuickQuoteHandler(threadid,doc,quotebutton,postername,hasQuote,postid,isedit) {
    quotebutton.__salastread_threadid = threadid;
    quotebutton.__salastread_postid = postid;
@@ -1376,40 +1354,44 @@ function handleShowThread(doc) {
 					}
 				}
 			}
+			
+			posterImg = false;
 			posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
 			if (userNameBox.getElementsByTagName('img').length > 0)
 			{
 				// They have a mod star or something else
 				posterImg = userNameBox.getElementsByTagName('img')[0].title;
-				if (posterImg == 'Admin')
-				{
+				if (posterImg == 'Admin') {
 					persistObject.addAdmin(posterId, posterName);
-				}
-				if (posterImg == 'Moderator')
-				{
+				} else if (posterImg == 'Moderator') {
 					persistObject.addMod(posterId, posterName);
 				}
 			}
 			posterColor = false;
 			posterBG = false;
 			posterNote = false;
-			if (posterId == threadOP)
-			{
+			if (posterId == threadOP) {
 				posterColor = persistObject.getPreference("opColor");
 				posterBG =  persistObject.getPreference("opBackground");
 				posterNote = "Thread Poster";
 			}
-			if (persistObject.isMod(posterId))
-			{
-				posterColor = persistObject.getPreference("modColor");
-				posterBG =  persistObject.getPreference("modBackground");
-				posterNote = "Forum Moderator";
+			if (persistObject.isMod(posterId)) {
+				if(posterImg == 'Moderator') {
+					posterColor = persistObject.getPreference("modColor");
+					posterBG =  persistObject.getPreference("modBackground");
+					posterNote = "Forum Moderator";
+				} else {
+					persistObject.removeMod(posterId);
+				}
 			}
-			if (persistObject.isAdmin(posterId))
-			{
-				posterColor = persistObject.getPreference("adminColor");
-				posterBG =  persistObject.getPreference("adminBackground");
-				posterNote = "Forum Administrator";
+			if (persistObject.isAdmin(posterId)) {
+				if(posterImg == "Admin") {
+					posterColor = persistObject.getPreference("adminColor");
+					posterBG =  persistObject.getPreference("adminBackground");
+					posterNote = "Forum Administrator";
+				} else {
+					persistObject.removeAdmin(posterId);
+				}
 			}
 			userPosterColor = persistObject.getPosterColor(posterId);
 			userPosterBG = persistObject.getPosterBackground(posterId);
@@ -2001,78 +1983,6 @@ function SALR_ParamsToUrl(params) {
    }
    return res;
 }
-
-/* BETTING THIS IS UNUSED
-var SALR_ProfileUserName;
-
-function SALR_HandleProfileInsertion(e) {
-   try
-   {
-      var doc = e.originalTarget;
-      var location = doc.location;
-
-      var params = new Object();
-
-      var qstring = location.search;
-      if (qstring.substr(0,1)=="?")
-         qstring = qstring.substr(1);
-      var qsplit = qstring.split("&");
-      for (var qn=0; qn<qsplit.length; qn++) {
-         var qparams = qsplit[qn].split("=");
-         var qname = unescape(qparams[0]);
-         var qvalue = unescape(qparams[1]);
-         params[qname] = qvalue;
-      }
-
-      var capImg = doc.getElementById("captcha");
-
-      if ( capImg && params["salr_addprofilekey"] && params["action"]=="editprofile" ) {
-         var ihtmlm = doc.body.innerHTML.match(/">User Control Panel For (.*?)<\/a>/);
-         if (!ihtmlm) return;
-         SALR_ProfileUserName = ihtmlm[1];
-         setTimeout(function() {
-            var data = new Object();
-            data["captchaUrl"] = capImg.src;
-            openDialog("chrome://salastread/content/profileEditConfirm.xul","_blank",
-                       "chrome,titlebar,modal,resizable", data);
-            if (data["continue"]) {
-               var formtag = persistObject.selectSingleNode(doc, doc.body, "//form[@action='member.php']");
-               var captext = persistObject.selectSingleNode(doc, doc.body, "//input[@name='captcha']");
-               var f1 = persistObject.selectSingleNode(doc, doc.body, "//input[@name='field1']");
-               if (formtag && captext && f1) {
-                  f1.value = "SALR["+ params["salr_addprofilekey"] +"]";
-                  formtag.action = "member.php?salr_profileinsertcontinue=true" + SALR_ParamsToUrl(params);
-                  captext.value = data["captchaText"];
-                  formtag.submit();
-               }
-            }
-         },1);
-         return;
-      }
-      else if ( params["salr_profileinsertcontinue"]=="true" ) {
-         if (doc.body.innerHTML.indexOf("hank you for")!=-1) {
-            // Success!!
-            alert("Profile successfully updated");
-            if (params["salr_onsuccessurl"]) {
-               var surl = params["salr_onsuccessurl"];
-               if (surl.indexOf("?")!=-1)
-                  surl += "&";
-               else
-                  surl += "?";
-               surl += "salr_username=" + SALR_ProfileUserName;
-               doc.location = surl;
-            }
-         } else {
-            if (confirm("Your profile did not update correctly. (You may have entered an incorrect validation code.) "+
-                        "Press OK to try again.")) {
-               doc.location = "http://forums.somethingawful.com/member.php?s=&action=editprofile"+SALR_ParamsToUrl(params);
-            }
-         }
-      }
-   } catch (err) { }
-}
-
-*/
 
 function SALR_windowOnLoadMini(e) {
    var doc = e.originalTarget;
