@@ -1,4 +1,4 @@
-pref('extensions.salastread.currentVersion', '1.99.070520');
+pref('extensions.salastread.currentVersion', '1.99.070521');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
@@ -97,8 +97,6 @@ pref('extensions.salastread.hideReportButtons', false);
 
 	//USER DISPLAY OPTIONS
 pref('extensions.salastread.resizeCustomTitleText', true);
-pref('extensions.salastread.hideSignature', false);
-pref('extensions.salastread.hideTitle', false);
 
 
 //SA MENUS
@@ -124,7 +122,6 @@ pref('extensions.salastread.expireMinAge', 7);
 pref('extensions.salastread.timeSpentOnForums', 0);
 pref('extensions.salastread.dontHighlightThreads', false);
 pref('extensions.salastread.dontHighlightPosts', false);
-pref('extensions.salastread.dontCheckKillSwitch', false);
 pref('extensions.salastread.highlightUsernames', true);
 pref('extensions.salastread.disableGradients', false);
 pref('extensions.salastread.thumbnailAllImages', true);

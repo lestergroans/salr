@@ -1022,7 +1022,6 @@ salrPersistObject.prototype = {
 		return lrver;
 	},
 
-	// This function seems to no longer work?
 	// Sets the last version ran
 	// @param: (string) Version number
 	// @return: nothing
@@ -1135,7 +1134,7 @@ salrPersistObject.prototype = {
 			statement.reset();
 		}
 	},
-	
+
 	// Remove a user as a mod
 	// @param: (int) User ID
 	// @return: nothing
@@ -1171,7 +1170,7 @@ salrPersistObject.prototype = {
 			statement.reset();
 		}
 	},
-	
+
 	// Removed a user as a admin
 	// @param: (int) User ID
 	// @return: nothing
@@ -1709,7 +1708,7 @@ salrPersistObject.prototype = {
 		{
 			postLinksBox.style.backgroundColor = colorToUse;
 		}
-		
+
 		post.className += " colored";
 	},
 
@@ -2134,7 +2133,6 @@ salrPersistObject.prototype = {
 		var expireLength = this.getPreference("expireMinAge") * 86400; // days * 24 * 60 * 60
 		var rightNow = this.currentTimeStamp;
 		var expireWhen = rightNow - expireLength;
-		dump (expireWhen);
 		var statement = this.database.createStatement("DELETE FROM `threaddata` WHERE `lastviewdt` < ?1 AND `star` != 1");
 		statement.bindStringParameter(0,expireWhen);
 		statement.execute();
