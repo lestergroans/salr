@@ -16,38 +16,28 @@
 .sampletable td, .postsampletable td {
 	font-family: Verdana, Arial, Helvetica, sans-serif;
 	font-size: small;
-	padding: 4px 4px 4px 4px;
+	padding: 2px;
 	border: 1px solid #ddd;
 	background: #fff;
 	color: #000;
 }
 
-.postsampletable td {
-	text-align: center;
-	vertical-align: middle;
-	height: 60px;
+.sampletable td > img {
+	margin-left: auto;
+	margin-right: auto;
+}
 
+.sampletable td[onclick] {
 	text-decoration: underline;
 	cursor: pointer;
 }
+	
 
-.nonewpost-tag, .newpost-tag, .unread-tag {
-	width: 1px;
-}
-
-.nonewpost-tag, .newpost-tag, .unread-tag {
+.postsampletable td {
 	text-align: center;
 	vertical-align: middle;
-}
+	height: 30px;
 
-.nonewpost-light,
-.newpost-light,
-.unread-light,
-.nonewpost-dark,
-.newpost-dark,
-.unread-dark,
-.nonewpost-reply {
-	text-align: center;
 	text-decoration: underline;
 	cursor: pointer;
 }
