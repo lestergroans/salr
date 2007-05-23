@@ -1029,7 +1029,7 @@ salrPersistObject.prototype = {
 	{
 		if (!this.setPreference("lastRunVersion", ver))
 		{
-			this.preferences.setCharPref("lastRunVersion", this.getPreference("currentVersion"));
+			this.preferences.setCharPref("lastRunVersion", ver);
 		}
 	},
 
