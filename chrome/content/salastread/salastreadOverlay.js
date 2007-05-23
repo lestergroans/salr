@@ -531,7 +531,7 @@ function SALR_SAMenuShowing() {
 function SALR_LaunchPinHelper() {
    persistObject.setPreference('showMenuPinHelper', false);
 
-   SALR_runConfig("catMenuButton");
+   SALR_runConfig("menu");
    alert("You may return to the menu settings at any time by choosing \"Configure SALastRead...\" from the SA menu, or by "+
          "clicking the \"Configure Last Read Extension\" link in the header of any forum page.");
 }
@@ -1804,12 +1804,14 @@ function reanchorThreadToLink(doc) {
 }
 
 function SALR_runConfig(page) {
-	var data = "";
-	if (typeof(page) == "string") {
-		data = page;
-	}
-
-	openDialog("chrome://salastread/content/pref.xul", "Preferences", "chrome,titlebar,toolbar,centerscreen,modal", "");
+	//hopefully this fixes stuff in OSX
+	var pref = Components.classes["@mozilla.org/preferences-service;1"]
+				.getService(Components.interfaces.nsIPrefBranch);
+	
+    var instantApply = pref.getBoolPref("browser.preferences.instantApply");
+	var features = "chrome,titlebar,toolbar,centerscreen" + (instantApply ? ",dialog=no" : ",modal");
+	
+	openDialog("chrome://salastread/content/pref.xul", "Preferences", features, page);
 }
 
 function handleEditPost(e) {
