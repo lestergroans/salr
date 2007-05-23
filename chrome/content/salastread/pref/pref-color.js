@@ -1,190 +1,72 @@
+var backgrounds = { '' : '#FFFFFF', 'FYAD' : '#FF9999', 'BYOB' : '#9999FF' };
 
-function initColors() {
-	loadColors(isDropDownFYAD());
-}
-
-function loadColorLauncher() {
-	loadColors(isDropDownFYAD());
-}
-
-function isDropDownFYAD() {
-	var ft = document.getElementById("forumtype");
-	return ft.selectedIndex == 1;
-}
-
-function HexToNumber(hex) {
-	var res = 0;
-	for (var i=0; i<hex.length; i++) {
-		res = res * 16;
-		
-		switch (hex[i]) {
-			case "0": res += 0; break;
-			case "1": res += 1; break;
-			case "2": res += 2; break;
-			case "3": res += 3; break;
-			case "4": res += 4; break;
-			case "5": res += 5; break;
-			case "6": res += 6; break;
-			case "7": res += 7; break;
-			case "8": res += 8; break;
-			case "9": res += 9; break;
-			case "a": case "A": res += 10; break;
-			case "b": case "B": res += 11; break;
-			case "c": case "C": res += 12; break;
-			case "d": case "D": res += 13; break;
-			case "e": case "E": res += 14; break;
-			case "f": case "F": res += 15; break;
-		}
-	}
+function loadColors() {
+	//check the dropdown's value
+	var forum = document.getElementById("forumtype").selectedItem.value;
 	
-	return res;
-}
-
-function loadColors(isfyad) {
-	try {
-		if(isfyad) { document.getElementById("sampletableholder").style.backgroundColor = "#f99"; } 
-		else { document.getElementById("sampletableholder").style.backgroundColor = "#fff"; }
-		
-		var gradientsOn = !document.getElementById("disableGradients").checked;
-		var ctypes = new Array("readWithNew", "read", "unread");
-		
-		for(var cn = 0; cn < ctypes.length; cn++) {
-			for(var dnum = 0; dnum < 5; dnum++) {
-				var ctype = ctypes[cn];
-				var mobj = document.getElementById(ctype+"-"+dnum);
-				var suffix = "";
-				
-				if ( ctype=="readWithNew" && dnum == 4 ) {
-					ctype = "postedInThreadRe";
-				} else {
-					var isdark = ((dnum % 2) == 1);
-					suffix = (isdark) ? "Light" : "Dark";
-				}
-				
-				var prefname = ctype + suffix + (isfyad ? 'FYAD' : '');
-				
-				if (parent.prefobj.Preferences[prefname].value) {
-					var bcolor = parent.prefobj.Preferences[prefname].value;
-					mobj.style.backgroundColor = bcolor;
-					
-					if(gradientsOn && parent.prefobj.Preferences[prefname + "Highlight"]) {
-						var hlcolor = parent.prefobj.Preferences[prefname + "Highlight"].value;
-						mobj.style.backgroundRepeat = "repeat-x";
-						mobj.style.backgroundImage = GradientURLFromColor(hlcolor, mobj.offsetHeight);
-					} else {
-						mobj.style.backgroundImage = "";
-					}
-				
-					mobj.style.color = "#000";
-				} else {
-					mobj.style.backgroundColor = "#666";
-					mobj.style.backgroundImage = "";
-					mobj.style.color = "#aaa";
-				}
-				
-				mobj.style.border = "1px solid " + ((isfyad) ? "#000" : "#ddd");
-			}
+	//set the background color
+	document.getElementById('sampletableholder').style.backgroundColor = backgrounds[forum];
+	
+	//go through all the TDs, uses their class to know what pref they belong to
+	var tds = document.getElementById("sampletableholder").getElementsByTagName('td');
+	for(var i in tds) {
+		var td = tds[i];
+		var pref = document.getElementById(td.className + forum);
+		if(pref) {
+			td.style.backgroundColor = pref.value;
 		}
-		
-		var ptypes = new Array("seenPost", "unseenPost");
-		var ldtypes = new Array("Light", "Dark");
-		
-		for(var pn = 0; pn < ptypes.length; pn++) {
-			for(var ln = 0; ln < ldtypes.length; ln++) {
-				var colorname = ptypes[pn] + ldtypes[ln];
-				var suffix = (isfyad) ? "FYAD" : "";
-				document.getElementById(colorname).style.backgroundColor = parent.prefobj.Preferences[colorname + suffix].value;
-				document.getElementById(colorname).style.border = "1px solid " + ((isfyad) ? "#000" : "#ddd");
-			}
-		}
-		
-		document.getElementById("sampletable").style.border = "1px solid " + ((isfyad) ? "#000" : "#ddd");
-		document.getElementById("postsampletable").style.border = "1px solid " + ((isfyad) ? "#000" : "#ddd");
-	} catch(e) { 
-		Components.utils.reportError("loadColors error: "+e); 
 	}
-}
-
-function GradientURLFromColor(hlcolor, height) {
-   return "url(x-salr-gradientpng:"+
-                     HexToNumber(hlcolor.substring(1,3))+","+
-                     HexToNumber(hlcolor.substring(3,5))+","+
-                     HexToNumber(hlcolor.substring(5,7))+","+
-                     height+")";
 }
 
 function loadDefaultColors() {
-   for (var tx in parent.prefobj) {
-      if (tx.indexOf("defaultcolor_")==0) {
-         var cn = tx.substring(7);
-         parent.prefobj[cn] = parent.prefobj[tx];
-      }
-   }
-   var isfyad = isDropDownFYAD();
-   loadColors(isfyad);
-}
-
-var saveevent;
-var saveel;
-var savectype;
-var saveldtype;
-
-function choseTopOrBottom(chosetop) {
-   editColor(saveevent, saveel, savectype, saveldtype, chosetop);
-}
-
-function editColor(event, targetEl, ctype, ldtype, ishighlight) {
-	try {
-		var isfyad = isDropDownFYAD();
-		var colorname = ctype + ldtype + ((isfyad)?"FYAD":"");
-		var fcolorname = colorname;
-		
-		if (ishighlight) { fcolorname += "Highlight"; }
-		
-		if(parent.prefobj.Preferences[colorname].value) {
-			if(typeof(ishighlight)=="undefined") {
-				if(targetEl.style.backgroundImage != "") {
-					saveevent = event;
-					saveel = targetEl;
-					savectype = ctype;
-					saveldtype = ldtype;
-					
-					document.getElementById("gradientSelectorPopup").showPopup(targetEl, event.screenX, event.screenY, "context", "at_pointer", "topleft" );
-					return;
-				} else {
-					ishighlight = false;
-				}
-			}
-			
-			var pobj = new Object();
-			pobj.value = parent.prefobj.Preferences[fcolorname].value.substring(1);
-			pobj.accepted = false;
-			pobj.isGradient = ishighlight;
-			
-			if ( targetEl.style.backgroundImage != "" ) {
-				if ( ishighlight ) { 
-					pobj.otherColor = parent.prefobj.Preferences[colorname].value;
-				} else {
-					if ( parent.prefobj.Preferences[colorname+"Highlight"].value) {
-						pobj.otherColor = parent.prefobj.Preferences[colorname+"Highlight"].value;
-					}
-				}
-			}
-			
-			window.openDialog("chrome://salastread/content/colorpicker/colorpickerdialog.xul", "colorpickerdialog", "chrome", pobj);
-			if(pobj.accepted) {
-				var newvalue = "#" + pobj.value;
-				
-				if ( ishighlight==true ) {
-					targetEl.style.backgroundImage = GradientURLFromColor(newvalue, targetEl.offsetHeight);
-				} else {
-					targetEl.style.backgroundColor = newvalue;
-				}
-				
-				parent.prefobj.Preferences[fcolorname].value = newvalue;
-			}
+	//check the dropdown's value
+	var forum = document.getElementById("forumtype").selectedItem.value;
+	
+	//go through all the TDs, uses their class to know what pref they belong to
+	var tds = document.getElementById("sampletableholder").getElementsByTagName('td');
+	for(var i in tds) {
+		var td = tds[i];
+		var pref = document.getElementById(td.className + forum);
+		if(pref) {
+			try {
+				//reset the actual pref value
+				pref.reset();
+				//reset the pref value if a change hasn't been saved
+				pref.value = pref.valueFromPreferences;
+			} catch (e) {}
 		}
-	} catch(e) { 
-		Components.utils.reportError("editColor error: "+e); 
 	}
+	
+	loadColors();
+}
+
+function editColor(event, targetEl) {
+	//check the dropdown's value
+	var forum = document.getElementById("forumtype").selectedItem.value;
+
+	var pref = document.getElementById(targetEl.className + forum);
+	if(pref) {
+		var obj = {};
+			obj.value = pref.value;
+	
+		window.openDialog("chrome://salastread/content/colorpicker/colorpickerdialog.xul", "colorpickerdialog", "chrome", obj);
+		if(obj.accepted) {
+			pref.value = '#' + obj.value;
+			loadColors();
+		}
+	}
+}
+
+function toggleUserHighlighting() {
+	if(document.getElementById("userHighlighting").checked) {
+		//enable the others
+		document.getElementById("adminColorPicker").disabled = false;
+		document.getElementById("modColorPicker").disabled = false;
+		document.getElementById("opColorPicker").disabled = false;
+	} else {
+		//disable
+		document.getElementById("adminColorPicker").disabled = true;
+		document.getElementById("modColorPicker").disabled = true;
+		document.getElementById("opColorPicker").disabled = true;
+	}	
 }
