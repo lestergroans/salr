@@ -117,7 +117,6 @@ function importOldData()
 	persistObject.setPreference("menuPinnedForums", persistObject.pref.getCharPref("salastread.string.menuPinnedForums"));
 	persistObject.setPreference("persistStoragePath", persistObject.pref.getCharPref("salastread.string.persistStoragePath"));
 	persistObject.setPreference("remoteSyncStorageUrl", persistObject.pref.getCharPref("salastread.string.remoteSyncStorageUrl"));
-	persistObject.setPreference("threadIconOrder", persistObject.pref.getCharPref("salastread.string.threadIconOrder"));
 	persistObject.setPreference("alwaysShowGoToLastIcon", persistObject.pref.getBoolPref("salastread.toggle.alwaysShowGoToLastIcon"));
 	persistObject.setPreference("contextMenuOnBottom", persistObject.pref.getBoolPref("salastread.toggle.contextMenuOnBottom"));
 	persistObject.setPreference("convertTextToImage", persistObject.pref.getBoolPref("salastread.toggle.convertTextToImage"));
@@ -157,5 +156,9 @@ function importOldData()
 	persistObject.setPreference("useQuickQuote", persistObject.pref.getBoolPref("salastread.toggle.useQuickQuote"));
 	persistObject.setPreference("useRemoteSyncStorage", persistObject.pref.getBoolPref("salastread.toggle.useRemoteSyncStorage"));
 	persistObject.setPreference("useSAForumMenuBackground", persistObject.pref.getBoolPref("salastread.toggle.useSAForumMenuBackground"));
-	persistObject.pref.deleteBranch("salastread.color");
+	persistObject.pref.deleteBranch("salastread.color.postedInThreadRe");
+	persistObject.pref.deleteBranch("salastread.int.expireMinAge");
+	persistObject.pref.deleteBranch("salastread.string.forumListStoragePath");
+	persistObject.pref.deleteBranch("salastread.toggle.alwaysShowGoToLastIcon");
+	persistObject.pref.deleteBranch("salastread.url.goToLastReadPost");
 }

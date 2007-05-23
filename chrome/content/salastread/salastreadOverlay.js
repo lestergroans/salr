@@ -1321,7 +1321,7 @@ function handleShowThread(doc) {
 		for (i in postlist)
 		{
 			var post = postlist[i];
-			
+
 			if (post.className.indexOf("ignored") > -1)
 			{
 				// User is ignored by the system so skip doing anything else
@@ -1354,7 +1354,7 @@ function handleShowThread(doc) {
 					}
 				}
 			}
-			
+
 			posterImg = false;
 			posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
 			if (userNameBox.getElementsByTagName('img').length > 0)
@@ -1623,10 +1623,10 @@ function SALR_DirectionalNavigate(doc, dir) {
 	if (!sortfield) sortfield = "&sortfield=lastpost";
 	var sortorder = doc.location.href.match(/&sortorder=[a-z]+/);
 	if (!sortorder) sortorder = "&sortorder=desc";
-	
+
 	if (dir == "top") {
 		var threadForum = doc.__SALR_forumid;
-		
+
 		if(curPage == 1 && !threadForum) {
 			doc.location = urlbase + "/index.php";
 		} else {
@@ -1787,7 +1787,7 @@ function reanchorThreadToLink(doc) {
 	if(persistObject.getPreference('reanchorThreadOnLoad')){
 		if (doc.location.href.match(/\#(.*)$/)) {
 			var post = doc.getElementById(doc.location.href.match(/\#(.*)$/)[1]);
-			
+
 			if (post) {
 				var next = post.nextSibling;
 				if(next.id && next.id.match(/post\d+/)) {
@@ -1796,7 +1796,7 @@ function reanchorThreadToLink(doc) {
 						return;
 					}
 				}
-				
+
 				post.scrollIntoView(true);
 			}
 		}
