@@ -38,19 +38,19 @@ function SALRHexToNumber(hex) {
 }
 
 function SALR_menuItemCommand(event,el,etype) {
-   var target = "none";
-   if ( etype=="command" ) {
-      target = "current";
-   }
-   if ( etype=="click" ) {
-      if ( event.button == 2 || event.button == 1 ) {
-         target = "newtab";
-      }
-   }
+	var target = "none";
+	if(etype=="command") {
+		target = "current";
+	}
+	if(etype == "click") {
+		if(event.button == 2 || event.button == 1) {
+			target = "newtab";
+		}
+	}
 
-   if (target != "none") {
-      SALR_menuItemGoTo(event,"http://forums.somethingawful.com/forumdisplay.php?s=&forumid="+el.getAttribute("forumnum"),target);
-   }
+	if (target != "none") {
+		SALR_menuItemGoTo(event,"http://forums.somethingawful.com/forumdisplay.php?s=&forumid="+el.getAttribute("forumnum"),target);
+	}
 }
 
 function SALR_menuItemCommandGoToLastPost(event, el, etype, threadid) {
@@ -219,9 +219,6 @@ function populateForumMenuFrom(nested_menus, target, src, pinnedForumNumbers, pi
 		}
 	}
 }
-
-var SALR_DEBUG_pendingUpload = null;
-var SALR_DEBUG_pendingDownload = null;
 
 function buildSAForumMenu() {
 	try {
@@ -442,17 +439,20 @@ function handleSubscriptions(doc) {
 		{
 			if (!persistObject.getPreference("dontHighlightThreads"))
 			{
-				if ((threadRe+1) > threadLRCount) // If there are new posts
+				if ((threadRe + 1) > threadLRCount) // If there are new posts
 				{
 					if (!persistObject.getPreference("disableNewReCount"))
 					{
+						var newReplies = ((threadRe + 1) - threadLRCount)
+						var fontTag = threadRepliesBox.getElementsByTagName('font')[0];
+						
 						if (persistObject.getPreference("newPostCountUseOneLine"))
 						{
-							threadRepliesBox.innerHTML += '&nbsp;(' + ((threadRe+1) - threadLRCount) + ')';
+							fontTag.innerHTML += '&nbsp;(' + newReplies + ')';
 						}
 						else
 						{
-							threadRepliesBox.innerHTML += ' (' + ((threadRe+1) - threadLRCount) + ')';
+							fontTag.innerHTML += ' (' + newReplies + ')';
 						}
 					}
 					persistObject.blindColorThread(doc, threadlist[i], persistObject.getPreference("readWithNewLight"), persistObject.getPreference("readWithNewDark"));
