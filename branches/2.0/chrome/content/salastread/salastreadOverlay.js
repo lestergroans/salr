@@ -7,59 +7,13 @@ var needToShowChangeLog = false;
 // you may get banned from the forums. This delay is here at radium's command!
 var minMyThreadRefreshInterval = 60;
 
-var initialDocShellPrepared = false;
-var thisWindowPageTimers = new Array();
-
 //////////////////////////////////////////////
 
 var persistObject = null;
 
-function GetCurrentLPDateTime() {
-   var now = new Date();
-   var day = "00" + now.getDate();
-   var month = "00" + (now.getMonth()+1);
-   var year = "00" + (now.getYear()+1900);
-   var hour = "00" + now.getHours();
-   var minute = "00" + now.getMinutes();
-   day = day.substring(day.length-2,day.length);
-   month = month.substring(month.length-2,month.length);
-   year = year.substring(year.length-4,year.length);
-   hour = hour.substring(hour.length-2,hour.length);
-   minute = minute.substring(minute.length-2,minute.length);
-   return year + month + day + hour + minute;
-}
-
-function ConvertLPDateTimeToNum(lpdate, lptime) {
-   // Jun 05, 2006    14:46
-   // 012345678901    01234
-   var monthstr = lpdate.substring(0,3);  // "Jun"
-   var day = lpdate.substring(4,6);       // "05"
-   var year = lpdate.substring(8,12);     // "2006"
-   var hour = lptime.substring(0,2);      // "14"
-   var minute = lptime.substring(3,6);    // "46"
-   var month = "00";
-   if (monthstr == "Jan") month = "01";
-   if (monthstr == "Feb") month = "02";
-   if (monthstr == "Mar") month = "03";
-   if (monthstr == "Apr") month = "04";
-   if (monthstr == "May") month = "05";
-   if (monthstr == "Jun") month = "06";
-   if (monthstr == "Jul") month = "07";
-   if (monthstr == "Aug") month = "08";
-   if (monthstr == "Sep") month = "09";
-   if (monthstr == "Oct") month = "10";
-   if (monthstr == "Nov") month = "11";
-   if (monthstr == "Dec") month = "12";
-   return year + month + day + hour + minute;
-}
-
-function SALR_GetCurrentDT() {
-   return GetCurrentLPDateTime();
-}
-
 function SALRHexToNumber(hex) {
    var res = 0;
-   for (var i=0; i<hex.length; i++) {
+   for (var i = 0; i < hex.length; i++) {
       res = res * 16;
       switch (hex[i]) {
          case "0": res += 0; break;
@@ -83,97 +37,7 @@ function SALRHexToNumber(hex) {
    return res;
 }
 
-function SALR_MakeShowThreadCSS() {
-   var csstxt = "";
-   csstxt += "table.salastread_seenpost.salastread_odd tr { background-color: "+persistObject.getPreference('seenPostDark')+" !important; }\n\n";
-   csstxt += "table.salastread_seenpost.salastread_even tr { background-color: "+persistObject.getPreference('seenPostLight')+" !important; }\n\n";
-   //csstxt += "table.salastread_unseenpost.salastread_odd tr { background-color: "+persistObject.getPreference('unseenPostDark')+" !important; }\n\n";
-   //csstxt += "table.salastread_unseenpost.salastread_even tr { background-color: "+persistObject.getPreference('unseenPostLight')+" !important; }\n\n";
-   if ( persistObject.getPreference('hideTitle') ) {
-      csstxt += "dd.title * { display: none; }\n\n";
-   } else if ( persistObject.getPreference('resizeCustomTitleText') ) {
-      csstxt += "dd.title * { font-size: 8pt; }\n\n";
-   }
-
-   if ( persistObject.getPreference('hideSignature'))
-   {
-	   //So yeah firefox comes up with a pretty unique way of
-	   //interpretting SA's invalid HTML......
-      csstxt += ".signature + p + div { display: none; }\n\n"
-   }
-
-   // HEREHERE
-   return csstxt;
-}
-
-function SALR_MakeForumDisplayCSS() {
-   var sub = function(cls, isdark, basecolor, highlightcolor) {
-      var res = "";
-      if (isdark) {
-         res += "tr."+cls+" td.icon,";
-         res += "tr."+cls+" td.author,";
-         res += "tr."+cls+" td.views,";
-         res += "tr."+cls+" td.lastpost";
-      } else {
-         res += "tr."+cls+" td.title,";
-         res += "tr."+cls+" td.replies,";
-         res += "tr."+cls+" td.rating";
-      }
-      res += " { background-repeat: repeat-x !important; background-color: "+basecolor + " !important";
-      if (highlightcolor && !persistObject.getPreference('disableGradients')) {
-         res += "; background-image: url(x-salr-gradientpng:" +
-                    SALRHexToNumber(highlightcolor.substring(1,3)) + "," +
-                    SALRHexToNumber(highlightcolor.substring(3,5)) + "," +
-                    SALRHexToNumber(highlightcolor.substring(5,7)) + "," +
-                    "33) !important";
-      }
-      res += "; }\n\n";
-
-      res += "tr.salastread_postedinthread td.replies { background-repeat: repeat-x !important; background-color: "+
-                    persistObject.getPreference('postedInThreadRe') + " !important";
-      if (persistObject.getPreference('postedInThreadReHighlight') && !persistObject.getPreference('disableGradients')) {
-         var highlightcolor = persistObject.getPreference('postedInThreadReHighlight');
-         res += "; background-image: url(x-salr-gradientpng:" +
-                    SALRHexToNumber(highlightcolor.substring(1,3)) + "," +
-                    SALRHexToNumber(highlightcolor.substring(3,5)) + "," +
-                    SALRHexToNumber(highlightcolor.substring(5,7)) + "," +
-                    "33) !important";
-      }
-      res += "; }\n\n";
-
-      return res;
-   };
-
-   var csstext = "";
-   csstext += sub("salastread_readthread", true, persistObject.getPreference('readDark'), persistObject.getPreference('readDarkHighlight'));
-   csstext += sub("salastread_readthread", false, persistObject.getPreference('readLight'), persistObject.getPreference('readLightHighlight'));
-   csstext += sub("salastread_readwithnewthread", true, persistObject.getPreference('readWithNewDark'), persistObject.getPreference('readWithNewDarkHighlight'));
-   csstext += sub("salastread_readwithnewthread", false, persistObject.getPreference('readWithNewLight'), persistObject.getPreference('readWithNewLightHighlight'));
-   //csstext += sub("salastread_unreadthread", true, persistObject.getPreference('unreadDark'), persistObject.getPreference('unreadDarkHighlight'));
-   //csstext += sub("salastread_unreadthread", false, persistObject.getPreference('unreadLight'), persistObject.getPreference('unreadLightHighlight'));
-   csstext += "td.replies { white-space: nowrap; }\n\n";
-   csstext += ".salastread_newreplycount { font-weight: normal !important; }\n\n";
-
-   return csstext;
-}
-
-function changeBGColorsFromTo(doc, context, xpathbase, bgfrom, bgto, bgtohighlight) {
-   var xarray = persistObject.selectNodes(doc, context, xpathbase+"[@bgcolor='"+bgfrom+"']");
-   for (var x=0; x<xarray.length; x++) {
-      xarray[x].style.backgroundColor = bgto;
-      if ( bgtohighlight && !persistObject.getPreference('disableGradients') ) {
-         xarray[x].style.backgroundRepeat = "repeat-x";
-         xarray[x].style.backgroundImage = "url(x-salr-gradientpng:"+
-              SALRHexToNumber( bgtohighlight.substring(1,3) ) + "," +
-              SALRHexToNumber( bgtohighlight.substring(3,5) ) + "," +
-              SALRHexToNumber( bgtohighlight.substring(5,7) ) + "," +
-               "33)";
-      }
-   }
-   return xarray;
-}
-
-function SAmenuitemCommand2(event,el,etype) {
+function SALR_menuItemCommand(event,el,etype) {
    var target = "none";
    if ( etype=="command" ) {
       target = "current";
@@ -185,117 +49,117 @@ function SAmenuitemCommand2(event,el,etype) {
    }
 
    if (target != "none") {
-      SAmenuitemGoto(event,"http://forums.somethingawful.com/forumdisplay.php?s=&forumid="+el.getAttribute("forumnum"),target);
+      SALR_menuItemGoTo(event,"http://forums.somethingawful.com/forumdisplay.php?s=&forumid="+el.getAttribute("forumnum"),target);
    }
 }
 
-function SAmenuitemCommandGoToLastPost(event, el, etype, threadid) {
+function SALR_menuItemCommandGoToLastPost(event, el, etype, threadid) {
 	try {
 		var postid = persistObject.getLastPostID(threadid);
 
 		if(postid != 0) {
-			SAmenuitemCommandURL2(event, "http://forums.somethingawful.com/showthread.php?s=&postid=" + postid + "#post" + postid, etype);
+			SALR_menuItemCommandURL(event, "http://forums.somethingawful.com/showthread.php?s=&postid=" + postid + "#post" + postid, etype);
 		} else {
-			SAmenuitemCommandURL2(event, "http://forums.somethingawful.com/showthread.php?s=&threadid=" + threadid, etype);
+			SALR_menuItemCommandURL(event, "http://forums.somethingawful.com/showthread.php?s=&threadid=" + threadid, etype);
 		}
 	} catch(e) {
 		Components.utils.reportError("Couldn't find thread id: " + threadid);
 	}
 }
 
-function SAmenuitemCommandURL2(event,el,etype) {
-   var target = "none";
-   if ( etype=="command" ) {
-      target = "current";
-   }
-   if ( etype=="click" ) {
-      if ( event.button == 2 || event.button == 1 ) {
-         target = "newtab";
-      }
-   }
+function SALR_menuItemCommandURL(event,el,etype) {
+	var target = "none";
+	if(etype=="command") {
+		target = "current";
+	}
+	if(etype=="click") {
+		if(event.button == 2 || event.button == 1) {
+			target = "newtab";
+		}
+	}
 
-   var targeturl = "";
-   if ( typeof(el) == "string" ) {
-      targeturl = el;
-   } else {
-      targeturl = el.getAttribute("targeturl");
-   }
+	var targeturl = "";
+	if(typeof(el) == "string") {
+		targeturl = el;
+	} else {
+		targeturl = el.getAttribute("targeturl");
+	}
 
-   if (target != "none") {
-      SAmenuitemGoto(event,targeturl,target);
-   }
+	if(target != "none") {
+		SALR_menuItemGoTo(event,targeturl,target);
+	}
 }
 
-function SAmenuitemGoto(event,url,target) {
-   if (target=="newtab") {
-      getBrowser().addTab(url);
-   }
-   else if (target=="current") {
-      loadURI(url);
-   }
+function SALR_menuItemGoTo(event,url,target) {
+	if (target=="newtab") {
+		getBrowser().addTab(url);
+	} else if (target=="current") {
+		loadURI(url);
+	}
 }
 
 function grabForumList(doc, selectnode) {
-   var optionlist = persistObject.selectNodes(doc, selectnode, "OPTION");
-   var oDomParser = new DOMParser();
-   var forumsDoc = oDomParser.parseFromString("<?xml version=\"1.0\"?>\n<forumlist></forumlist>", "text/xml");
-   var targetEl = forumsDoc.documentElement;
-   var oldForumXml = persistObject.forumListXml;
-   for (var i=0; i<optionlist.length; i++) {
-      var thisopt = optionlist[i];
-      var thisopttext = thisopt.firstChild.nodeValue;
-      if ( thisopttext.substring(0,2)=="--" && thisopt.getAttribute("value")!="-1" ) {
-         var fel = forumsDoc.createElement("forum");
-         var myid = thisopt.getAttribute("value");
-         fel.setAttribute("id", myid);
+	var optionlist = persistObject.selectNodes(doc, selectnode, "OPTION");
+	var oDomParser = new DOMParser();
+	var forumsDoc = oDomParser.parseFromString("<?xml version=\"1.0\"?>\n<forumlist></forumlist>", "text/xml");
+	var targetEl = forumsDoc.documentElement;
+	var oldForumXml = persistObject.forumListXml;
+	for (var i=0; i<optionlist.length; i++) {
+		var thisopt = optionlist[i];
+		var thisopttext = thisopt.firstChild.nodeValue;
+		if(thisopttext.substring(0, 2) == "--" && thisopt.getAttribute("value") != "-1") {
+			var fel = forumsDoc.createElement("forum");
+			var myid = thisopt.getAttribute("value");
+			fel.setAttribute("id", myid);
 
-         // Carry over sticky attributes
-         if ( oldForumXml ) {
-            var oldEl = persistObject.selectSingleNode(oldForumXml, oldForumXml, "//forum[@id='"+myid+"']");
-            if (oldEl) {
-               if ( oldEl.hasAttribute("mods") ) {
-                  fel.setAttribute("mods", oldEl.getAttribute("mods"));
-               }
-               if ( oldEl.hasAttribute("modnames") ) {
-                  fel.setAttribute("modnames", oldEl.getAttribute("modnames"));
-               }
-            }
-         }
+			// Carry over sticky attributes
+			if(oldForumXml) {
+				var oldEl = persistObject.selectSingleNode(oldForumXml, oldForumXml, "//forum[@id='"+myid+"']");
+				if(oldEl) {
+					if(oldEl.hasAttribute("mods")) {
+						fel.setAttribute("mods", oldEl.getAttribute("mods"));
+					}
+					if(oldEl.hasAttribute("modnames")) {
+						fel.setAttribute("modnames", oldEl.getAttribute("modnames"));
+					}
+				}
+			}
 
-         var catname = "sub";
-         var xtext = thisopttext.substring(2);
-         while ( xtext.substring(0,2)=="--" ) {
-             catname += "-sub";
-             xtext = xtext.substring(2);
-         }
-         xtext = xtext.substring(1);
-         fel.setAttribute("name", xtext);
-         fel.setAttribute("cat", catname);
+			var catname = "sub";
+			var xtext = thisopttext.substring(2);
+			while(xtext.substring(0, 2) == "--") {
+				catname += "-sub";
+				xtext = xtext.substring(2);
+			}
+			xtext = xtext.substring(1);
+			fel.setAttribute("name", xtext);
+			fel.setAttribute("cat", catname);
 
-         targetEl.appendChild(fel);
-         targetEl.insertBefore(forumsDoc.createTextNode("\n"), fel);
-      } else if (thisopt.getAttribute("value")!="-1" ) {
-         var fel;
-         if ( thisopt.getAttribute("value").match(/\D/) ) {
-            fel = forumsDoc.createElement("util");
-         } else {
-            fel = forumsDoc.createElement("cat");
-            targetEl = fel;
-         }
-         if(thisopttext.substring(0,1)  == " ") {
-            fel.setAttribute("name", thisopttext.substring(1));
-         } else {
-            fel.setAttribute("name", thisopttext);
-         }
-         fel.setAttribute("id", thisopt.getAttribute("value"));
-         forumsDoc.documentElement.appendChild(fel);
-         forumsDoc.documentElement.insertBefore(forumsDoc.createTextNode("\n"), fel);
-      }
-   }
-   persistObject.forumListXml = forumsDoc;
-   if ( persistObject.getPreference('showSAForumMenu') ) {
-      buildSAForumMenu();
-   }
+			targetEl.appendChild(fel);
+			targetEl.insertBefore(forumsDoc.createTextNode("\n"), fel);
+		} else if(thisopt.getAttribute("value") != "-1") {
+			var fel;
+			if(thisopt.getAttribute("value").match(/\D/)) {
+				fel = forumsDoc.createElement("util");
+			} else {
+				fel = forumsDoc.createElement("cat");
+				targetEl = fel;
+			}
+			if(thisopttext.substring(0,1)  == " ") {
+				fel.setAttribute("name", thisopttext.substring(1));
+			} else {
+				fel.setAttribute("name", thisopttext);
+			}
+			fel.setAttribute("id", thisopt.getAttribute("value"));
+			forumsDoc.documentElement.appendChild(fel);
+			forumsDoc.documentElement.insertBefore(forumsDoc.createTextNode("\n"), fel);
+		}
+	}
+	
+	persistObject.forumListXml = forumsDoc;
+	if(persistObject.getPreference('showSAForumMenu')) {
+		buildSAForumMenu();
+	}
 }
 
 function populateForumMenuFrom(nested_menus, target, src, pinnedForumNumbers, pinnedForumElements) {
@@ -335,8 +199,8 @@ function populateForumMenuFrom(nested_menus, target, src, pinnedForumNumbers, pi
 			var menuel = document.createElement("menuitem");
 				menuel.setAttribute("label", thisforum.getAttribute("name"));
 				menuel.setAttribute("forumnum", thisforum.getAttribute("id"));
-				menuel.setAttribute("onclick", "SAmenuitemCommand2(event,this,'click');");
-				menuel.setAttribute("oncommand", "SAmenuitemCommand2(event,this,'command');");
+				menuel.setAttribute("onclick", "SALR_menuItemCommand(event,this,'click');");
+				menuel.setAttribute("oncommand", "SALR_menuItemCommand(event,this,'command');");
 
 			if(thisforum.getAttribute("cat") && thisforum.getAttribute("cat").substring(0, 3) == "sub") {
 				menuel.setAttribute("class", "lastread_menu_" + thisforum.getAttribute("cat"));
@@ -413,8 +277,8 @@ function buildSAForumMenu() {
 		}
 		menuel.setAttribute("label","Something Awful");
 		menuel.setAttribute("image", "chrome://salastread/skin/sa.png");
-		menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','click');");
-		menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,'http://www.somethingawful.com','command');");
+		menuel.setAttribute("onclick", "SALR_menuItemCommandURL(event,'http://www.somethingawful.com','click');");
+		menuel.setAttribute("oncommand", "SALR_menuItemCommandURL(event,'http://www.somethingawful.com','command');");
 		menuel.setAttribute("class","menuitem-iconic lastread_menu_frontpage");
 		menupopup.appendChild(menuel);
 		menupopup.appendChild(document.createElement("menuseparator"));
@@ -441,8 +305,8 @@ function buildSAForumMenu() {
 					}
 					menuel.setAttribute("label", forumname);
 					menuel.setAttribute("forumnum", thisforum.getAttribute("id"));
-					menuel.setAttribute("onclick", "SAmenuitemCommand2(event,this,'click');");
-					menuel.setAttribute("oncommand", "SAmenuitemCommand2(event,this,'command');");
+					menuel.setAttribute("onclick", "SALR_menuItemCommand(event,this,'click');");
+					menuel.setAttribute("oncommand", "SALR_menuItemCommand(event,this,'command');");
 					menuel.setAttribute("class", "lastread_menu_sub");
 					menupopup.appendChild(menuel);
 				} else if(pinnedForumNumbers[j]=="sep") {
@@ -453,8 +317,8 @@ function buildSAForumMenu() {
 						var menuel = document.createElement("menuitem");
 							menuel.setAttribute("label", persistObject.UnescapeMenuURL(umatch[1]));
 							menuel.setAttribute("targeturl", persistObject.UnescapeMenuURL(umatch[2]));
-							menuel.setAttribute("onclick", "SAmenuitemCommandURL2(event,this,'click');");
-							menuel.setAttribute("oncommand", "SAmenuitemCommandURL2(event,this,'command');");
+							menuel.setAttribute("onclick", "SALR_menuItemCommandURL(event,this,'click');");
+							menuel.setAttribute("oncommand", "SALR_menuItemCommandURL(event,this,'command');");
 							menuel.setAttribute("class", "lastread_menu_sub");
 
 						menupopup.appendChild(menuel);
@@ -508,24 +372,23 @@ function SALR_StarredThreadMenuShowing() {
 		var title = starred[id];
 		var menuel = document.createElement("menuitem");
 			menuel.setAttribute("label", title);
-			menuel.setAttribute("onclick", "SAmenuitemCommandGoToLastPost(event, this, 'click'," + id + ");");
-			menuel.setAttribute("oncommand", "SAmenuitemCommandGoToLastPost(event, this, 'command'," + id + ");");
+			menuel.setAttribute("onclick", "SALR_menuItemCommandGoToLastPost(event, this, 'click'," + id + ");");
+			menuel.setAttribute("oncommand", "SALR_menuItemCommandGoToLastPost(event, this, 'command'," + id + ");");
 		menupopup.appendChild(menuel);
 	}
 }
 
 function SALR_SAMenuShowing() {
-   //alert("here - " + persistObject.getPreference('showMenuPinHelper'));
-   if ( persistObject.getPreference('showMenuPinHelper') == false ) {
-      var ms = document.getElementById("salr_pinhelper_sep");
-      var mi = document.getElementById("salr_pinhelper_item");
-      if ( ms != null ) {
-         ms.parentNode.removeChild(ms);
-      }
-      if ( mi != null ) {
-         mi.parentNode.removeChild(mi);
-      }
-   }
+	if(persistObject.getPreference('showMenuPinHelper') == false) {
+		var ms = document.getElementById("salr_pinhelper_sep");
+		var mi = document.getElementById("salr_pinhelper_item");
+		if(ms != null) {
+			ms.parentNode.removeChild(ms);
+		}
+		if(mi != null) {
+			mi.parentNode.removeChild(mi);
+		}
+	}
 }
 
 function SALR_LaunchPinHelper() {
@@ -864,7 +727,7 @@ function removeThread(evt) {
 	//var doc = evt.originalTarget.ownerDocument;
 	var threadid = this.id.match(/unread_(\d+)/)[1];
 	persistObject.removeThread(threadid);
-	for (var i=0;i<this.parentNode.parentNode.childNodes.length;i++)
+	for (var i = 0; i < this.parentNode.parentNode.childNodes.length;i++)
 	{
 		if (this.parentNode.parentNode.childNodes[i].nodeName != "#text")
 		{
@@ -1027,49 +890,30 @@ function SALR_TimerTick() {
 }
 
 function SALR_SyncTick(force,trace) {
-   var xforce = force ? true : false;
-   trace = (trace==true) ? true : false;
-   if (persistObject) {
-      var res;
-      if (trace)
-         res = persistObject.PerformRemoteSync(xforce, function(){}, function(a){alert(a);});
-      else
-         res = persistObject.PerformRemoteSync(xforce, function(){}, function(a){});
-      if (xforce) { alert("res.bad = "+res.bad+"\nres.msg = "+res.msg); }
-   }
+	var xforce = force ? true : false;
+	trace = (trace==true) ? true : false;
+	if(persistObject) {
+		var res;
+		if(trace) {
+			res = persistObject.PerformRemoteSync(xforce, function(){}, function(a){alert(a);});
+		} else {
+			res = persistObject.PerformRemoteSync(xforce, function(){}, function(a){});
+		}
+		
+		if (xforce) { 
+			alert("res.bad = "+res.bad+"\nres.msg = "+res.msg);
+		}
+	}
 }
 
 function salastread_windowOnUnload(e) {
-   if ( e.originalTarget == window.__salastread_quotedoc ) {
-      //releaseQuickQuoteVarsWithClose();
-      releaseQuickQuoteVars();
-   }
-   if ( e.originalTarget.__salastread_processed ) {
-      SALR_DecTimer();
-      persistObject.SaveTimerValue();
-   }
-}
-
-function cleanupLostPageTimers() {
-   // because attaching to the unload event dynamically doesn't appear to work ...
-   var cont = document.getElementById("content");
-   var browsers = cont.browsers;
-   var newPageTimers = new Array();
-   for (var i=0; i<thisWindowPageTimers.length; i++) {
-      var thisTimer = thisWindowPageTimers[i];
-      var gotThisOne = 0;
-      for (var j=0; j<browsers.length; j++) {
-         var thisBrowser = browsers[j];
-         if (thisBrowser.contentDocument && thisBrowser.contentDocument.__SALASTREAD_PAGETIMER==thisTimer) {
-            gotThisOne = 1;
-            newPageTimers.push(thisTimer);
-         }
-      }
-      if (gotThisOne==0) {
-         thisTimer.Finalize();
-      }
-   }
-   thisWindowPageTimers = newPageTimers;
+	if(e.originalTarget == window.__salastread_quotedoc) {
+		releaseQuickQuoteVars();
+	}
+	if(e.originalTarget.__salastread_processed) {
+		SALR_DecTimer();
+		persistObject.SaveTimerValue();
+	}
 }
 
 function quickQuoteButtonClick(evt) {
@@ -1151,7 +995,7 @@ function handleShowThread(doc) {
 	{
 		var forumid = persistObject.getForumID(doc);
 	}
-	catch(e)
+	catch(zzzz)
 	{
 		// Can't get the forum id so abort for now
 		return;
@@ -1507,7 +1351,8 @@ function handleShowThread(doc) {
 			}
 
 			postbody = persistObject.selectSingleNode(doc, post, "TBODY//TD[contains(@class,'postbody')]");
-			persistObject.convertSpecialLinks(doc, postbody);
+			persistObject.convertSpecialLinks(postbody, doc);
+			persistObject.scaleImages(postbody, doc);
 		}
 
 		// Get the last post #
@@ -1532,35 +1377,6 @@ function handleShowThread(doc) {
 			alert(e);
 		}
 	}
-}
-
-function handleSupport(doc)
-{
-	if (doc.getElementById('content') == null)
-	{
-		// If there is no content div then abort since something's not right
-		return;
-	}
-	if (doc.getElementById('content').getElementsByTagName('iframe')[0].src.search(/supportfaq/) == -1)
-	{
-		// The iframe isn't there so something's changed
-		return;
-	}
-	var newImg = doc.createElement('img');
-	newImg.src = "chrome://salastread/skin/techsupport.jpg";
-	var newText = doc.createElement('p');
-	newText.innerHTML = "Please disable SA Last Read before reporting a problem with the forums";
-	newText.style.textAlign = "center";
-	var emptyP = doc.createElement('p');
-	var newLink = doc.createElement('a');
-	emptyP.appendChild(newLink);
-	emptyP.style.textAlign = "center";
-	newLink.href = "http://code.google.com/p/salr/issues/list";
-	newLink.innerHTML = "Click here to report a problem with SA Last Read instead";
-	var supportTable = doc.getElementById('content').getElementsByTagName('table')[1];
-	supportTable.parentNode.replaceChild(newImg, supportTable);
-	newImg.parentNode.appendChild(newText);
-	newImg.parentNode.appendChild(emptyP);
 }
 
 var specialDoc;
@@ -1749,13 +1565,6 @@ function SALR_PageMouseDown(event) {
       cx("left", 0, -1);
       cx("right", 0, 1);
       cx("bottom", 1, 0);
-
-      if (!doc.__SALR_maxPage) {
-	        var ss = doc.createElement("link");
-            ss.rel = "stylesheet";
-            ss.href = "chrome://salastread/content/pagenavigator-content.css";
-            doc.getElementsByTagName('head')[0].appendChild(ss);
-      }
    }
 }
 
@@ -1770,29 +1579,14 @@ function SALR_ChangeLastReadOnThread(e) {
 		persistObject.setLastPostID(threadid, postid, true);
 		persistObject.setLastReadPostCount(threadid, postcount, true);
 
-		//create the little yellow popup (could this be done via CSS?)
+		//create the little yellow popup
 		var doc = e.originalTarget.ownerDocument;
 		var notel = doc.createElement("div");
 			notel.innerHTML = "Last Post reset to this post.";
-			notel.style.position = "absolute";
-			notel.style.border = "1px solid black";
-			notel.style.backgroundColor = "yellow";
-			notel.style.color = "black";
-			notel.style.padding = "2px 2px 2px 2px";
-			notel.style.fontFamily = "Tahoma, Arial, Helvetica, sans-serif";
-			notel.style.fontSize = "small";
-		var lef = 0;
-		var top = 0;
-		var tel = e.originalTarget;
-
-		while (tel) {
-			lef += tel.offsetLeft;
-			top += tel.offsetTop;
-			tel = tel.offsetParent;
-		}
-
-		notel.style.top = (top + e.originalTarget.offsetHeight) + "px";
-		notel.style.left = lef + "px";
+			notel.className = "SALR_yellowPopup";
+			
+		notel.style.top = e.originalTarget.y + "px";
+		notel.style.left = e.originalTarget.x + "px";
 		notel.opacity = 100;
 
 		doc.body.appendChild(notel);
@@ -1996,12 +1790,6 @@ function salastread_hidePageHeader(doc) {
          return false;
       };
       doc.body.appendChild(togLink);
-
-      var lr = doc.createElement("link");
-      lr.rel = "stylesheet";
-      lr.type = "text/css";
-      lr.href = "chrome://salastread/content/hideshowheaderbutton.css";
-      doc.getElementsByTagName('head')[0].appendChild(lr);
    }
 }
 
@@ -2037,6 +1825,14 @@ function SALR_windowOnLoadMini(e) {
 
 function SALR_getPageTitle(doc) {
 	return doc.title.replace(/( \- )?The Something ?Awful Forums( \- )?/i, '');
+}
+
+function SALR_insertCSS(css, doc) {
+	var stylesheet = doc.createElement("link");
+		stylesheet.rel = "stylesheet";
+		stylesheet.type = "text/css";
+		stylesheet.href = css;
+	doc.getElementsByTagName('head')[0].appendChild(stylesheet);
 }
 
 var SALR_SilenceLoadErrors = false;
@@ -2101,7 +1897,7 @@ function salastread_windowOnLoad(e) {
 				}
 			}
 
-			if (loadCount == 3) {
+			if(loadCount == 3) {
 				if (needToShowChangeLog == true) {
 					needToShowChangeLog = false;
 					showChangelogWindow();
@@ -2111,11 +1907,8 @@ function salastread_windowOnLoad(e) {
 				window.addEventListener('load', SALR_windowOnLoadMini, true);
 			}
 
-			//var doc = e.originalTarget;
-			//var location = doc.location;
-
-			if (doc.__salastread_processed) {
-				if(persistObject.getPreference('reanchorThreadOnLoad') ) {
+			if(doc.__salastread_processed) {
+				if(persistObject.getPreference('reanchorThreadOnLoad')) {
 					if (isSa) {
 						if ( location.href.indexOf("showthread.php?") != -1 ) {
 							reanchorThreadToLink(doc);
@@ -2124,34 +1917,33 @@ function salastread_windowOnLoad(e) {
 				}
 				return;
 			}
-
-			if ( location && location.href && !doc.__salastread_processed ) {
+			
+			if(location && location.href && !doc.__salastread_processed) {
 				if (isSa) {
-					//            var newPageTimer = persistObject.TimeManager.GetStart();
-					//            doc.__SALASTREAD_PAGETIMER = newPageTimer;
-					//            thisWindowPageTimers.push(newPageTimer);
+					//insert any CSS we might need now
+					if(persistObject.getPreference('gestureEnable')) {
+						SALR_insertCSS("chrome://salastread/content/pagenavigator-content.css", doc);
+					}
+			
+					//insert content CSS
+					SALR_insertCSS("chrome://salastread/content/contentStyling.css", doc);
+					
 					// why the FUCK doesn't this work?
-					//doc.addEventListener("unload", function() { alert("a"); doc.__SALASTREAD_PAGETIMER.Finalize(); }, true);
 					var hresult = 0;
-					if ( location.href.indexOf("forumdisplay.php?") != -1 ) {
-						if (doc.getElementById('forum') != null) {
+					if(location.href.indexOf("forumdisplay.php?") != -1) {
+						if(doc.getElementById('forum') != null) {
 							// Only do if there is a list of posts
 							handleForumDisplay(doc);
 						}
-					} else if ( location.href.indexOf("showthread.php?") != -1) {
+					} else if (location.href.indexOf("showthread.php?") != -1) {
 					handleShowThread(doc);
-					} else if ( location.href.indexOf("newreply.php") != -1) {
+					} else if (location.href.indexOf("newreply.php") != -1) {
 						handleNewReply(e);
-					} else if ( location.href.indexOf("editpost.php") != -1) {
+					} else if (location.href.indexOf("editpost.php") != -1) {
 						handleEditPost(e);
 					} else if ( location.href.indexOf("member2.php") != -1 ||
 								location.href.indexOf("usercp.php") != -1) {
 						handleSubscriptions(doc);
-					}/* else if ( location.href.indexOf("member.php") != -1 &&
-								location.href.indexOf("salr_") != -1) {
-						SALR_HandleProfileInsertion(e);
-					} */ else if (location.href.search(/supportmail\.php/) > -1) {
-						handleSupport(doc);
 					}
 					var hcliresult = handleConfigLinkInsertion(e);
 					handleBodyClassing(e);
@@ -2186,20 +1978,6 @@ function salastread_windowOnLoad(e) {
 					if (persistObject.getPreference('removeHeaderAndFooter')) {
 						salastread_hidePageHeader(doc);
 					}
-
-					if (persistObject.getPreference('props')) {
-						var ssel = doc.createElement("LINK");
-							ssel.setAttribute('rel',"STYLESHEET");
-							ssel.setAttribute('type',"text/css");
-							ssel.setAttribute('href',"chrome://salastread/content/props.css");
-							//ssel.setAttribute('href',"file://C|/Documents%20and%20Settings/Tim%20Fries/Desktop/SALastRead/src/jar/content/salastread/props.css");
-							//ssel.setAttribute('href','data:text/css,body{background:red;}');
-						doc.getElementsByTagName('head')[0].appendChild(ssel);
-					}
-					//} else {
-					//   if ( location.href == "chrome://salastread/content/configuration.html" ) {
-					//      doc.persistObject = persistObject;
-					//   }
 				}
 			}
 		} catch(ex) {
@@ -2222,7 +2000,6 @@ function salastread_windowOnLoad(e) {
 				throw ex;
 			}
 		}
-		//   cleanupLostPageTimers();
 	}
 }
 
@@ -2257,8 +2034,10 @@ function SALR_HideContextMenuItems() {
 	}
 }
 
-function SALR_ContextMenuShowing(e) {
-	if(e.originalTarget == document.getElementById("contentAreaContextMenu")) {
+function SALR_ContextMenuShowing(e) 
+{
+	if(e.originalTarget == document.getElementById("contentAreaContextMenu")) 
+	{
 		SALR_HideContextMenuItems();
 		try {
 			var doc = document.getElementById("content").mCurrentBrowser.contentDocument;
@@ -2295,7 +2074,8 @@ function SALR_ContextVis_StarThisThread(doc) {
 	var target = gContextMenu.target;
 	var threadid = null;
 	while (target) {
-		if (target.className) {
+		if(target.className) 
+		{
 			var tidmatch = target.className.match(/salastread_thread_(\d+)/);
 			if (tidmatch) {
 				threadid = tidmatch[1];
@@ -2316,12 +2096,12 @@ function SALR_StarThread()
 	var threadid = document.getElementById("salastread-context-starthread").data;
 	var lpdtvalue = document.getElementById("salastread-context-starthread").lpdtvalue;
 	var target = document.getElementById("salastread-context-starthread").target;
-	if (threadid)
+	if(threadid)
 	{
 		var starStatus = persistObject.isThreadStarred(threadid);
 		persistObject.toggleThreadStar(threadid);
 
-		if (target.ownerDocument.location.href.search(/showthread.php/i) == -1)
+		if(target.ownerDocument.location.href.search(/showthread.php/i) == -1)
 		{
 			target.ownerDocument.location = target.ownerDocument.location;
 		}
@@ -2338,13 +2118,13 @@ function SALR_IgnoreThread()
 	var threadid = document.getElementById("salastread-context-ignorethread").data;
 	var lpdtvalue = document.getElementById("salastread-context-ignorethread").lpdtvalue;
 	var target = document.getElementById("salastread-context-ignorethread").target;
-	if (threadid)
+	if(threadid)
 	{
-		if (confirm("Are you sure you want to ignore thread #"+threadid+"?"))
+		if(confirm("Are you sure you want to ignore thread #" + threadid + "?"))
 		{
 			var ignoreStatus = persistObject.isThreadIgnored(threadid);
 			persistObject.toggleThreadIgnore(threadid);
-			if (target.ownerDocument.location.href.search(/showthread.php/i) == -1)
+			if(target.ownerDocument.location.href.search(/showthread.php/i) == -1) 
 			{
 				target.parentNode.removeChild(target);
 			}
@@ -2352,15 +2132,9 @@ function SALR_IgnoreThread()
 	}
 }
 
-function SALR_ThreadWatch() {
-   window.open("chrome://salastread/content/threadwatch/threadwatch.xul", "_blank",
-               "chrome, centerscreen, titlebar, resizable");
-}
-
 function showChangelogWindow() {
 	openDialog("chrome://salastread/content/newfeatures/newfeatures.xul", "SALR_newfeatures", "chrome,centerscreen,dialog=no");
 }
-
 
 // This code gets called every page load as part of Firefox's extension process
 try
@@ -2408,7 +2182,7 @@ try
 		window.addEventListener('beforeunload', salastread_windowOnBeforeUnload, true);
 		window.addEventListener('unload', salastread_windowOnUnload, true);
 	}
-	else
+	else 
 	{
 		throw "SALR Startup Error";
 	}
