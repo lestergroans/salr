@@ -1986,12 +1986,14 @@ salrPersistObject.prototype = {
 	},
 
 	// Convert image/videos links in threads to inline images/videos
-	// @param: td
+	// @param: post body (td), document body
 	// @return: nothing
-	convertSpecialLinks: function(doc, postbody)
+	convertSpecialLinks: function(postbody, doc)
 	{
 		var newImg, vidIdSearch, vidid, vidsrc;
 		var linksInPost = this.selectNodes(doc, postbody, "descendant::A");
+		var maxWidth = this.getPreference("maxWidthOfConvertedImages");
+		var maxHeight = this.getPreference("maxHeightOfConvertedImages");
 		for (var i in linksInPost)
 		{
 			var link = linksInPost[i];
@@ -2019,24 +2021,17 @@ salrPersistObject.prototype = {
 								continue;
 							}
 						}
+						
 						newImg = doc.createElement("img");
 						newImg.src = link.href;
 						newImg.title = "Link converted by SALR";
-						newImg.style.border = "1px dashed #f00";
-						if (this.getPreference("shrinkTextToImages"))
-						{
-							var maxWidth = this.getPreference("maxWidthOfConvertedImages") + "px";
-							var maxHeight = this.getPreference("maxHeightOfConvertedImages") + "px";
-							newImg.style.maxWidth = maxWidth;
-							newImg.style.maxHeight = maxHeight
-							newImg.addEventListener("click",
-							function() {
-								this.style.maxWidth = (this.style.maxWidth == '') ? maxWidth : '';
-								this.style.maxHeight = (this.style.maxHeight == '') ? maxHeight : '';
-								this.title = "Link converted by SALR";
-							},false);
-							newImg.title += " - Click to enlarge";
+						newImg.style.border = "1px dashed red";
+						newImg.className = "SALR_convertedImage";
+						
+						if(this.getPreference("shrinkTextToImages")) {
+							this.scaleImage(newImg, maxWidth, maxHeight);
 						}
+						
 						if ((link.firstChild == link.lastChild && (link.firstChild.tagName && link.firstChild.tagName.search(/img/i) > -1)) ||
 							link.textContent.search(/http:/i) == 0)
 						{
@@ -2062,7 +2057,51 @@ salrPersistObject.prototype = {
 			}
 		}
 	},
-
+	
+	// Scale all images in the post body to the user-specified size
+	// @param: body of the post, document body
+	// @return: nothing
+	scaleImages: function(postbody, doc)
+	{
+		if(this.getPreference("thumbnailAllImages"))
+		{
+			var maxWidth = this.getPreference("maxWidthOfConvertedImages");
+			var maxHeight = this.getPreference("maxHeightOfConvertedImages");
+			
+			var images = this.selectNodes(doc, postbody, "img");
+			for(var i in images)
+			{
+				var image = images[i];
+				
+				//this gets a little weird due to needing to avoid images that we've text->img'd previously
+				if( (!image.className) &&
+					((image.width > maxWidth && maxWidth > -1) || (image.height > maxHeight && maxHeight > -1))) {
+					this.scaleImage(image, maxWidth, maxHeight);
+				}
+			}
+		}
+	},
+	
+	// Scales an image using CSS maxWidth/Height values
+	// @param: image element, max width, max height
+	// @return: nothing
+	scaleImage: function(img, width, height)
+	{
+		//set img details
+		img.style.maxWidth = width + "px";
+		img.style.maxHeight = height + "px";
+		if(!img.style.border) {
+			img.style.border = "1px dashed blue";
+		}
+		
+		img.addEventListener("click",
+		function() {
+			this.style.maxWidth = (this.style.maxWidth == '') ? width + "px": '';
+			this.style.maxHeight = (this.style.maxHeight == '') ? height + "px": '';
+		}, false);	
+	},
+	
+	
 	// Takes a button and turns it into a quick button
 	// @param: (html element) doc, (html element) button, (int) forumid
 	// @return: (html element) quick button
