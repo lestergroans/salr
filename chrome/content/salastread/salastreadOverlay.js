@@ -1151,7 +1151,7 @@ function handleShowThread(doc) {
 	{
 		var forumid = persistObject.getForumID(doc);
 	}
-	catch(zzzz)
+	catch(e)
 	{
 		// Can't get the forum id so abort for now
 		return;
@@ -1532,6 +1532,35 @@ function handleShowThread(doc) {
 			alert(e);
 		}
 	}
+}
+
+function handleSupport(doc)
+{
+	if (doc.getElementById('content') == null)
+	{
+		// If there is no content div then abort since something's not right
+		return;
+	}
+	if (doc.getElementById('content').getElementsByTagName('iframe')[0].src.search(/supportfaq/) == -1)
+	{
+		// The iframe isn't there so something's changed
+		return;
+	}
+	var newImg = doc.createElement('img');
+	newImg.src = "chrome://salastread/skin/techsupport.jpg";
+	var newText = doc.createElement('p');
+	newText.innerHTML = "Please disable SA Last Read before reporting a problem with the forums";
+	newText.style.textAlign = "center";
+	var emptyP = doc.createElement('p');
+	var newLink = doc.createElement('a');
+	emptyP.appendChild(newLink);
+	emptyP.style.textAlign = "center";
+	newLink.href = "http://code.google.com/p/salr/issues/list";
+	newLink.innerHTML = "Click here to report a problem with SA Last Read instead";
+	var supportTable = doc.getElementById('content').getElementsByTagName('table')[1];
+	supportTable.parentNode.replaceChild(newImg, supportTable);
+	newImg.parentNode.appendChild(newText);
+	newImg.parentNode.appendChild(emptyP);
 }
 
 var specialDoc;
@@ -2121,7 +2150,9 @@ function salastread_windowOnLoad(e) {
 					}/* else if ( location.href.indexOf("member.php") != -1 &&
 								location.href.indexOf("salr_") != -1) {
 						SALR_HandleProfileInsertion(e);
-					} */
+					} */ else if (location.href.search(/supportmail\.php/) > -1) {
+						handleSupport(doc);
+					}
 					var hcliresult = handleConfigLinkInsertion(e);
 					handleBodyClassing(e);
 
