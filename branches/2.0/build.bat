@@ -6,7 +6,7 @@ md build\components
 md build\defaults
 md build\skin
 cd chrome
-7z a -tzip "%x%.jar" * -r -mx=0 -xr!.svn -x!Thumbs.db
+7z a -tzip "%x%.jar" * -r -mx=0 -xr!.svn -x!Thumbs.db -x!desktop.ini
 move "%x%.jar" ..\build\chrome
 cd ..
 copy install.* build

@@ -1939,10 +1939,6 @@ salrPersistObject.prototype = {
 				navDiv.appendChild(lastButton);
 			}
 			doc.body.appendChild(navDiv);
-			var ss = doc.createElement("link");
-			ss.rel = "stylesheet";
-			ss.href = "chrome://salastread/content/pagenavigator-content.css";
-			doc.getElementsByTagName('head')[0].appendChild(ss);
 			// Do these do anything?
 			doc.__SALR_curPage = curPage;
 			doc.__SALR_maxPage = numPages;
@@ -2026,11 +2022,6 @@ salrPersistObject.prototype = {
 						newImg.src = link.href;
 						newImg.title = "Link converted by SALR";
 						newImg.style.border = "1px dashed red";
-						newImg.className = "SALR_convertedImage";
-						
-						if(this.getPreference("shrinkTextToImages")) {
-							this.scaleImage(newImg, maxWidth, maxHeight);
-						}
 						
 						if ((link.firstChild == link.lastChild && (link.firstChild.tagName && link.firstChild.tagName.search(/img/i) > -1)) ||
 							link.textContent.search(/http:/i) == 0)
@@ -2043,7 +2034,6 @@ salrPersistObject.prototype = {
 							link.previousSibling.textContent += link.textContent;
 							link.textContent = '';
 							link.parentNode.replaceChild(newImg, link);
-							//link.appendChild(newImg);
 						}
 					}
 				}
@@ -2068,39 +2058,40 @@ salrPersistObject.prototype = {
 			var maxWidth = this.getPreference("maxWidthOfConvertedImages");
 			var maxHeight = this.getPreference("maxHeightOfConvertedImages");
 			
+			if(maxHeight) {
+				maxHeight += "px";
+			}
+			
+			if(maxWidth) {
+				maxWidth += "px";
+			}
+			
 			var images = this.selectNodes(doc, postbody, "img");
 			for(var i in images)
 			{
 				var image = images[i];
 				
-				//this gets a little weird due to needing to avoid images that we've text->img'd previously
-				if( (!image.className) &&
-					((image.width > maxWidth && maxWidth > -1) || (image.height > maxHeight && maxHeight > -1))) {
-					this.scaleImage(image, maxWidth, maxHeight);
+				if(!image.src.match(/forumimages\.somethingawful\.com/i)) {
+					if(maxWidth) {
+						image.style.maxWidth = maxWidth;
+					}
+					if(maxHeight) {
+						image.style.maxHeight = maxHeight;
+					}
+
+					image.addEventListener("click",
+					function() {
+						if(maxWidth) {
+							this.style.maxWidth = (this.style.maxWidth == maxWidth) ? "100%" : maxWidth;
+						}
+						if(maxHeight) {
+							this.style.maxHeight = (this.style.maxHeight == maxHeight) ? "100%" : maxHeight;
+						}
+					}, false);
 				}
 			}
 		}
 	},
-	
-	// Scales an image using CSS maxWidth/Height values
-	// @param: image element, max width, max height
-	// @return: nothing
-	scaleImage: function(img, width, height)
-	{
-		//set img details
-		img.style.maxWidth = width + "px";
-		img.style.maxHeight = height + "px";
-		if(!img.style.border) {
-			img.style.border = "1px dashed blue";
-		}
-		
-		img.addEventListener("click",
-		function() {
-			this.style.maxWidth = (this.style.maxWidth == '') ? width + "px": '';
-			this.style.maxHeight = (this.style.maxHeight == '') ? height + "px": '';
-		}, false);	
-	},
-	
 	
 	// Takes a button and turns it into a quick button
 	// @param: (html element) doc, (html element) button, (int) forumid

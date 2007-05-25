@@ -20,7 +20,7 @@
 	</preferences>
 	
 	<groupbox>
-		<caption label="Text-to-Image Options"/>
+		<caption label="Text-to-Image Conversion"/>
 		
 		<vbox>
 			<checkbox preference="convertTextToImage" label="Convert links to images to inline images in posts" />
@@ -28,38 +28,40 @@
 			<vbox style="margin-left: 20px">
 				<checkbox preference="dontTextToImageIfMayBeNws" label="Don't convert if post contains an NWS/NMS warning" />
 				<checkbox preference="dontTextToImageInSpoilers" label="Don't convert links inside [spoiler] tags" />
-				
-				<checkbox preference="shrinkTextToImages" label="Scale converted images" />
-				<vbox style="margin-left: 20px;">
-					<grid>
-						<columns>
-							<column />
-							<column />
-						</columns>
-						
-						<rows>
-							<description>
-								Enter the values for the maximum height/width you would like SALR to scale images to.  
-								All dimensions are in pixels, and a value of -1 indicates that the image will not be scaled on that axis.
-							</description>
-							<row align="center">
-								<label value="Max Width" control="maxWidth"/>
-								<textbox id="maxWidth" preference="maxWidthOfConvertedImages" size="3" />
-								<label value="(px)" control="maxWidth" />
-							</row>
-							
-							<row align="center">
-								<label value="Max Height" control="maxHeight"/>
-								<textbox id="maxHeight" preference="maxHeightOfConvertedImages" size="3" />
-								<label value="(px)" control="maxHeight" />
-							</row>
-						</rows>
-					</grid>
-				</vbox>
-			
 			</vbox>
-			
-			<checkbox preference="thumbnailAllImages" label="Thumbnail all forum images until clicked"/>
+		</vbox>
+	</groupbox>
+	
+	<groupbox>
+		<caption label="Image Scaling" />
+		<vbox>
+			<checkbox preference="thumbnailAllImages" label="Scale all forum images until clicked"/>
+			<vbox style="margin-left: 20px;">
+				<grid>
+					<columns>
+						<column />
+						<column />
+					</columns>
+					
+					<rows>
+						<description>
+							Enter the values for the maximum height/width you would like SALR to scale images to.  
+							All dimensions are in pixels, set to 0 to disable scaling in that direction.
+						</description>
+						<row align="center">
+							<label value="Max Width" control="maxWidth"/>
+							<textbox id="maxWidth" preference="maxWidthOfConvertedImages" size="3" />
+							<label value="(px)" control="maxWidth" />
+						</row>
+						
+						<row align="center">
+							<label value="Max Height" control="maxHeight"/>
+							<textbox id="maxHeight" preference="maxHeightOfConvertedImages" size="3" />
+							<label value="(px)" control="maxHeight" />
+						</row>
+					</rows>
+				</grid>
+			</vbox>
 		</vbox>
 	</groupbox>
 	</prefpane>
