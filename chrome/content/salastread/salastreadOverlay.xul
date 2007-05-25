@@ -10,12 +10,15 @@
 -->
 	<script type="application/x-javascript" src="chrome://salastread/content/salastreadOverlay.js"/>
 
+<!--
 	<statusbar id="status-bar">
 		<statusbarpanel insertafter="security-button" id="somethingawful-button" style="display: none;">
 			<image src="chrome://salastread/skin/sa.png" width="16" height="16" title="Something Awful"/>
 		</statusbarpanel>
 	</statusbar>
-
+-->
+	
+	<!-- Add our submenu to the main Context menu -->
 	<popup id="contentAreaContextMenu">
 		<menu 	label="SA Last Read Options" 
 				id="salastread-context-menu"
@@ -30,4 +33,9 @@
 		<menuseparator id="salastread-context-menuseparator" position="2"/>
 	</popup>
 
+	<!-- Add item to the tools menu (in case they don't want the main SA menu) -->
+	<menupopup id="menu_ToolsPopup"> 
+		<menuitem id="salastread-tools-menuitem" label="SALR Config" insertafter="devToolsSeparator"  oncommand="SALR_runConfig();" />
+	</menupopup> 	
+	
 </overlay>

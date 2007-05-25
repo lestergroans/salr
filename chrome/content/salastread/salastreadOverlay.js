@@ -2,13 +2,6 @@
 
 var needToShowChangeLog = false;
 
-// WARNING WARNING WARNING WARNING
-// Changing the following value, or any of the code that enforces the delay,
-// you may get banned from the forums. This delay is here at radium's command!
-var minMyThreadRefreshInterval = 60;
-
-//////////////////////////////////////////////
-
 var persistObject = null;
 
 function SALRHexToNumber(hex) {
@@ -744,46 +737,45 @@ function removeThread(evt) {
 }
 
 function convertPLTag(message) {
-   return message.replace(/\[PL=(.*?)\](.*?)\[\/PL\]/g,"[URL=http://forums.somethingawful.com/showthread.php?s=&postid=$1#post$1]$2[/URL]");
-   //return message.replace(/\[PL=(.*?)\](.*?)\[\/PL\]/g,"[URL=http://forums.somethingawful.com/showthread.php?s=&action=showpost&postid=$1]$2[/URL]");
+	return message.replace(/\[PL=(.*?)\](.*?)\[\/PL\]/g,"[URL=http://forums.somethingawful.com/showthread.php?s=&postid=$1#post$1]$2[/URL]");
 }
 
 function parsePLTagsInEdit(tarea) {
-   var xtxt = tarea.value;
-   tarea.value = convertPLTag(xtxt);
+	var xtxt = tarea.value;
+	tarea.value = convertPLTag(xtxt);
 }
 
 var quickquotewin = null;
 
 function releaseQuickQuoteVarsWithClose() {
-   quickquotewin.close();
+	quickquotewin.close();
 }
 
 function releaseQuickQuoteVars() {
-   window.__salastread_quotedoc = null;
-   window.__salastread_quotetext = null;
-   window.__salastread_quotethreadid = null;
-   window.__salastread_quotepostid = null;
-   window.__salastread_alreadypostedinthread = null;
-   window.__salastread_needretrieval = null;
-   quickQuoteSubmitting = false;
-   quickquotewin = null;
+	window.__salastread_quotedoc = null;
+	window.__salastread_quotetext = null;
+	window.__salastread_quotethreadid = null;
+	window.__salastread_quotepostid = null;
+	window.__salastread_alreadypostedinthread = null;
+	window.__salastread_needretrieval = null;
+	quickQuoteSubmitting = false;
+	quickquotewin = null;
 }
 
 function quickQuoteAddHidden(doc,form,name,value) {
-   var newel = doc.createElement("INPUT");
-   newel.type = "hidden";
-   newel.name = name;
-   newel.value = value;
-   form.appendChild(newel);
+	var newel = doc.createElement("INPUT");
+		newel.type = "hidden";
+		newel.name = name;
+		newel.value = value;
+	form.appendChild(newel);
 }
 
 function quickQuoteAddFile(doc,form,name,value) {
-   var newel = doc.createElement("INPUT");
-   newel.type = "file";
-   newel.name = name;
-   newel.value = value;
-   form.appendChild(newel);
+	var newel = doc.createElement("INPUT");
+		newel.type = "file";
+		newel.name = name;
+		newel.value = value;
+	form.appendChild(newel);
 }
 
 var quickQuoteSubmitting = false;
@@ -1000,7 +992,7 @@ function handleShowThread(doc) {
 		// Can't get the forum id so abort for now
 		return;
 	}
-	var failed, i, zzzz;	// Little variables that'll get reused
+	var failed, i;	// Little variables that'll get reused
 	// The following forums have special needs that must be dealt with
 	var inFYAD = persistObject.inFYAD(forumid);
 	var inBYOB = persistObject.inBYOB(forumid);
@@ -1304,7 +1296,7 @@ function handleShowThread(doc) {
 			if (insertPostLastMarkLink)
 			{
 				resetLink = doc.createElement("a");
-				resetLink.href = "javascript:void('lr',"+postid+");";
+				resetLink.href = "javascript:void('lr'," + postid + ");";
 				resetLink.title = "Set \"Last Read\" post in this thread to this post";
 				resetLink.threadid = threadid;
 				resetLink.postid = postid;
@@ -1505,25 +1497,24 @@ function SALR_DirectionalNavigate(doc, dir) {
 }
 
 function SALR_PageMouseUp(event) {
-   var targ = event.target;
-   var doc = targ.ownerDocument;
-   if (targ && targ.SALR_isGestureElement==true) {
-      doc.body.addEventListener('contextmenu', SALR_GestureContextMenu, false);
-      SALR_DirectionalNavigate(doc, targ.SALR_dir);
-      //alert("dir="+targ.SALR_dir);
-   }
+	var targ = event.target;
+	var doc = targ.ownerDocument;
+	if (targ && targ.SALR_isGestureElement==true) {
+		doc.body.addEventListener('contextmenu', SALR_GestureContextMenu, false);
+		SALR_DirectionalNavigate(doc, targ.SALR_dir);
+	}
 
-   var gn = doc.getElementById("salastread_gesturenavtop");
-   if (gn) {
-      var rx = function(dir) {
-         var el = doc.getElementById("salastread_gesturenav"+dir);
-         el.parentNode.removeChild(el);
-      }
-      rx("top");
-      rx("left");
-      rx("right");
-      rx("bottom");
-   }
+	var gn = doc.getElementById("salastread_gesturenavtop");
+	if (gn) {
+		var rx = function(dir) {
+			var el = doc.getElementById("salastread_gesturenav"+dir);
+			el.parentNode.removeChild(el);
+		}
+		rx("top");
+		rx("left");
+		rx("right");
+		rx("bottom");
+	}
 }
 
 function SALR_GestureContextMenu(event) {
@@ -1565,8 +1556,8 @@ function SALR_PageMouseDown(event) {
       cx("left", 0, -1);
       cx("right", 0, 1);
       cx("bottom", 1, 0);
-   }
 }
+   }
 
 //handle setting the last read post to a user-defined post
 function SALR_ChangeLastReadOnThread(e) {
@@ -1584,11 +1575,10 @@ function SALR_ChangeLastReadOnThread(e) {
 		var notel = doc.createElement("div");
 			notel.innerHTML = "Last Post reset to this post.";
 			notel.className = "SALR_yellowPopup";
-			
-		notel.style.top = e.originalTarget.y + "px";
-		notel.style.left = e.originalTarget.x + "px";
-		notel.opacity = 100;
-
+			notel.style.top = e.pageY + "px";
+			notel.style.left = e.pageX + "px";
+			notel.opacity = 100;
+		
 		doc.body.appendChild(notel);
 		setTimeout( function() { SALR_NoteFade(notel); }, 1000 );
 	} catch(e) {
@@ -1627,7 +1617,7 @@ function reanchorThreadToLink(doc) {
 }
 
 function SALR_runConfig(page) {
-	//hopefully this fixes stuff in OSX
+	//check a pref so the dialog has the proper constructor arguments
 	var pref = Components.classes["@mozilla.org/preferences-service;1"]
 				.getService(Components.interfaces.nsIPrefBranch);
 	
@@ -1835,6 +1825,15 @@ function SALR_insertCSS(css, doc) {
 	doc.getElementsByTagName('head')[0].appendChild(stylesheet);
 }
 
+//not used right now, might be useful later!
+function SALR_insertDynamicCSS(css, doc) {
+	var stylesheet = doc.createElement("style");
+		stylesheet.type = "text/css";
+		stylesheet.innerHTML = css;
+	
+	doc.getElementsByTagName('head')[0].appendChild(stylesheet);
+}
+
 var SALR_SilenceLoadErrors = false;
 var firstLoad = true;
 var loadCount = 0;
@@ -1849,14 +1848,6 @@ function salastread_windowOnLoad(e) {
 	// This IF statement included to help debugging, change the pref value to disable without restarting FF
 	if(Components.classes["@mozilla.org/preferences;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.salastread.").getBoolPref("disabled") == false)
 	{
-		/*
-		alert("e is "+e+"\ne.originalTarget.location.href is "+e.originalTarget.location.href);
-		if ( e.originalTarget == "[Object HTMLDocument]" ) {
-		   alert("originalTarget is " + e.originalTarget + "\ntypeof = "+typeof(e.originalTarget));
-		}
-		var doc = window._content.document;
-		SALR_UpdateStatusBarIcon();
-		*/
 		SALR_SilenceLoadErrors = false;
 
 		var doc = e.originalTarget;
@@ -1881,7 +1872,6 @@ function salastread_windowOnLoad(e) {
 				}
 
 				// DOMContentLoaded test...
-				//__TEST__hookupTitleChanged();
 				document.getElementById("appcontent").addEventListener("DOMContentLoaded", salastread_windowOnLoad, false);
 
 				//add handler or hide context menu, depending on setting
@@ -1894,6 +1884,11 @@ function salastread_windowOnLoad(e) {
 
 					cacm.removeChild(mopt);
 					cacm.removeChild(moptsep);
+				}
+				
+				if(!persistObject.getPreference("showSAToolsMenu")) {
+					var item = document.getElementById("salastread-tools-menuitem");
+						item.parentNode.removeChild(item);
 				}
 			}
 
@@ -1922,9 +1917,17 @@ function salastread_windowOnLoad(e) {
 				if (isSa) {
 					//insert any CSS we might need now
 					if(persistObject.getPreference('gestureEnable')) {
+						SALR_insertCSS("chrome://salastread/content/gestureStyling.css", doc);
+					}
+					
+					if(persistObject.getPreference('removeHeaderAndFooter')) {
+						SALR_insertCSS("chrome://salastread/content/hideshowheaderbutton.css", doc);
+					}
+					
+					if(persistObject.getPreference('enablePageNavigator') || persistObject.getPreference('enableForumNavigator')) {
 						SALR_insertCSS("chrome://salastread/content/pagenavigator-content.css", doc);
 					}
-			
+					
 					//insert content CSS
 					SALR_insertCSS("chrome://salastread/content/contentStyling.css", doc);
 					

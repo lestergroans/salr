@@ -1,4 +1,4 @@
-pref('extensions.salastread.currentVersion', '1.99.070523');
+pref('extensions.salastread.currentVersion', '1.99.070524');
 pref('extensions.salastread.disabled', false);
 pref('extensions.salastread.postsPerPage', 40);
 pref('extensions.salastread.enableFYAD', true);
@@ -107,6 +107,7 @@ pref('extensions.salastread.hideOtherSAMenus', true);
 pref('extensions.salastread.menuPinnedForums', '1,22,44');
 pref('extensions.salastread.contextMenuOnBottom', true);
 pref('extensions.salastread.enableContextMenu', true);
+pref('extensions.salastread.showSAToolsMenu', false);
 
 
 //FILE SETTINGS

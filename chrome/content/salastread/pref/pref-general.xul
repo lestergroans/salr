@@ -12,13 +12,15 @@
 		<preference id="enablePageNavigator"	name="extensions.salastread.enablePageNavigator" 	type="bool"/>
 		<preference id="enableForumNavigator"	name="extensions.salastread.enableForumNavigator" 	type="bool"/>
 		<preference id="gestureEnable" 			name="extensions.salastread.gestureEnable" 			type="bool"/>
-		<preference id="suppressErrors"			name="extensions.salastread.suppressErrors" 		type="bool"/>
+		<preference id="showSAToolsMenu" 		name="extensions.salastread.showSAToolsMenu" 		type="bool"/>
 		
 		<preference id="showGoToLastIcon"			name="extensions.salastread.showGoToLastIcon" 		type="bool"/>
 		<preference id="goToLastReadPost"			name="extensions.salastread.goToLastReadPost" 		type="string"/>
 		<preference id="alwaysShowGoToLastIcon"		name="extensions.salastread.alwaysShowGoToLastIcon" type="bool"/>
 		<preference id="showUnvisitIcon"			name="extensions.salastread.showUnvisitIcon" 		type="bool"/>
 		<preference id="markThreadUnvisited"		name="extensions.salastread.markThreadUnvisited" 	type="string"/>
+		
+		<preference id="suppressErrors"			name="extensions.salastread.suppressErrors" 		type="bool"/>		
     </preferences>
 
 	<groupbox>
@@ -29,7 +31,7 @@
 		<checkbox preference="enablePageNavigator" 	 label="Add a page navigator to the lower-right corner of the browser" />
 		<checkbox preference="enableForumNavigator"  label="Add a forum navigator to the lower-right corner of the browser" />
 		<checkbox preference="gestureEnable" 		 label="Allow mouse gestures to navigate around threads and forums" />
-		<checkbox preference="suppressErrors"		 label="Don't display error popup messages" />
+		<checkbox preference="showSAToolsMenu" 		 label="Add 'SALR Config' item to the tools menu" />
 	</vbox>
 	</groupbox>
 	
@@ -60,6 +62,11 @@
 			</vbox>
 			
 		</vbox>
+	</groupbox>
+	
+	<groupbox>
+		<caption label="Debugging Info"/>
+		<checkbox preference="suppressErrors" label="Don't display error popup messages" />
 	</groupbox>
 	</prefpane>
 </overlay>
