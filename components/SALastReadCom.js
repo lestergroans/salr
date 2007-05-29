@@ -2082,10 +2082,10 @@ salrPersistObject.prototype = {
 					image.addEventListener("click",
 					function() {
 						if(maxWidth) {
-							this.style.maxWidth = (this.style.maxWidth == maxWidth) ? "100%" : maxWidth;
+							this.style.maxWidth = (this.style.maxWidth == maxWidth) ? "" : maxWidth;
 						}
 						if(maxHeight) {
-							this.style.maxHeight = (this.style.maxHeight == maxHeight) ? "100%" : maxHeight;
+							this.style.maxHeight = (this.style.maxHeight == maxHeight) ? "" : maxHeight;
 						}
 					}, false);
 				}

@@ -1135,8 +1135,8 @@ function handleShowThread(doc) {
 		}
 
 		// Update the last read total
-		var editbuttons = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'postbar')]//A[contains(@href,'action=editpost')]");
-		var postcount = (perpage * (curPage-1)) + editbuttons.length;
+		var postlist = persistObject.selectNodes(doc, doc, "//table[contains(@id,'post')]");
+		var postcount = (perpage * (curPage - 1)) + postlist.length;
 		persistObject.setLastReadPostCount(threadid, postcount);
 
 		var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId, postbody, f;
@@ -1153,7 +1153,7 @@ function handleShowThread(doc) {
 		doc.postlinks = new Array;
 
 		// Loop through each post
-		var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
+		//var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
 		for (i in postlist)
 		{
 			var post = postlist[i];
