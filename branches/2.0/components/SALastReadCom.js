@@ -1854,11 +1854,11 @@ salrPersistObject.prototype = {
 		var pageList = this.selectNodes(doc, doc, "//DIV[contains(@class,'pages')]");
 		pageList = pageList[pageList.length-1];
 		var numPages = pageList.innerHTML.match(/\((\d+)\)/);
-		var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
+		var curPage = this.selectSingleNode(doc, doc, "//SPAN[contains(@class,'curpage')]");
 		if (pageList.childNodes.length > 1) // Are there pages
 		{
 			numPages = parseInt(numPages[1], 10);
-			curPage = parseInt(curPage[1], 10);
+			curPage = parseInt(curPage.innerHTML, 10);
 			var navDiv = doc.createElement("div");
 			navDiv.className = "salastread_pagenavigator";
 			var firstButtonImg = doc.createElement("img");
