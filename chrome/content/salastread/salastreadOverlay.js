@@ -579,6 +579,28 @@ function handleForumDisplay(doc)
 			}
 		}
 
+
+		//get preferences once
+		var dontHighlightThreads = persistObject.getPreference("dontHighlightThreads");
+		var disableNewReCount = persistObject.getPreference("disableNewReCount");
+		var newPostCountUseOneLine = persistObject.getPreference("newPostCountUseOneLine");
+		var disableGradients = persistObject.getPreference("disableGradients");
+		var showUnvisitIcon = persistObject.getPreference("showUnvisitIcon");
+		var swapIconOrder = persistObject.getPreference("swapIconOrder");
+		var showGoToLastIcon = persistObject.getPreference("showGoToLastIcon");
+		var alwaysShowGoToLastIcon = persistObject.getPreference("alwaysShowGoToLastIcon");
+		var readWithNewLight = persistObject.getPreference("readWithNewLight");
+		var readWithNewDark = persistObject.getPreference("readWithNewDark");
+		var readLight = persistObject.getPreference("readLight");
+		var readDark = persistObject.getPreference("readDark");
+		var postedInThreadRe = persistObject.getPreference("postedInThreadRe");
+		var modColor = persistObject.getPreference("modColor");
+		var modBackground = persistObject.getPreference("modBackground");
+		var adminColor = persistObject.getPreference("adminColor");
+		var adminBackground = persistObject.getPreference("adminBackground");
+		var highlightUsernames = persistObject.getPreference("highlightUsernames");
+		var dontBoldNames = persistObject.getPreference("dontBoldNames");
+
 		// We'll need lots of variables for this
 		var threadIconBox, threadTitleBox, threadAuthorBox, threadRepliesBox;
 		var threadTitle, threadId, threadOPId, threadRe, threadDetails;
@@ -587,11 +609,11 @@ function handleForumDisplay(doc)
 		var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
 		var iconlist = persistObject.iconList;
 		var table = document.getElementById('forum');
+		
 		// Here be where we work on the thread rows
 		var threadlist = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'thread')]");
 		for (var i in threadlist)
 		{
-
 			var thread = threadlist[i];
 
 			threadTitleBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class,'title')]");
@@ -608,7 +630,8 @@ function handleForumDisplay(doc)
 			{
 				// If thread is ignored might as well remove it and stop now
 				thread.parentNode.removeChild(thread);
-				// Update the title just incase it doesn't know what it is
+				
+				// Update the title just incase we doesn't know what it is
 				persistObject.setThreadTitle(threadId, threadTitle);
 				continue;
 			}
@@ -616,6 +639,7 @@ function handleForumDisplay(doc)
 			{
 				threadIconBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class,'icon')]");
 			}
+			
 			threadAuthorBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class, 'author')]");
 			threadRepliesBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class, 'replies')]");
 			threadLRCount = threadDetails['lastreplyct'];
@@ -623,26 +647,32 @@ function handleForumDisplay(doc)
 			threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
 			posterColor = false;
 			posterBG = false;
+			
 			if (threadDetails['mod'])
 			{
-				posterColor = persistObject.getPreference("modColor");
-				posterBG =  persistObject.getPreference("modBackground");
+				posterColor = modColor;
+				posterBG =  modBackground;
 			}
+			
 			if (threadDetails['admin'])
 			{
-				posterColor = persistObject.getPreference("adminColor");
-				posterBG =  persistObject.getPreference("adminBackground");
+				posterColor = adminColor;
+				posterBG =  adminBackground;
 			}
+			
 			if (threadDetails['color'])
 			{
 				posterColor = threadDetails['color'];
 			}
+			
 			if (threadDetails['background'])
 			{
 				posterBG = threadDetails['background'];
 			}
+			
 			// So right click star/ignore works
 			thread.className += " salastread_thread_" + threadId;
+			
 			// Replace the thread icon with a linked thread icon
 			if (!inDump && threadIconBox.firstChild.src.search(/posticons\/(.*)/i) > -1)
 			{
@@ -657,6 +687,7 @@ function handleForumDisplay(doc)
 					threadIconBox.appendChild(iconGo);
 				}
 			}
+			
 			// If this thread is in the DB as being read
 			if (threadLRCount > -1)
 			{
@@ -668,13 +699,13 @@ function handleForumDisplay(doc)
 				{
 					persistObject.StoreOPData(threadId, threadOPId);
 				}
-				if (!persistObject.getPreference("dontHighlightThreads"))
+				if (!dontHighlightThreads)
 				{
 					if ((threadRe+1) > threadLRCount) // If there are new posts
 					{
-						if (!persistObject.getPreference("disableNewReCount"))
+						if (!disableNewReCount)
 						{
-							if (persistObject.getPreference("newPostCountUseOneLine"))
+							if (newPostCountUseOneLine)
 							{
 								threadRepliesBox.innerHTML += '&nbsp;(' + ((threadRe+1) - threadLRCount) + ')';
 							}
@@ -683,31 +714,30 @@ function handleForumDisplay(doc)
 								threadRepliesBox.innerHTML += ' (' + ((threadRe+1) - threadLRCount) + ')';
 							}
 						}
-						persistObject.colorThread(doc, thread, forumid, persistObject.getPreference("readWithNewLight"), persistObject.getPreference("readWithNewDark"));
+						persistObject.colorThread(doc, thread, forumid, readWithNewLight, readWithNewDark);
 					}
 					else
 					{
-						persistObject.colorThread(doc, thread, forumid, persistObject.getPreference("readLight"), persistObject.getPreference("readDark"));
+						persistObject.colorThread(doc, thread, forumid, readLight, readDark);
 					}
-					if (!persistObject.getPreference("disableGradients"))
+					if (!disableGradients)
 					{
 						persistObject.addGradient(thread);
 					}
 					if (threadDetails['posted'])
 					{
-						threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
+						threadRepliesBox.style.backgroundColor = postedInThreadRe;
 					}
 				}
-				if (persistObject.getPreference("showUnvisitIcon") && persistObject.getPreference("swapIconOrder"))
+				if (showUnvisitIcon && swapIconOrder)
 				{
 					persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 				}
-				if ((persistObject.getPreference("showGoToLastIcon") && ((threadRe+1) > threadLRCount)) ||
-					persistObject.getPreference("alwaysShowGoToLastIcon"))
+				if ((showGoToLastIcon && ((threadRe+1) > threadLRCount)) || alwaysShowGoToLastIcon)
 				{
 					persistObject.insertLastIcon(doc, threadTitleBox, threadId, parseInt(threadLRCount));
 				}
-				if (persistObject.getPreference("showUnvisitIcon") && !persistObject.getPreference("swapIconOrder"))
+				if (showUnvisitIcon && !swapIconOrder)
 				{
 					persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 				}
@@ -716,7 +746,7 @@ function handleForumDisplay(doc)
 			{
 				persistObject.insertStar(doc, threadTitleBox);
 			}
-			if (persistObject.getPreference("highlightUsernames"))
+			if (highlightUsernames)
 			{
 				if (posterBG != false)
 				{
@@ -725,7 +755,7 @@ function handleForumDisplay(doc)
 				if (posterColor != false)
 				{
 					threadAuthorBox.getElementsByTagName("a")[0].style.color = posterColor;
-					if (!persistObject.getPreference("dontBoldNames"))
+					if (!dontBoldNames)
 					{
 						threadAuthorBox.getElementsByTagName("a")[0].style.fontWeight = "bold";
 					}
@@ -1214,11 +1244,11 @@ function handleShowThread(doc) {
 				}
 			}
 			
+			//Check to see if there's a mod or admin star
 			posterImg = false;
 			posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
 			if (userNameBox.getElementsByTagName('img').length > 0)
 			{
-				// They have a mod star or something else
 				posterImg = userNameBox.getElementsByTagName('img')[0].title;
 				if (posterImg == 'Admin')
 				{
@@ -1346,7 +1376,7 @@ function handleShowThread(doc) {
 			
 			//grab this once up here to avoid repetition
 			if(useQuickQuote || hideEditButtons) {
-				editbutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
+				editbutton = persistObject.selectSingleNode(doc, post, "tbody//ul[contains(@class,'postbuttons')]//li//a[contains(@href,'action=editpost')]");
 			}
 
 			if(hideEditButtons && editbutton) {
@@ -1359,7 +1389,7 @@ function handleShowThread(doc) {
 
 			if (useQuickQuote && !threadClosed)
 			{
-				quotebutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
+				quotebutton = persistObject.selectSingleNode(doc, post, "tbody//ul[contains(@class,'postbuttons')]//li//a[contains(@href,'action=newreply')]");
 				if (quotebutton)
 				{
 					attachQuickQuoteHandler(threadid, doc, persistObject.turnIntoQuickButton(doc, quotebutton, forumid), posterName, 1, postid);
@@ -1374,7 +1404,7 @@ function handleShowThread(doc) {
 			{
 				if(posterId == userId)
 				{
-					reportbutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'modalert.php')]");
+					reportbutton = persistObject.selectSingleNode(doc, post, "tbody//ul[contains(@class,'postbuttons')]//li//a[contains(@href,'modalert.php')]");
 					if(reportbutton)
 					{
 						reportbutton.parentNode.removeChild(reportbutton);
