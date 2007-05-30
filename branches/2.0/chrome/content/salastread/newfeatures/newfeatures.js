@@ -6,14 +6,14 @@ persistObject = persistObject.wrappedJSObject;
 function windowLoad()
 {
 	var currentVersion = persistObject.SALRversion;
-	var currentBuild = parseInt(currentVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3], 10);
+	var currentBuild = parseInt(currentVersion.match(/^(\d+)\.(\d+)\.(\d+)/)[3], 10);
 	var oldVersion = persistObject.LastRunVersion;
 	persistObject.LastRunVersion = persistObject.SALRversion;
 	if (oldVersion == "0.0.0") // This is their first time running it
 	{
 		return;
 	}
-	var oldBuild = parseInt(oldVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)[3], 10);
+	var oldBuild = parseInt(oldVersion.match(/^(\d+)\.(\d+)\.(\d+)/)[3], 10);
 	if (oldVersion < "1.99") // When the 2.0 rewrite started
 	{
 		importOldData();

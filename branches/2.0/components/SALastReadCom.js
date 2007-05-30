@@ -1059,7 +1059,7 @@ salrPersistObject.prototype = {
 	{
 		var isDev = false;
 		var ver = this.getPreference("currentVersion");
-		var vm = ver.match(/^(\d+)\.(\d+)\.(\d+)$/);
+		var vm = ver.match(/^(\d+)\.(\d+)\.(\d+)/);
 		if (vm)
 		{
 			var build = vm[3];
@@ -1075,7 +1075,7 @@ salrPersistObject.prototype = {
 	{
 		var isDev = false;
 		var ver = this.getPreference("currentVersion");
-		var vm = ver.match(/^(\d+)\.(\d+)\.(\d+)$/);
+		var vm = ver.match(/^(\d+)\.(\d+)\.(\d+)/);
 		if (vm)
 		{
 			var build = parseInt(vm[3], 10);
