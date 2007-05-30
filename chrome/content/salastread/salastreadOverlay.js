@@ -977,7 +977,7 @@ function addInternalDebugLog(msg) {
 }
 
 function handleShowThread(doc) {
-
+	var failed, i, e;	// Little variables that'll get reused
 	if (doc.getElementById('thread') == null)
 	{
 		// If there is no thread div then abort since something's not right
@@ -992,7 +992,6 @@ function handleShowThread(doc) {
 		// Can't get the forum id so abort for now
 		return;
 	}
-	var failed, i;	// Little variables that'll get reused
 	// The following forums have special needs that must be dealt with
 	var inFYAD = persistObject.inFYAD(forumid);
 	var inBYOB = persistObject.inBYOB(forumid);
@@ -1058,7 +1057,8 @@ function handleShowThread(doc) {
 		if (!persistObject.gotForumList)
 		{
 			var selectnode = persistObject.selectSingleNode(doc, doc.body, "//SELECT[@name='forumid']");
-			if (selectnode) {
+			if (selectnode)
+			{
 				// TODO: Audit this function
 				grabForumList(doc, selectnode);
 				persistObject.gotForumList = true;
@@ -1137,13 +1137,12 @@ function handleShowThread(doc) {
 		// Update the last read total
 		var postlist = persistObject.selectNodes(doc, doc, "//table[contains(@id,'post')]");
 		var postcount = (perpage * (curPage - 1)) + postlist.length;
-		persistObject.setLastReadPostCount(threadid, postcount);
 
 		var curPostId, colorDark = true, colorOfPost, postIdLink, resetLink, profileLink, posterId, postbody, f;
 		var posterColor, posterBG, userNameBox, posterNote, posterImg, posterName, slink, quotebutton, editbutton, reportbutton;
 		var userPosterColor, userPosterBG, userPosterNote;
 
-		//group calls to the prefs up here so we aren't repeating them, should help speed things up a bit
+		// Group calls to the prefs up here so we aren't repeating them, should help speed things up a bit
 		var hideEditButtons = persistObject.getPreference('hideEditButtons');
 		var hideReportButtons = persistObject.getPreference('hideReportButtons');
 		var useQuickQuote = persistObject.getPreference('useQuickQuote');
@@ -1153,7 +1152,6 @@ function handleShowThread(doc) {
 		doc.postlinks = new Array;
 
 		// Loop through each post
-		//var postlist = persistObject.selectNodes(doc, doc, "//TABLE[contains(@id,'post')]");
 		for (i in postlist)
 		{
 			var post = postlist[i];
@@ -1197,35 +1195,47 @@ function handleShowThread(doc) {
 			{
 				// They have a mod star or something else
 				posterImg = userNameBox.getElementsByTagName('img')[0].title;
-				if (posterImg == 'Admin') {
+				if (posterImg == 'Admin')
+				{
 					persistObject.addAdmin(posterId, posterName);
-				} else if (posterImg == 'Moderator') {
+				}
+				else if (posterImg == 'Moderator')
+				{
 					persistObject.addMod(posterId, posterName);
 				}
 			}
 			posterColor = false;
 			posterBG = false;
 			posterNote = false;
-			if (posterId == threadOP) {
+			if (posterId == threadOP)
+			{
 				posterColor = persistObject.getPreference("opColor");
 				posterBG =  persistObject.getPreference("opBackground");
 				posterNote = "Thread Poster";
 			}
-			if (persistObject.isMod(posterId)) {
-				if(posterImg == 'Moderator') {
+			if (persistObject.isMod(posterId))
+			{
+				if(posterImg == 'Moderator')
+				{
 					posterColor = persistObject.getPreference("modColor");
 					posterBG =  persistObject.getPreference("modBackground");
 					posterNote = "Forum Moderator";
-				} else {
+				}
+				else
+				{
 					persistObject.removeMod(posterId);
 				}
 			}
-			if (persistObject.isAdmin(posterId)) {
-				if(posterImg == "Admin") {
+			if (persistObject.isAdmin(posterId))
+			{
+				if(posterImg == "Admin")
+				{
 					posterColor = persistObject.getPreference("adminColor");
 					posterBG =  persistObject.getPreference("adminBackground");
 					posterNote = "Forum Administrator";
-				} else {
+				}
+				else
+				{
 					persistObject.removeAdmin(posterId);
 				}
 			}
@@ -1325,18 +1335,23 @@ function handleShowThread(doc) {
 			if (useQuickQuote && !threadClosed)
 			{
 				quotebutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=newreply')]");
-				if (quotebutton) {
+				if (quotebutton)
+				{
 					attachQuickQuoteHandler(threadid, doc, persistObject.turnIntoQuickButton(doc, quotebutton, forumid), posterName, 1, postid);
 				}
-				if (editbutton) {
+				if (editbutton)
+				{
 					attachQuickQuoteHandler(threadid, doc, persistObject.turnIntoQuickButton(doc, editbutton, forumid), posterName, 1, postid, true);
 				}
 			}
 
-			if(hideReportButtons) {
-				if(posterId == userId) {
+			if(hideReportButtons)
+			{
+				if(posterId == userId)
+				{
 					reportbutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'modalert.php')]");
-					if(reportbutton) {
+					if(reportbutton)
+					{
 						reportbutton.parentNode.removeChild(reportbutton);
 					}
 				}
@@ -1350,6 +1365,7 @@ function handleShowThread(doc) {
 		// Get the last post #
 		lastPostId = postIdLink.href.match(/#post(\d+)/i)[1];
 		persistObject.setLastPostID(threadid, lastPostId);
+		persistObject.setLastReadPostCount(threadid, postcount);
 
 	}
 	// below hasn't been rewritten
