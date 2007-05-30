@@ -395,7 +395,7 @@ function handleSubscriptions(doc) {
 	if (!cpusernav) {
 		return;
 	}
-	
+
 	//get preferences once
 	var dontHighlightThreads = persistObject.getPreference("dontHighlightThreads");
 	var disableNewReCount = persistObject.getPreference("disableNewReCount");
@@ -410,15 +410,15 @@ function handleSubscriptions(doc) {
 	var readLight = persistObject.getPreference("readLight");
 	var readDark = persistObject.getPreference("readDark");
 	var postedInThreadRe = persistObject.getPreference("postedInThreadRe");
-	
+
 	var subTable = persistObject.selectSingleNode(doc, doc, "//table[contains(@class,'standard')]");
 	var threadlist = persistObject.selectNodes(doc, subTable, "TBODY/TR");
 	var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
-	
+
 	for (i in threadlist)
 	{
 		var thread = threadlist[i];
-		
+
 		if (thread.getElementsByTagName('th').length)
 		{
 			// It's part of the header or footer so drop out
@@ -444,10 +444,10 @@ function handleSubscriptions(doc) {
 		{
 			thread.parentNode.deleteRow(i);
 		}
-		
+
 		// So right click star/ignore works
 		thread.className = "salastread_thread_" + threadId;
-		
+
 		// If this thread is in the DB as being read
 		if (threadLRCount > -1)
 		{
@@ -483,23 +483,23 @@ function handleSubscriptions(doc) {
 					threadRepliesBox.style.backgroundColor = postedInThreadRe;
 				}
 			}
-			
+
 			if (showUnvisitIcon && swapIconOrder)
 			{
 				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 			}
-			
+
 			if ((showGoToLastIcon && ((threadRe + 1) > threadLRCount)) || alwaysShowGoToLastIcon)
 			{
 				persistObject.insertLastIcon(doc, threadTitleBox, threadId, threadLRCount);
 			}
-			
+
 			if (showUnvisitIcon && !swapIconOrder)
 			{
 				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 			}
 		}
-		
+
 		if (threadDetails['star'])
 		{
 			// This is causing errors, disabled for now
@@ -609,7 +609,7 @@ function handleForumDisplay(doc)
 		var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
 		var iconlist = persistObject.iconList;
 		var table = document.getElementById('forum');
-		
+
 		// Here be where we work on the thread rows
 		var threadlist = persistObject.selectNodes(doc, doc, "//TR[contains(@class,'thread')]");
 		for (var i in threadlist)
@@ -630,7 +630,7 @@ function handleForumDisplay(doc)
 			{
 				// If thread is ignored might as well remove it and stop now
 				thread.parentNode.removeChild(thread);
-				
+
 				// Update the title just incase we doesn't know what it is
 				persistObject.setThreadTitle(threadId, threadTitle);
 				continue;
@@ -639,7 +639,7 @@ function handleForumDisplay(doc)
 			{
 				threadIconBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class,'icon')]");
 			}
-			
+
 			threadAuthorBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class, 'author')]");
 			threadRepliesBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class, 'replies')]");
 			threadLRCount = threadDetails['lastreplyct'];
@@ -647,32 +647,32 @@ function handleForumDisplay(doc)
 			threadOPId = parseInt(threadAuthorBox.getElementsByTagName('a')[0].href.match(/userid=(\d+)/i)[1]);
 			posterColor = false;
 			posterBG = false;
-			
+
 			if (threadDetails['mod'])
 			{
 				posterColor = modColor;
 				posterBG =  modBackground;
 			}
-			
+
 			if (threadDetails['admin'])
 			{
 				posterColor = adminColor;
 				posterBG =  adminBackground;
 			}
-			
+
 			if (threadDetails['color'])
 			{
 				posterColor = threadDetails['color'];
 			}
-			
+
 			if (threadDetails['background'])
 			{
 				posterBG = threadDetails['background'];
 			}
-			
+
 			// So right click star/ignore works
 			thread.className += " salastread_thread_" + threadId;
-			
+
 			// Replace the thread icon with a linked thread icon
 			if (!inDump && threadIconBox.firstChild.src.search(/posticons\/(.*)/i) > -1)
 			{
@@ -687,7 +687,7 @@ function handleForumDisplay(doc)
 					threadIconBox.appendChild(iconGo);
 				}
 			}
-			
+
 			// If this thread is in the DB as being read
 			if (threadLRCount > -1)
 			{
@@ -1214,7 +1214,7 @@ function handleShowThread(doc) {
 				// User is ignored by the system so skip doing anything else
 				continue;
 			}
-			
+
 			curPostId = post.id.match(/post(\d+)/)[1];
 			postcount = (perpage * (curPage - 1)) + parseInt(i) + 1;
 			profileLink = persistObject.selectSingleNode(doc, post, "tbody//td[contains(@class,'postlinks')]//ul[contains(@class,'profilelinks')]//a[contains(@href,'userid=')]");
@@ -1228,7 +1228,7 @@ function handleShowThread(doc) {
 				userNameBox = persistObject.selectSingleNode(doc, post, "TBODY//DIV[contains(@class,'title')]//following-sibling::B");
 			}
 			titleBox = persistObject.selectSingleNode(doc, post, "tbody//dl[contains(@class,'userinfo')]//dd[contains(@class,'title')]");
-			
+
 			if (titleBox && persistObject.getPreference("resizeCustomTitleText"))
 			{
 				// Adds a scrollbar if they have a really wide custom title
@@ -1243,7 +1243,7 @@ function handleShowThread(doc) {
 					}
 				}
 			}
-			
+
 			//Check to see if there's a mod or admin star
 			posterImg = false;
 			posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
@@ -1373,7 +1373,7 @@ function handleShowThread(doc) {
 				postIdLink.parentNode.insertBefore(resetLink, postIdLink);
 				postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
 			}
-			
+
 			//grab this once up here to avoid repetition
 			if(useQuickQuote || hideEditButtons) {
 				editbutton = persistObject.selectSingleNode(doc, post, "tbody//ul[contains(@class,'postbuttons')]//li//a[contains(@href,'action=editpost')]");
@@ -1465,7 +1465,7 @@ function handleSupport(doc)
 	emptyP.style.textAlign = "center";
 	newLink.href = "http://code.google.com/p/salr/issues/list";
 	newLink.innerHTML = "Click here to report a problem with SA Last Read instead";
-	var supportTable = doc.getElementById('content').getElementsByTagName('table')[1];
+	var supportTable = doc.getElementById('content').getElementsByTagName('div')[1];
 	supportTable.parentNode.replaceChild(newImg, supportTable);
 	newImg.parentNode.appendChild(newText);
 	newImg.parentNode.appendChild(emptyP);
@@ -2030,7 +2030,7 @@ function salastread_windowOnLoad(e) {
 
 					//insert content CSS
 					SALR_insertCSS("chrome://salastread/content/contentStyling.css", doc);
-					
+
 					// why the FUCK doesn't this work?
 					var hresult = 0;
 					if ( location.href.indexOf("forumdisplay.php?") != -1 ) {
