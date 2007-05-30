@@ -1040,11 +1040,11 @@ function handleShowThread(doc) {
 				pageList = pageList[0];
 			}
 			var numPages = pageList.innerHTML.match(/\((\d+)\)/);
-			var curPage = pageList.innerHTML.match(/[^ ][ \[;](\d+)[ \]&][^ ]/);
+			var curPage = persistObject.selectSingleNode(doc, doc, "//SPAN[contains(@class,'curpage')]");
 			if (pageList.childNodes.length > 1) // Are there pages
 			{
-				numPages = parseInt(numPages[1]);
-				curPage = parseInt(curPage[1]);
+				numPages = parseInt(numPages[1], 10);
+				curPage = parseInt(curPage.innerHTML, 10);
 			}
 			else
 			{
@@ -1366,8 +1366,8 @@ function handleShowThread(doc) {
 		lastPostId = postIdLink.href.match(/#post(\d+)/i)[1];
 		persistObject.setLastPostID(threadid, lastPostId);
 		persistObject.setLastReadPostCount(threadid, postcount);
-
 	}
+
 	// below hasn't been rewritten
 	try {
 		try { SALR_InsertThreadKeyboardNavigation(doc); } catch (e) { }
