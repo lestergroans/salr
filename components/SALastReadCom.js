@@ -1768,23 +1768,24 @@ salrPersistObject.prototype = {
 	// @return: nothing
 	addGradient: function(thread)
 	{
-		var cellCount = (thread.getElementsByTagName('td').length > 8 ? 8 : thread.getElementsByTagName('td').length);
-		for (var i=0;i<cellCount;i++)
+		var cells = thread.getElementsByTagName('td');
+		for(var i = cells.length - 1; i >= 0; i--)
 		{
-			thread.getElementsByTagName('td')[i].style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
-			thread.getElementsByTagName('td')[i].style.backgroundRepeat = "repeat-x";
+			var cell = cells[i];
+				cell.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
+				cell.style.backgroundRepeat = "repeat-x";
 		}
 	},
 
 	// Blidly colors the thread by alternating without regard to content
-	// @param:
-	// @return:
+	// @param: document body, thread table row, light color, dark color
+	// @return: nothing
 	blindColorThread: function(doc, thread, lightColorToUse, darkColorToUse)
 	{
-		for (var i=0;i<8;i+=2)
+		var cells = thread.getElementsByTagName('td');
+		for(var i = cells.length - 1; i >= 0; i--)
 		{
-			thread.getElementsByTagName('td')[i].style.backgroundColor = lightColorToUse;
-			thread.getElementsByTagName('td')[i+1].style.backgroundColor = darkColorToUse;
+			cells[i].style.backgroundColor = (i % 2) ? darkColorToUse : lightColorToUse;
 		}
 	},
 

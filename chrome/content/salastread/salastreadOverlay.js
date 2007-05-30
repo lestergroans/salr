@@ -1,49 +1,49 @@
 // <script> This line added because my IDE has problems detecting JS ~ 0330 ~ duz
 
 var needToShowChangeLog = false;
-
+var showErrors = false;
 var persistObject = null;
 
 function SALRHexToNumber(hex) {
-   var res = 0;
-   for (var i=0; i<hex.length; i++) {
-      res = res * 16;
-      switch (hex[i]) {
-         case "0": res += 0; break;
-         case "1": res += 1; break;
-         case "2": res += 2; break;
-         case "3": res += 3; break;
-         case "4": res += 4; break;
-         case "5": res += 5; break;
-         case "6": res += 6; break;
-         case "7": res += 7; break;
-         case "8": res += 8; break;
-         case "9": res += 9; break;
-         case "a": case "A": res += 10; break;
-         case "b": case "B": res += 11; break;
-         case "c": case "C": res += 12; break;
-         case "d": case "D": res += 13; break;
-         case "e": case "E": res += 14; break;
-         case "f": case "F": res += 15; break;
-      }
-   }
-   return res;
+	var res = 0;
+	for (var i=0; i<hex.length; i++) {
+		res = res * 16;
+		switch (hex[i]) {
+			case "0": res += 0; break;
+			case "1": res += 1; break;
+			case "2": res += 2; break;
+			case "3": res += 3; break;
+			case "4": res += 4; break;
+			case "5": res += 5; break;
+			case "6": res += 6; break;
+			case "7": res += 7; break;
+			case "8": res += 8; break;
+			case "9": res += 9; break;
+			case "a": case "A": res += 10; break;
+			case "b": case "B": res += 11; break;
+			case "c": case "C": res += 12; break;
+			case "d": case "D": res += 13; break;
+			case "e": case "E": res += 14; break;
+			case "f": case "F": res += 15; break;
+		}
+	}
+	return res;
 }
 
-function SALR_menuItemCommand(event,el,etype) {
-   var target = "none";
-   if ( etype=="command" ) {
-      target = "current";
-   }
-   if ( etype=="click" ) {
-      if ( event.button == 2 || event.button == 1 ) {
-         target = "newtab";
-      }
-   }
+function SALR_menuItemCommand(event, el, etype) {
+	var target = "none";
+	if(etype=="command") {
+		target = "current";
+	}
+	if(etype=="click") {
+		if(event.button == 2 || event.button == 1) {
+			target = "newtab";
+		}
+	}
 
-   if (target != "none") {
+	if(target != "none") {
 		SALR_menuItemGoTo(event,"http://forums.somethingawful.com/forumdisplay.php?s=&forumid="+el.getAttribute("forumnum"),target);
-   }
+	}
 }
 
 function SALR_menuItemCommandGoToLastPost(event, el, etype, threadid) {
@@ -56,39 +56,39 @@ function SALR_menuItemCommandGoToLastPost(event, el, etype, threadid) {
 			SALR_menuItemCommandURL(event, "http://forums.somethingawful.com/showthread.php?s=&threadid=" + threadid, etype);
 		}
 	} catch(e) {
-		Components.utils.reportError("Couldn't find thread id: " + threadid);
+		alert("Couldn't find thread id: " + threadid);
 	}
 }
 
-function SALR_menuItemCommandURL(event,el,etype) {
-   var target = "none";
-   if ( etype=="command" ) {
-      target = "current";
-   }
-   if ( etype=="click" ) {
-      if ( event.button == 2 || event.button == 1 ) {
-         target = "newtab";
-      }
-   }
+function SALR_menuItemCommandURL(event, el, etype) {
+	var target = "none";
+	if(etype=="command") {
+		target = "current";
+	}
+	if(etype=="click") {
+		if(event.button == 2 || event.button == 1) {
+			target = "newtab";
+		}
+	}
 
-   var targeturl = "";
-   if ( typeof(el) == "string" ) {
-      targeturl = el;
-   } else {
-      targeturl = el.getAttribute("targeturl");
-   }
+	var targeturl = "";
+	if(typeof(el) == "string") {
+		targeturl = el;
+	} else {
+		targeturl = el.getAttribute("targeturl");
+	}
 
-   if (target != "none") {
+	if(target != "none") {
 		SALR_menuItemGoTo(event,targeturl,target);
-   }
+	}
 }
 
-function SALR_menuItemGoTo(event,url,target) {
-   if (target=="newtab") {
-      getBrowser().addTab(url);
+function SALR_menuItemGoTo(event, url, target) {
+	if (target=="newtab") {
+		getBrowser().addTab(url);
 	} else if (target=="current") {
-      loadURI(url);
-   }
+		loadURI(url);
+	}
 }
 
 function grabForumList(doc, selectnode) {
@@ -391,21 +391,40 @@ function SALR_LaunchPinHelper() {
 
 // Do anything needed to the subscribed threads list
 function handleSubscriptions(doc) {
-	var subForm = persistObject.selectSingleNode(doc, doc, "//FORM[@method='get'][contains(@action,'member2.php')]");
-	if (!subForm) {
+	var cpusernav = persistObject.selectSingleNode(doc, doc, "//ul[contains(@id,'usercpnav')]");
+	if (!cpusernav) {
 		return;
 	}
-	var subTable = subForm.parentNode;
+	
+	//get preferences once
+	var dontHighlightThreads = persistObject.getPreference("dontHighlightThreads");
+	var disableNewReCount = persistObject.getPreference("disableNewReCount");
+	var newPostCountUseOneLine = persistObject.getPreference("newPostCountUseOneLine");
+	var disableGradients = persistObject.getPreference("disableGradients");
+	var showUnvisitIcon = persistObject.getPreference("showUnvisitIcon");
+	var swapIconOrder = persistObject.getPreference("swapIconOrder");
+	var showGoToLastIcon = persistObject.getPreference("showGoToLastIcon");
+	var alwaysShowGoToLastIcon = persistObject.getPreference("alwaysShowGoToLastIcon");
+	var readWithNewLight = persistObject.getPreference("readWithNewLight");
+	var readWithNewDark = persistObject.getPreference("readWithNewDark");
+	var readLight = persistObject.getPreference("readLight");
+	var readDark = persistObject.getPreference("readDark");
+	var postedInThreadRe = persistObject.getPreference("postedInThreadRe");
+	
+	var subTable = persistObject.selectSingleNode(doc, doc, "//table[contains(@class,'standard')]");
 	var threadlist = persistObject.selectNodes(doc, subTable, "TBODY/TR");
 	var starredthreads = persistObject.starList, ignoredthreads = persistObject.ignoreList;
+	
 	for (i in threadlist)
 	{
-		if (threadlist[i].getElementsByTagName('td')[0].colSpan > "1")
+		var thread = threadlist[i];
+		
+		if (thread.getElementsByTagName('th').length)
 		{
 			// It's part of the header or footer so drop out
 			continue;
 		}
-		threadTitleBox = persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'threadid=')]");
+		threadTitleBox = persistObject.selectSingleNode(doc, thread, "TD//A[contains(@href,'threadid=')]");
 		if (threadTitleBox == null)
 		{
 			// No subscribed threads listed, should rewrite this to be nicer
@@ -413,70 +432,74 @@ function handleSubscriptions(doc) {
 		}
 		else
 		{
-			threadTitleBox = threadTitleBox.parentNode.parentNode;
+			threadTitleBox = threadTitleBox.parentNode;
 		}
-		threadId = parseInt(persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'threadid=')]").href.match(/threadid=(\d+)/)[1]);
+		threadId = parseInt(persistObject.selectSingleNode(doc, thread, "TD//A[contains(@href,'threadid=')]").href.match(/threadid=(\d+)/)[1]);
 		threadDetails = persistObject.getThreadDetails(threadId);
-		threadRepliesBox = persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'javascript:who(')]").parentNode.parentNode;
-		threadRe = parseInt(persistObject.selectSingleNode(doc, threadlist[i], "TD//A[contains(@href,'javascript:who(')]").innerHTML);
+		threadRepliesBox = persistObject.selectSingleNode(doc, thread, "TD//A[contains(@href,'javascript:who(')]").parentNode;
+		threadRe = parseInt(persistObject.selectSingleNode(doc, thread, "TD//A[contains(@href,'javascript:who(')]").innerHTML);
 		threadLRCount = threadDetails['lastreplyct'];
 		// If thread is ignored
 		if (threadDetails['ignore'])
 		{
-			threadlist[i].parentNode.deleteRow(i);
+			thread.parentNode.deleteRow(i);
 		}
+		
 		// So right click star/ignore works
-		threadlist[i].className = "salastread_thread_" + threadId;
+		thread.className = "salastread_thread_" + threadId;
+		
 		// If this thread is in the DB as being read
 		if (threadLRCount > -1)
 		{
-			if (!persistObject.getPreference("dontHighlightThreads"))
+			if (!dontHighlightThreads)
 			{
-				if ((threadRe+1) > threadLRCount) // If there are new posts
+				if ((threadRe + 1) > threadLRCount) // If there are new posts
 				{
-					if (!persistObject.getPreference("disableNewReCount"))
+					if (!disableNewReCount)
 					{
 						var newReplies = ((threadRe + 1) - threadLRCount)
-						var fontTag = threadRepliesBox.getElementsByTagName('font')[0];
 
-						if (persistObject.getPreference("newPostCountUseOneLine"))
+						if (newPostCountUseOneLine)
 						{
-							fontTag.innerHTML += '&nbsp;(' + newReplies + ')';
+							threadRepliesBox.innerHTML += '&nbsp;(' + newReplies + ')';
 						}
 						else
 						{
-							fontTag.innerHTML += ' (' + newReplies + ')';
+							threadRepliesBox.innerHTML += ' (' + newReplies + ')';
 						}
 					}
-					persistObject.blindColorThread(doc, threadlist[i], persistObject.getPreference("readWithNewLight"), persistObject.getPreference("readWithNewDark"));
+					persistObject.blindColorThread(doc, thread, readWithNewLight, readWithNewDark);
 				}
 				else
 				{
-					persistObject.blindColorThread(doc, threadlist[i], persistObject.getPreference("readLight"), persistObject.getPreference("readDark"));
+					persistObject.blindColorThread(doc, thread, readLight, readDark);
 				}
-				if (!persistObject.getPreference("disableGradients"))
+				if (!disableGradients)
 				{
-					persistObject.addGradient(threadlist[i]);
+					persistObject.addGradient(thread);
 				}
 				if (persistObject.didIPostHere(threadId))
 				{
-					threadRepliesBox.style.backgroundColor = persistObject.getPreference("postedInThreadRe");
+					threadRepliesBox.style.backgroundColor = postedInThreadRe;
 				}
 			}
-			if (persistObject.getPreference("showUnvisitIcon") && persistObject.getPreference("swapIconOrder"))
+			
+			if (showUnvisitIcon && swapIconOrder)
 			{
 				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 			}
-			if ((persistObject.getPreference("showGoToLastIcon") && ((threadRe+1) > threadLRCount)) ||
-				persistObject.getPreference("alwaysShowGoToLastIcon"))
+			
+			if ((showGoToLastIcon && ((threadRe + 1) > threadLRCount)) || alwaysShowGoToLastIcon)
 			{
 				persistObject.insertLastIcon(doc, threadTitleBox, threadId, threadLRCount);
 			}
-			if (persistObject.getPreference("showUnvisitIcon") && !persistObject.getPreference("swapIconOrder"))
+			
+			if (showUnvisitIcon && !swapIconOrder)
 			{
 				persistObject.insertUnreadIcon(doc, threadTitleBox, threadId).addEventListener("click", removeThread, false);
 			}
 		}
+		
 		if (threadDetails['star'])
 		{
 			// This is causing errors, disabled for now
@@ -1161,9 +1184,10 @@ function handleShowThread(doc) {
 				// User is ignored by the system so skip doing anything else
 				continue;
 			}
+			
 			curPostId = post.id.match(/post(\d+)/)[1];
 			postcount = (perpage * (curPage - 1)) + parseInt(i) + 1;
-			profileLink = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'userid=')]");
+			profileLink = persistObject.selectSingleNode(doc, post, "tbody//td[contains(@class,'postlinks')]//ul[contains(@class,'profilelinks')]//a[contains(@href,'userid=')]");
 			posterId = profileLink.href.match(/userid=(\d+)/i)[1];
 			if (!inFYAD)
 			{
@@ -1173,7 +1197,8 @@ function handleShowThread(doc) {
 			{
 				userNameBox = persistObject.selectSingleNode(doc, post, "TBODY//DIV[contains(@class,'title')]//following-sibling::B");
 			}
-			titleBox = persistObject.selectSingleNode(doc, post, "TBODY//TR//TD//DL//DD[contains(@class,'title')]");
+			titleBox = persistObject.selectSingleNode(doc, post, "tbody//dl[contains(@class,'userinfo')]//dd[contains(@class,'title')]");
+			
 			if (titleBox && persistObject.getPreference("resizeCustomTitleText"))
 			{
 				// Adds a scrollbar if they have a really wide custom title
@@ -1188,7 +1213,7 @@ function handleShowThread(doc) {
 					}
 				}
 			}
-
+			
 			posterImg = false;
 			posterName = userNameBox.textContent.replace(/^\s+|\s+$/, '');
 			if (userNameBox.getElementsByTagName('img').length > 0)
@@ -1292,7 +1317,7 @@ function handleShowThread(doc) {
 				}
 			}
 			colorDark = !colorDark;
-			postIdLink = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'#post')]");
+			postIdLink = persistObject.selectSingleNode(doc, post, "tbody//td[contains(@class,'postdate')]//a[contains(@href,'#post')]");
 			postid = postIdLink.href.match(/#post(\d+)/i)[1];
 			if (insertPostTargetLink)
 			{
@@ -1318,7 +1343,7 @@ function handleShowThread(doc) {
 				postIdLink.parentNode.insertBefore(resetLink, postIdLink);
 				postIdLink.parentNode.insertBefore(doc.createTextNode(" "), postIdLink);
 			}
-
+			
 			//grab this once up here to avoid repetition
 			if(useQuickQuote || hideEditButtons) {
 				editbutton = persistObject.selectSingleNode(doc, post, "TBODY//TR[contains(@class,'postbar')]//TD//A[contains(@href,'action=editpost')]");
@@ -1627,7 +1652,7 @@ function SALR_ChangeLastReadOnThread(e) {
 		doc.body.appendChild(notel);
 		setTimeout( function() { SALR_NoteFade(notel); }, 1000 );
 	} catch(e) {
-		Components.utils.reportError("Error marking thread: " + e);
+		alert("Error marking thread: " + e);
 	}
 }
 
@@ -1975,7 +2000,7 @@ function salastread_windowOnLoad(e) {
 
 					//insert content CSS
 					SALR_insertCSS("chrome://salastread/content/contentStyling.css", doc);
-
+					
 					// why the FUCK doesn't this work?
 					var hresult = 0;
 					if ( location.href.indexOf("forumdisplay.php?") != -1 ) {
@@ -2214,6 +2239,7 @@ try
 	if (persistObject && persistObject.LastRunVersion != persistObject.SALRversion)
 	{
 		needToShowChangeLog = !persistObject.IsDevelopmentRelease;
+		showErrors = persistObject.getPreference('suppressErrors');
 		// Here we have to put special cases for specific dev build numbers that require the changelog dialog to appear
 		var buildNum = parseInt(persistObject.LastRunVersion.match(/^(\d+)\.(\d+)\.(\d+)/)[3], 10);
 		if (buildNum <= 70418) { // Put the latest build number to need an SQL patch here
