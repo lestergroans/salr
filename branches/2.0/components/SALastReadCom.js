@@ -2017,12 +2017,12 @@ salrPersistObject.prototype = {
 								continue;
 							}
 						}
-						
+
 						newImg = doc.createElement("img");
 						newImg.src = link.href;
 						newImg.title = "Link converted by SALR";
 						newImg.style.border = "1px dashed red";
-						
+
 						if ((link.firstChild == link.lastChild && (link.firstChild.tagName && link.firstChild.tagName.search(/img/i) > -1)) ||
 							link.textContent.search(/http:/i) == 0)
 						{
@@ -2047,7 +2047,7 @@ salrPersistObject.prototype = {
 			}
 		}
 	},
-	
+
 	// Scale all images in the post body to the user-specified size
 	// @param: body of the post, document body
 	// @return: nothing
@@ -2057,20 +2057,20 @@ salrPersistObject.prototype = {
 		{
 			var maxWidth = this.getPreference("maxWidthOfConvertedImages");
 			var maxHeight = this.getPreference("maxHeightOfConvertedImages");
-			
+
 			if(maxHeight) {
 				maxHeight += "px";
 			}
-			
+
 			if(maxWidth) {
 				maxWidth += "px";
 			}
-			
+
 			var images = this.selectNodes(doc, postbody, "img");
 			for(var i in images)
 			{
 				var image = images[i];
-				
+
 				if(!image.src.match(/forumimages\.somethingawful\.com/i)) {
 					if(maxWidth) {
 						image.style.maxWidth = maxWidth;
@@ -2092,7 +2092,7 @@ salrPersistObject.prototype = {
 			}
 		}
 	},
-	
+
 	// Takes a button and turns it into a quick button
 	// @param: (html element) doc, (html element) button, (int) forumid
 	// @return: (html element) quick button
