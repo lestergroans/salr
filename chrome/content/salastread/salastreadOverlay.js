@@ -617,7 +617,7 @@ function handleForumDisplay(doc)
 			var thread = threadlist[i];
 
 			threadTitleBox = persistObject.selectSingleNode(doc, thread, "TD[contains(@class,'title')]");
-			if (threadTitleBox.getElementsByTagName('a')[0].href.search(/announcement/i) > -1)
+			if (threadTitleBox.getElementsByTagName('a')[0].className.search(/announcement/i) > -1)
 			{
 				// It's an announcement so skip the rest
 				continue;
@@ -630,7 +630,6 @@ function handleForumDisplay(doc)
 			{
 				// If thread is ignored might as well remove it and stop now
 				thread.parentNode.removeChild(thread);
-
 				// Update the title just incase we doesn't know what it is
 				persistObject.setThreadTitle(threadId, threadTitle);
 				continue;
