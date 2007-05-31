@@ -1774,6 +1774,7 @@ salrPersistObject.prototype = {
 			var cell = cells[i];
 				cell.style.backgroundImage = "url('chrome://salastread/skin/gradient.png')";
 				cell.style.backgroundRepeat = "repeat-x";
+				cell.style.backgroundPosition = "bottom left";
 		}
 	},
 
