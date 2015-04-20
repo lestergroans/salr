@@ -1,0 +1,3 @@
+SALastRead is a Firefox extension to enhance your Something Awful forums browsing experience. It adds several features to the forums, including highlighting threads and posts you've already thread, adding a 'Jump to New Posts' button to threads on the thread list page, Quick Quote and Quick Reply windows to post new replies to the forums without having to wait for the forum reply page, Text-to-Image functionality to convert links to images into inline images, tracking threads you've posted in, and a SA Menu allowing quick access to your favorite forums.
+
+# SALastRead 2.0 is in development on [Bounty Source](https://salr.bountysource.com/).  Please go there for downloads and issue tracking. #
